@@ -1,62 +1,77 @@
-# OTJ-PROD-V00 --- Índice Geral
+# OTJ-PROD-V00 — Índice Geral
 
 ## Objetivo
 
-Esta coleção reúne toda a documentação funcional do produto **O Tio do
-Joca (OTJ)**. Serve como ponto de entrada para compreender a plataforma,
-os seus objetivos, os perfis de utilizador e a evolução prevista.
+Este documento apresenta a estrutura da documentação **Product** do projeto **O Tio do Joca (OTJ)**, servindo como índice e guia de navegação para toda a documentação funcional do produto.
 
-## Organização da Coleção
+---
 
-  Código         Documento
-  -------------- ---------------------------
-  OTJ-PROD-V00   Índice Geral
-  OTJ-PROD-V01   Visão Geral da Plataforma
-  OTJ-PROD-V02   Funcionalidades
-  OTJ-PROD-V03   Perfis de Utilizador
-  OTJ-PROD-V04   Casos de Utilização
-  OTJ-PROD-V05   Roadmap
-  OTJ-PROD-V06   Glossário
+# Estrutura da documentação
 
-## Relação com Outras Coleções
+## OTJ-PROD-V00 — Índice Geral
+Apresenta a organização da documentação Product.
 
--   Arquitetura
--   ERD
--   SQL
--   API
--   Backend
--   Frontend
--   DevOps
--   QA
--   Infrastructure
--   Security
--   Operations
--   Manuals
--   Guides
--   UX
--   ADR
+## OTJ-PROD-V01 — Visão do Produto
+Visão global, missão, proposta de valor e objetivos.
 
-## Convenções
+## OTJ-PROD-V02 — Objetivos e Princípios
+Objetivos estratégicos e princípios orientadores.
 
--   Todos os documentos utilizam Markdown.
--   A nomenclatura segue o padrão `OTJ-PROD-Vxx`.
--   Cada documento possui objetivo, âmbito, índice e referências.
+## OTJ-PROD-V03 — Personas
+Perfis dos diferentes tipos de utilizadores.
 
-## Histórico de Versões
+## OTJ-PROD-V04 — Casos de Utilização
+Descrição dos principais casos de utilização da plataforma.
 
-  ------------------------------------------------------------------------
-  Versão                 Data              Descrição
-  ---------------------- ----------------- -------------------------------
-  1.0                    2026-07-14        Criação do índice geral da
-                                           documentação de produto.
+## OTJ-PROD-V05 — Requisitos Funcionais
+Lista completa dos requisitos funcionais.
 
-  ------------------------------------------------------------------------
+## OTJ-PROD-V06 — Requisitos Não Funcionais
+Requisitos de desempenho, segurança, disponibilidade, acessibilidade e qualidade.
 
-## Próximos Documentos
+## OTJ-PROD-V07 — Módulos Funcionais
+Descrição funcional dos módulos da plataforma.
 
-1.  OTJ-PROD-V01 --- Visão Geral da Plataforma
-2.  OTJ-PROD-V02 --- Funcionalidades
-3.  OTJ-PROD-V03 --- Perfis de Utilizador
-4.  OTJ-PROD-V04 --- Casos de Utilização
-5.  OTJ-PROD-V05 --- Roadmap
-6.  OTJ-PROD-V06 --- Glossário
+## OTJ-PROD-V08 — Fluxos de Utilização
+Principais fluxos de navegação e interação.
+
+## OTJ-PROD-V09 — Roadmap
+Planeamento da evolução do produto.
+
+## OTJ-PROD-V10 — Métricas e KPIs
+Indicadores de desempenho e sucesso do produto.
+
+---
+
+# Relação com outras áreas da documentação
+
+A documentação Product complementa a restante documentação do projeto:
+
+- Architecture
+- ADR
+- ERD
+- SQL
+- API
+- Backend
+- Frontend
+- DevOps
+- QA
+- Infrastructure
+- Security
+- Operations
+
+---
+
+# Estado do Documento
+
+| Campo | Valor |
+|-------|-------|
+| Projeto | O Tio do Joca |
+| Código | OTJ-PROD-V00 |
+| Versão | 1.0 |
+| Estado | Em desenvolvimento |
+| Última atualização | 15/07/2026 |
+
+---
+
+**Próximo documento:** OTJ-PROD-V01 — Visão do Produto
