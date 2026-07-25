@@ -1,0 +1,3 @@
+# Ponteiro local da sessão activa: não deve ser versionado.
+active.json
+*.tmp
