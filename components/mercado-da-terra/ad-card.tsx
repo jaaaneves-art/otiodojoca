@@ -20,7 +20,7 @@ export function AdCard({ ad }: { ad: Ad }) {
   };
 
   return (
-    <Link href={`/feira/${ad.id}`}>
+    <Link href={`/mercado-da-terra/${ad.id}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
         <CardContent className="p-6">
           <div className="flex justify-between items-start">

@@ -37,7 +37,7 @@ export default async function ProfilePage() {
             <Link href="/forum" className="text-terra-600 hover:text-terra-800">
               <MessageSquare className="w-5 h-5" />
             </Link>
-            <Link href="/feira" className="text-terra-600 hover:text-terra-800">
+            <Link href="/mercado-da-terra" className="text-terra-600 hover:text-terra-800">
               <ShoppingBag className="w-5 h-5" />
             </Link>
             <LogoutButton />

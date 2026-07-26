@@ -42,7 +42,7 @@ export function NewAdForm() {
     if (adError || !ad) {
       setError("Erro ao criar anuncio. Tenta novamente.");
     } else {
-      router.push(`/feira/${ad.id}`);
+      router.push(`/mercado-da-terra/${ad.id}`);
       router.refresh();
     }
   }

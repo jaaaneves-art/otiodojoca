@@ -18,7 +18,7 @@ export default async function HomePage() {
                 <Link href="/forum">Forum</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/feira">Feira</Link>
+                <Link href="/mercado-da-terra">Feira</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/perfil">Perfil</Link>
@@ -68,7 +68,7 @@ export default async function HomePage() {
             icon={<ShoppingBag className="w-8 h-8" />}
             title="Feira da Terra"
             description="Compra, vende ou troca produtos locais."
-            href="/feira"
+            href="/mercado-da-terra"
           />
           <FeatureCard
             icon={<Calendar className="w-8 h-8" />}
