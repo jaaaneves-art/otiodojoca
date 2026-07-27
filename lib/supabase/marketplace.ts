@@ -111,7 +111,7 @@ export async function getAdById(id: number) {
   const supabase = createClient();
 
   // Incrementar contador de visualizações
-  await supabase.rpc("increment_views", { ad_id: id }).catch(() => {});
+  try { await supabase.rpc("increment_views", { ad_id: id }); } catch {}
 
   const { data, error } = await supabase
     .from("marketplace_ads")
@@ -499,6 +499,7 @@ export async function reportAd(
 
   return { report: data, error: null };
 }
+
 
 
 
