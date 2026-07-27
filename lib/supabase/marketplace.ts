@@ -2,23 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 
 export interface Ad {
   id: number;
-  user_id: string;
+  author_id: string;
+  category_id: number | null;
   title: string;
-  description: string;
-  category: string;
-  subcategory?: string;
+  description: string | null;
   price: number | null;
   price_type: "fixed" | "negotiable" | "free";
-  location: string;
-  municipality: string;
-  district: string;
-  images: string[];
+  location: string | null;
+  contact_method: "message" | "phone" | "email" | "in_person" | null;
+  contact_info: string | null;
   status: "active" | "inactive" | "sold" | "reserved" | "expired";
-  contact_method: "message" | "phone" | "email" | "in_person";
+  expires_at: string | null;
   created_at: string;
   updated_at: string;
-  expires_at?: string;
-  views_count: number;
 }
 
 export interface FilterOptions {
@@ -26,7 +22,7 @@ export interface FilterOptions {
   category?: string;
   priceMin?: number;
   priceMax?: number;
-  municipality?: string;
+
   priceType?: string;
   status?: string;
   sortBy?: string;
@@ -59,11 +55,7 @@ export async function getAds(filters: FilterOptions = {}) {
   }
 
   if (filters.category) {
-    query = query.eq("category", filters.category);
-  }
-
-  if (filters.municipality) {
-    query = query.eq("municipality", filters.municipality);
+    query = query.eq("category_id", filters.category);
   }
 
   if (filters.priceType) {
@@ -88,9 +80,6 @@ export async function getAds(filters: FilterOptions = {}) {
       break;
     case "price-high":
       query = query.order("price", { ascending: false });
-      break;
-    case "views":
-      query = query.order("views_count", { ascending: false });
       break;
     case "newest":
     default:
@@ -147,7 +136,7 @@ export async function getAdById(id: number) {
  * Cria um novo anúncio
  */
 export async function createAd(
-  data: Omit<Ad, "id" | "created_at" | "updated_at" | "views_count">
+  data: Omit<Ad, "id" | "created_at" | "updated_at">
 ) {
   const supabase = createClient();
 
@@ -156,7 +145,7 @@ export async function createAd(
     .insert([
       {
         ...data,
-        views_count: 0,
+
       },
     ])
     .select()
@@ -219,7 +208,7 @@ export async function getUserAds(userId: string) {
   const { data, error } = await supabase
     .from("marketplace_ads")
     .select("*")
-    .eq("user_id", userId)
+    .eq("author_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -233,7 +222,7 @@ export async function getUserAds(userId: string) {
 /**
  * Obtém anúncios similares (mesma categoria)
  */
-export async function getSimilarAds(category: string, excludeId: number, limit = 6) {
+export async function getSimilarAds(categoryId: number, excludeId: number, limit = 6) {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -244,7 +233,7 @@ export async function getSimilarAds(category: string, excludeId: number, limit =
       author:profiles(id, username, avatar_url)
     `
     )
-    .eq("category", category)
+    .eq("category_id", categoryId)
     .eq("status", "active")
     .neq("id", excludeId)
     .limit(limit);
@@ -510,3 +499,10 @@ export async function reportAd(
 
   return { report: data, error: null };
 }
+
+
+
+
+
+
+

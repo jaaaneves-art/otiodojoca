@@ -29,4 +29,6 @@ Desenvolver a plataforma OTJ (O Tio do Joca), um ecossistema digital para agricu
 
 ## Próximo passo
 
-Integrar o OPF no projeto OTJ, validar o ciclo de trabalho (estado, sessões e checkpoints) e iniciar a utilização diária do framework.
+
+Adicionar upload de imagens e botao de apagar anuncio no Mercado da Terra
+

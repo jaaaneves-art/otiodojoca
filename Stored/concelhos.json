@@ -1,0 +1,2158 @@
+[
+  {
+    "codigo_dico": "0101",
+    "concelho": "Águeda",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-agueda.pt"
+  },
+  {
+    "codigo_dico": "0102",
+    "concelho": "Albergaria-a-Velha",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-albergaria.pt"
+  },
+  {
+    "codigo_dico": "0103",
+    "concelho": "Anadia",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-anadia.pt"
+  },
+  {
+    "codigo_dico": "0104",
+    "concelho": "Arouca",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-arouca.pt"
+  },
+  {
+    "codigo_dico": "0105",
+    "concelho": "Aveiro",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-aveiro.pt"
+  },
+  {
+    "codigo_dico": "0106",
+    "concelho": "Castelo de Paiva",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-castelo-paiva.pt"
+  },
+  {
+    "codigo_dico": "0107",
+    "concelho": "Espinho",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-espinho.pt"
+  },
+  {
+    "codigo_dico": "0108",
+    "concelho": "Estarreja",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-estarreja.pt"
+  },
+  {
+    "codigo_dico": "0109",
+    "concelho": "Santa Maria da Feira",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "santamariadafeira@cm-feira.pt"
+  },
+  {
+    "codigo_dico": "0110",
+    "concelho": "Ílhavo",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geralcmi@cm-ilhavo.pt"
+  },
+  {
+    "codigo_dico": "0111",
+    "concelho": "Mealhada",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "gabpresidencia@cm-mealhada.pt"
+  },
+  {
+    "codigo_dico": "0112",
+    "concelho": "Murtosa",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-murtosa.pt"
+  },
+  {
+    "codigo_dico": "0113",
+    "concelho": "Oliveira de Azeméis",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-oaz.pt"
+  },
+  {
+    "codigo_dico": "0114",
+    "concelho": "Oliveira do Bairro",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "cmolb@cm-olb.pt"
+  },
+  {
+    "codigo_dico": "0115",
+    "concelho": "Ovar",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "gapresidencia@cm-ovar.pt"
+  },
+  {
+    "codigo_dico": "0116",
+    "concelho": "São João da Madeira",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-sjm.pt"
+  },
+  {
+    "codigo_dico": "0117",
+    "concelho": "Sever do Vouga",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "cm.sever@cm-sever.pt"
+  },
+  {
+    "codigo_dico": "0118",
+    "concelho": "Vagos",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-vagos.pt"
+  },
+  {
+    "codigo_dico": "0119",
+    "concelho": "Vale de Cambra",
+    "distrito_regiao": "Aveiro",
+    "ilha": null,
+    "email": "geral@cm-valedecambra.pt"
+  },
+  {
+    "codigo_dico": "0201",
+    "concelho": "Aljustrel",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@mun-aljustrel.pt"
+  },
+  {
+    "codigo_dico": "0202",
+    "concelho": "Almodôvar",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-almodovar.pt"
+  },
+  {
+    "codigo_dico": "0203",
+    "concelho": "Alvito",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-alvito.pt"
+  },
+  {
+    "codigo_dico": "0204",
+    "concelho": "Barrancos",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-barrancos.pt"
+  },
+  {
+    "codigo_dico": "0205",
+    "concelho": "Beja",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-beja.pt"
+  },
+  {
+    "codigo_dico": "0206",
+    "concelho": "Castro Verde",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-castroverde.pt"
+  },
+  {
+    "codigo_dico": "0207",
+    "concelho": "Cuba",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-cuba.pt"
+  },
+  {
+    "codigo_dico": "0208",
+    "concelho": "Ferreira do Alentejo",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-ferreira-alentejo.pt"
+  },
+  {
+    "codigo_dico": "0209",
+    "concelho": "Mértola",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-mertola.pt"
+  },
+  {
+    "codigo_dico": "0210",
+    "concelho": "Moura",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "cmmoura@cm-moura.pt"
+  },
+  {
+    "codigo_dico": "0211",
+    "concelho": "Odemira",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-odemira.pt"
+  },
+  {
+    "codigo_dico": "0212",
+    "concelho": "Ourique",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cmourique.pt"
+  },
+  {
+    "codigo_dico": "0213",
+    "concelho": "Serpa",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-serpa.pt"
+  },
+  {
+    "codigo_dico": "0214",
+    "concelho": "Vidigueira",
+    "distrito_regiao": "Beja",
+    "ilha": null,
+    "email": "geral@cm-vidigueira.pt"
+  },
+  {
+    "codigo_dico": "0301",
+    "concelho": "Amares",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@municipioamares.pt"
+  },
+  {
+    "codigo_dico": "0302",
+    "concelho": "Barcelos",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@cm-barcelos.pt"
+  },
+  {
+    "codigo_dico": "0303",
+    "concelho": "Braga",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "municipe@cm-braga.pt"
+  },
+  {
+    "codigo_dico": "0304",
+    "concelho": "Cabeceiras de Basto",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "servicoatendimentounico@cabeceirasdebasto.pt"
+  },
+  {
+    "codigo_dico": "0305",
+    "concelho": "Celorico de Basto",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@mun-celoricodebasto.pt"
+  },
+  {
+    "codigo_dico": "0306",
+    "concelho": "Esposende",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "cm.esposende@mail.telepac.pt"
+  },
+  {
+    "codigo_dico": "0307",
+    "concelho": "Fafe",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@cm-fafe.pt"
+  },
+  {
+    "codigo_dico": "0308",
+    "concelho": "Guimarães",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@cm-guimaraes.pt"
+  },
+  {
+    "codigo_dico": "0309",
+    "concelho": "Póvoa de Lanhoso",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@mun-planhoso.pt"
+  },
+  {
+    "codigo_dico": "0310",
+    "concelho": "Terras de Bouro",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@cm-terrasdebouro.pt"
+  },
+  {
+    "codigo_dico": "0311",
+    "concelho": "Vieira do Minho",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@cm-vminho.pt"
+  },
+  {
+    "codigo_dico": "0312",
+    "concelho": "Vila Nova de Famalicão",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "camaramunicipal@famalicao.pt"
+  },
+  {
+    "codigo_dico": "0313",
+    "concelho": "Vila Verde",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@cm-vilaverde.pt"
+  },
+  {
+    "codigo_dico": "0314",
+    "concelho": "Vizela",
+    "distrito_regiao": "Braga",
+    "ilha": null,
+    "email": "geral@cm-vizela.pt"
+  },
+  {
+    "codigo_dico": "0401",
+    "concelho": "Alfândega da Fé",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "gabinete.presidente@cm-alfandegadafe.pt"
+  },
+  {
+    "codigo_dico": "0402",
+    "concelho": "Bragança",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "cmb@cm-braganca.pt"
+  },
+  {
+    "codigo_dico": "0403",
+    "concelho": "Carrazeda de Ansiães",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@cmca.pt"
+  },
+  {
+    "codigo_dico": "0404",
+    "concelho": "Freixo de Espada à Cinta",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@cm-fec.pt"
+  },
+  {
+    "codigo_dico": "0405",
+    "concelho": "Macedo de Cavaleiros",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@cm-macedodecavaleiros.pt"
+  },
+  {
+    "codigo_dico": "0406",
+    "concelho": "Miranda do Douro",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@cm-mdouro.pt"
+  },
+  {
+    "codigo_dico": "0407",
+    "concelho": "Mirandela",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@cm-mirandela.pt"
+  },
+  {
+    "codigo_dico": "0408",
+    "concelho": "Mogadouro",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@mogadouro.pt"
+  },
+  {
+    "codigo_dico": "0409",
+    "concelho": "Torre de Moncorvo",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@torredemoncorvo.pt"
+  },
+  {
+    "codigo_dico": "0410",
+    "concelho": "Vila Flor",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@cm-vilaflor.pt"
+  },
+  {
+    "codigo_dico": "0411",
+    "concelho": "Vimioso",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "gi.cmv@cm-vimioso.pt"
+  },
+  {
+    "codigo_dico": "0412",
+    "concelho": "Vinhais",
+    "distrito_regiao": "Bragança",
+    "ilha": null,
+    "email": "geral@cm-vinhais.pt"
+  },
+  {
+    "codigo_dico": "0501",
+    "concelho": "Belmonte",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-belmonte.pt"
+  },
+  {
+    "codigo_dico": "0502",
+    "concelho": "Castelo Branco",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "camara@cm-castelobranco.pt"
+  },
+  {
+    "codigo_dico": "0503",
+    "concelho": "Covilhã",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "info@cm-covilha.pt"
+  },
+  {
+    "codigo_dico": "0504",
+    "concelho": "Fundão",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-fundao.pt"
+  },
+  {
+    "codigo_dico": "0505",
+    "concelho": "Idanha-a-Nova",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-idanhanova.pt"
+  },
+  {
+    "codigo_dico": "0506",
+    "concelho": "Oleiros",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-oleiros.pt"
+  },
+  {
+    "codigo_dico": "0507",
+    "concelho": "Penamacor",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "secretaria.gap@cm-penamacor.pt"
+  },
+  {
+    "codigo_dico": "0508",
+    "concelho": "Proença-a-Nova",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-proencanova.pt"
+  },
+  {
+    "codigo_dico": "0509",
+    "concelho": "Sertã",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-serta.pt"
+  },
+  {
+    "codigo_dico": "0510",
+    "concelho": "Vila de Rei",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-viladerei.pt"
+  },
+  {
+    "codigo_dico": "0511",
+    "concelho": "Vila Velha de Ródão",
+    "distrito_regiao": "Castelo Branco",
+    "ilha": null,
+    "email": "geral@cm-vvrodao.pt"
+  },
+  {
+    "codigo_dico": "0601",
+    "concelho": "Arganil",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-arganil.pt"
+  },
+  {
+    "codigo_dico": "0602",
+    "concelho": "Cantanhede",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-cantanhede.pt"
+  },
+  {
+    "codigo_dico": "0603",
+    "concelho": "Coimbra",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-coimbra.pt"
+  },
+  {
+    "codigo_dico": "0604",
+    "concelho": "Condeixa-a-Nova",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-condeixa.pt"
+  },
+  {
+    "codigo_dico": "0605",
+    "concelho": "Figueira da Foz",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "municipe@cm-figfoz.pt"
+  },
+  {
+    "codigo_dico": "0606",
+    "concelho": "Góis",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "correio@cm-gois.pt"
+  },
+  {
+    "codigo_dico": "0607",
+    "concelho": "Lousã",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-lousa.pt"
+  },
+  {
+    "codigo_dico": "0608",
+    "concelho": "Mira",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-mira.pt"
+  },
+  {
+    "codigo_dico": "0609",
+    "concelho": "Miranda do Corvo",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "camara@cm-mirandadocorvo.pt"
+  },
+  {
+    "codigo_dico": "0610",
+    "concelho": "Montemor-o-Velho",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-montemorvelho.pt"
+  },
+  {
+    "codigo_dico": "0611",
+    "concelho": "Oliveira do Hospital",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-oliveiradohospital.pt"
+  },
+  {
+    "codigo_dico": "0612",
+    "concelho": "Pampilhosa da Serra",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "municipio@cm-pampilhosadaserra.pt"
+  },
+  {
+    "codigo_dico": "0613",
+    "concelho": "Penacova",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-penacova.pt"
+  },
+  {
+    "codigo_dico": "0614",
+    "concelho": "Penela",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-penela.pt"
+  },
+  {
+    "codigo_dico": "0615",
+    "concelho": "Soure",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-soure.pt"
+  },
+  {
+    "codigo_dico": "0616",
+    "concelho": "Tábua",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-tabua.pt"
+  },
+  {
+    "codigo_dico": "0617",
+    "concelho": "Vila Nova de Poiares",
+    "distrito_regiao": "Coimbra",
+    "ilha": null,
+    "email": "geral@cm-vilanovadepoiares.pt"
+  },
+  {
+    "codigo_dico": "0701",
+    "concelho": "Alandroal",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-alandroal.pt"
+  },
+  {
+    "codigo_dico": "0702",
+    "concelho": "Arraiolos",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-arraiolos.pt"
+  },
+  {
+    "codigo_dico": "0703",
+    "concelho": "Borba",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-borba.pt"
+  },
+  {
+    "codigo_dico": "0704",
+    "concelho": "Estremoz",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-estremoz.pt"
+  },
+  {
+    "codigo_dico": "0705",
+    "concelho": "Évora",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "cmevora@cm-evora.pt"
+  },
+  {
+    "codigo_dico": "0706",
+    "concelho": "Montemor-o-Novo",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "cmmontemor@cm-montemornovo.pt"
+  },
+  {
+    "codigo_dico": "0707",
+    "concelho": "Mora",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-mora.pt"
+  },
+  {
+    "codigo_dico": "0708",
+    "concelho": "Mourão",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "gap@cm-mourao.pt"
+  },
+  {
+    "codigo_dico": "0709",
+    "concelho": "Portel",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@portel.pt"
+  },
+  {
+    "codigo_dico": "0710",
+    "concelho": "Redondo",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-redondo.pt"
+  },
+  {
+    "codigo_dico": "0711",
+    "concelho": "Reguengos de Monsaraz",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-reguengos-monsaraz.pt"
+  },
+  {
+    "codigo_dico": "0712",
+    "concelho": "Vendas Novas",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-vendasnovas.pt"
+  },
+  {
+    "codigo_dico": "0713",
+    "concelho": "Viana do Alentejo",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "atendimento@cm-vianadoalentejo.pt"
+  },
+  {
+    "codigo_dico": "0714",
+    "concelho": "Vila Viçosa",
+    "distrito_regiao": "Évora",
+    "ilha": null,
+    "email": "geral@cm-vilavicosa.pt"
+  },
+  {
+    "codigo_dico": "0801",
+    "concelho": "Albufeira",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-albufeira.pt"
+  },
+  {
+    "codigo_dico": "0802",
+    "concelho": "Alcoutim",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-alcoutim.pt"
+  },
+  {
+    "codigo_dico": "0803",
+    "concelho": "Aljezur",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-aljezur.pt"
+  },
+  {
+    "codigo_dico": "0804",
+    "concelho": "Castro Marim",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "expediente@cm-castromarim.pt"
+  },
+  {
+    "codigo_dico": "0805",
+    "concelho": "Faro",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-faro.pt"
+  },
+  {
+    "codigo_dico": "0806",
+    "concelho": "Lagoa",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "expediente@cm-lagoa.pt"
+  },
+  {
+    "codigo_dico": "0807",
+    "concelho": "Lagos",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "expediente.geral@cm-lagos.pt"
+  },
+  {
+    "codigo_dico": "0808",
+    "concelho": "Loulé",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "cmloule@cm-loule.pt"
+  },
+  {
+    "codigo_dico": "0809",
+    "concelho": "Monchique",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-monchique.pt"
+  },
+  {
+    "codigo_dico": "0810",
+    "concelho": "Olhão",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-olhao.pt"
+  },
+  {
+    "codigo_dico": "0811",
+    "concelho": "Portimão",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-portimao.pt"
+  },
+  {
+    "codigo_dico": "0812",
+    "concelho": "São Brás de Alportel",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "camara@cm-sbras.pt"
+  },
+  {
+    "codigo_dico": "0813",
+    "concelho": "Silves",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "expediente@cm-silves.pt"
+  },
+  {
+    "codigo_dico": "0814",
+    "concelho": "Tavira",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "camara@cm-tavira.pt"
+  },
+  {
+    "codigo_dico": "0815",
+    "concelho": "Vila do Bispo",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-viladobispo.pt"
+  },
+  {
+    "codigo_dico": "0816",
+    "concelho": "Vila Real de Santo António",
+    "distrito_regiao": "Faro",
+    "ilha": null,
+    "email": "geral@cm-vrsa.pt"
+  },
+  {
+    "codigo_dico": "0901",
+    "concelho": "Aguiar da Beira",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@cm-aguiardabeira.pt"
+  },
+  {
+    "codigo_dico": "0902",
+    "concelho": "Almeida",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "camara@cm-almeida.pt"
+  },
+  {
+    "codigo_dico": "0903",
+    "concelho": "Celorico da Beira",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@cm-celoricodabeira.pt"
+  },
+  {
+    "codigo_dico": "0904",
+    "concelho": "Figueira de Castelo Rodrigo",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "cm-fcr@cm-fcr.pt"
+  },
+  {
+    "codigo_dico": "0905",
+    "concelho": "Fornos de Algodres",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@cm-fornosdealgodres.pt"
+  },
+  {
+    "codigo_dico": "0906",
+    "concelho": "Gouveia",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@cm-gouveia.pt"
+  },
+  {
+    "codigo_dico": "0907",
+    "concelho": "Guarda",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@mun-guarda.pt"
+  },
+  {
+    "codigo_dico": "0908",
+    "concelho": "Manteigas",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@cm-manteigas.pt"
+  },
+  {
+    "codigo_dico": "0909",
+    "concelho": "Mêda",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "cmeda@cm-meda.pt"
+  },
+  {
+    "codigo_dico": "0910",
+    "concelho": "Pinhel",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "cm-pinhel@cm-pinhel.pt"
+  },
+  {
+    "codigo_dico": "0911",
+    "concelho": "Sabugal",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@cm-sabugal.pt"
+  },
+  {
+    "codigo_dico": "0912",
+    "concelho": "Seia",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "cm-seia@cm-seia.pt"
+  },
+  {
+    "codigo_dico": "0913",
+    "concelho": "Trancoso",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "geral@cm-trancoso.pt"
+  },
+  {
+    "codigo_dico": "0914",
+    "concelho": "Vila Nova de Foz Côa",
+    "distrito_regiao": "Guarda",
+    "ilha": null,
+    "email": "correio@cm-fozcoa.pt"
+  },
+  {
+    "codigo_dico": "1001",
+    "concelho": "Alcobaça",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "cmalcobaca@cm-alcobaca.pt"
+  },
+  {
+    "codigo_dico": "1002",
+    "concelho": "Alvaiázere",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-alvaiazere.pt"
+  },
+  {
+    "codigo_dico": "1003",
+    "concelho": "Ansião",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-ansiao.pt"
+  },
+  {
+    "codigo_dico": "1004",
+    "concelho": "Batalha",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-batalha.pt"
+  },
+  {
+    "codigo_dico": "1005",
+    "concelho": "Bombarral",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-bombarral.pt"
+  },
+  {
+    "codigo_dico": "1006",
+    "concelho": "Caldas da Rainha",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-caldas-rainha.pt"
+  },
+  {
+    "codigo_dico": "1007",
+    "concelho": "Castanheira de Pêra",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "camara@cm-castanheiradepera.pt"
+  },
+  {
+    "codigo_dico": "1008",
+    "concelho": "Figueiró dos Vinhos",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "secretaria@cm-figueirodosvinhos.pt"
+  },
+  {
+    "codigo_dico": "1009",
+    "concelho": "Leiria",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "cmleiria@cm-leiria.pt"
+  },
+  {
+    "codigo_dico": "1010",
+    "concelho": "Marinha Grande",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-mgrande.pt"
+  },
+  {
+    "codigo_dico": "1011",
+    "concelho": "Nazaré",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-nazare.pt"
+  },
+  {
+    "codigo_dico": "1012",
+    "concelho": "Óbidos",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-obidos.pt"
+  },
+  {
+    "codigo_dico": "1013",
+    "concelho": "Pedrógão Grande",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-pedrogaogrande.pt"
+  },
+  {
+    "codigo_dico": "1014",
+    "concelho": "Peniche",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "cmpeniche@cm-peniche.pt"
+  },
+  {
+    "codigo_dico": "1015",
+    "concelho": "Pombal",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@cm-pombal.pt"
+  },
+  {
+    "codigo_dico": "1016",
+    "concelho": "Porto de Mós",
+    "distrito_regiao": "Leiria",
+    "ilha": null,
+    "email": "geral@municipio-portodemos.pt"
+  },
+  {
+    "codigo_dico": "1101",
+    "concelho": "Alenquer",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-alenquer.pt"
+  },
+  {
+    "codigo_dico": "1102",
+    "concelho": "Arruda dos Vinhos",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "cm-arruda@cm-arruda.pt"
+  },
+  {
+    "codigo_dico": "1103",
+    "concelho": "Azambuja",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-azambuja.pt"
+  },
+  {
+    "codigo_dico": "1104",
+    "concelho": "Cadaval",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-cadaval.pt"
+  },
+  {
+    "codigo_dico": "1105",
+    "concelho": "Cascais",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "atendimento.municipal@cm-cascais.pt"
+  },
+  {
+    "codigo_dico": "1106",
+    "concelho": "Lisboa",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-lisboa.pt"
+  },
+  {
+    "codigo_dico": "1107",
+    "concelho": "Loures",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-loures.pt"
+  },
+  {
+    "codigo_dico": "1108",
+    "concelho": "Lourinhã",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-lourinha.pt"
+  },
+  {
+    "codigo_dico": "1109",
+    "concelho": "Mafra",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-mafra.pt"
+  },
+  {
+    "codigo_dico": "1110",
+    "concelho": "Oeiras",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-oeiras.pt"
+  },
+  {
+    "codigo_dico": "1111",
+    "concelho": "Sintra",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "municipe@cm-sintra.pt"
+  },
+  {
+    "codigo_dico": "1112",
+    "concelho": "Sobral de Monte Agraço",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-sobral.pt"
+  },
+  {
+    "codigo_dico": "1113",
+    "concelho": "Torres Vedras",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-tvedras.pt"
+  },
+  {
+    "codigo_dico": "1114",
+    "concelho": "Vila Franca de Xira",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-vfxira.pt"
+  },
+  {
+    "codigo_dico": "1115",
+    "concelho": "Amadora",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-amadora.pt"
+  },
+  {
+    "codigo_dico": "1116",
+    "concelho": "Odivelas",
+    "distrito_regiao": "Lisboa",
+    "ilha": null,
+    "email": "geral@cm-odivelas.pt"
+  },
+  {
+    "codigo_dico": "1201",
+    "concelho": "Alter do Chão",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-alter-chao.pt"
+  },
+  {
+    "codigo_dico": "1202",
+    "concelho": "Arronches",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-arronches.pt"
+  },
+  {
+    "codigo_dico": "1203",
+    "concelho": "Avis",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-avis.pt"
+  },
+  {
+    "codigo_dico": "1204",
+    "concelho": "Campo Maior",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-campo-maior.pt"
+  },
+  {
+    "codigo_dico": "1205",
+    "concelho": "Castelo de Vide",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "cm.castvide@mail.telepac.pt"
+  },
+  {
+    "codigo_dico": "1206",
+    "concelho": "Crato",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-crato.pt"
+  },
+  {
+    "codigo_dico": "1207",
+    "concelho": "Elvas",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-elvas.pt"
+  },
+  {
+    "codigo_dico": "1208",
+    "concelho": "Fronteira",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "municipio@cm-fronteira.pt"
+  },
+  {
+    "codigo_dico": "1209",
+    "concelho": "Gavião",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-gaviao.pt"
+  },
+  {
+    "codigo_dico": "1210",
+    "concelho": "Marvão",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-marvao.pt"
+  },
+  {
+    "codigo_dico": "1211",
+    "concelho": "Monforte",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "cmmonforte@mail.telepac.pt"
+  },
+  {
+    "codigo_dico": "1212",
+    "concelho": "Nisa",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-nisa.pt"
+  },
+  {
+    "codigo_dico": "1213",
+    "concelho": "Ponte de Sor",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-pontedesor.pt"
+  },
+  {
+    "codigo_dico": "1214",
+    "concelho": "Portalegre",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "municipio@cm-portalegre.pt"
+  },
+  {
+    "codigo_dico": "1215",
+    "concelho": "Sousel",
+    "distrito_regiao": "Portalegre",
+    "ilha": null,
+    "email": "geral@cm-sousel.pt"
+  },
+  {
+    "codigo_dico": "1301",
+    "concelho": "Amarante",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-amarante.pt"
+  },
+  {
+    "codigo_dico": "1302",
+    "concelho": "Baião",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-baiao.pt"
+  },
+  {
+    "codigo_dico": "1303",
+    "concelho": "Felgueiras",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-felgueiras.pt"
+  },
+  {
+    "codigo_dico": "1304",
+    "concelho": "Gondomar",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-gondomar.pt"
+  },
+  {
+    "codigo_dico": "1305",
+    "concelho": "Lousada",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "cm-lousada@cm-lousada.pt"
+  },
+  {
+    "codigo_dico": "1306",
+    "concelho": "Maia",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-maia.pt"
+  },
+  {
+    "codigo_dico": "1307",
+    "concelho": "Marco de Canaveses",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "info@cm-marco-canaveses.pt"
+  },
+  {
+    "codigo_dico": "1308",
+    "concelho": "Matosinhos",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "mail@cm-matosinhos.pt"
+  },
+  {
+    "codigo_dico": "1309",
+    "concelho": "Paços de Ferreira",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-pacosdeferreira.pt"
+  },
+  {
+    "codigo_dico": "1310",
+    "concelho": "Paredes",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "cmparedes@cm-paredes.pt"
+  },
+  {
+    "codigo_dico": "1311",
+    "concelho": "Penafiel",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "penafiel@cm-penafiel.pt"
+  },
+  {
+    "codigo_dico": "1312",
+    "concelho": "Porto",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-porto.pt"
+  },
+  {
+    "codigo_dico": "1313",
+    "concelho": "Póvoa de Varzim",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-pvarzim.pt"
+  },
+  {
+    "codigo_dico": "1314",
+    "concelho": "Santo Tirso",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "gap@cm-stirso.pt"
+  },
+  {
+    "codigo_dico": "1315",
+    "concelho": "Valongo",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "gabmunicipe@cm-valongo.pt"
+  },
+  {
+    "codigo_dico": "1316",
+    "concelho": "Vila do Conde",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-viladoconde.pt"
+  },
+  {
+    "codigo_dico": "1317",
+    "concelho": "Vila Nova de Gaia",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@cm-gaia.pt"
+  },
+  {
+    "codigo_dico": "1318",
+    "concelho": "Trofa",
+    "distrito_regiao": "Porto",
+    "ilha": null,
+    "email": "geral@mun-trofa.pt"
+  },
+  {
+    "codigo_dico": "1401",
+    "concelho": "Abrantes",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-abrantes.pt"
+  },
+  {
+    "codigo_dico": "1402",
+    "concelho": "Alcanena",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-alcanena.pt"
+  },
+  {
+    "codigo_dico": "1403",
+    "concelho": "Almeirim",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-almeirim.pt"
+  },
+  {
+    "codigo_dico": "1404",
+    "concelho": "Alpiarça",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "atendimento@cm-alpiarca.pt"
+  },
+  {
+    "codigo_dico": "1405",
+    "concelho": "Benavente",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "gap@cm-benavente.pt"
+  },
+  {
+    "codigo_dico": "1406",
+    "concelho": "Cartaxo",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "correio@cm-cartaxo.pt"
+  },
+  {
+    "codigo_dico": "1407",
+    "concelho": "Chamusca",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-chamusca.pt"
+  },
+  {
+    "codigo_dico": "1408",
+    "concelho": "Constância",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-constancia.pt"
+  },
+  {
+    "codigo_dico": "1409",
+    "concelho": "Coruche",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-coruche.pt"
+  },
+  {
+    "codigo_dico": "1410",
+    "concelho": "Entroncamento",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-entroncamento.pt"
+  },
+  {
+    "codigo_dico": "1411",
+    "concelho": "Ferreira do Zêzere",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-ferreiradozezere.pt"
+  },
+  {
+    "codigo_dico": "1412",
+    "concelho": "Golegã",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-golega.pt"
+  },
+  {
+    "codigo_dico": "1413",
+    "concelho": "Mação",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-macao.pt"
+  },
+  {
+    "codigo_dico": "1414",
+    "concelho": "Rio Maior",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-riomaior.pt"
+  },
+  {
+    "codigo_dico": "1415",
+    "concelho": "Salvaterra de Magos",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-salvaterrademagos.pt"
+  },
+  {
+    "codigo_dico": "1416",
+    "concelho": "Santarém",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-santarem.pt"
+  },
+  {
+    "codigo_dico": "1417",
+    "concelho": "Sardoal",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-sardoal.pt"
+  },
+  {
+    "codigo_dico": "1418",
+    "concelho": "Tomar",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "presidencia@cm-tomar.pt"
+  },
+  {
+    "codigo_dico": "1419",
+    "concelho": "Torres Novas",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-torresnovas.pt"
+  },
+  {
+    "codigo_dico": "1420",
+    "concelho": "Vila Nova da Barquinha",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm-vnbarquinha.pt"
+  },
+  {
+    "codigo_dico": "1421",
+    "concelho": "Ourém",
+    "distrito_regiao": "Santarém",
+    "ilha": null,
+    "email": "geral@cm.ourem.pt"
+  },
+  {
+    "codigo_dico": "1501",
+    "concelho": "Alcácer do Sal",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@m-alcacerdosal.pt"
+  },
+  {
+    "codigo_dico": "1502",
+    "concelho": "Alcochete",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@cm-alcochete.pt"
+  },
+  {
+    "codigo_dico": "1503",
+    "concelho": "Almada",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "almadainforma@cma.m-almada.pt"
+  },
+  {
+    "codigo_dico": "1504",
+    "concelho": "Barreiro",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@cm-barreiro.pt"
+  },
+  {
+    "codigo_dico": "1505",
+    "concelho": "Grândola",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@cm-grandola.pt"
+  },
+  {
+    "codigo_dico": "1506",
+    "concelho": "Moita",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "cmmoita@mail.cm-moita.pt"
+  },
+  {
+    "codigo_dico": "1507",
+    "concelho": "Montijo",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@mun-montijo.pt"
+  },
+  {
+    "codigo_dico": "1508",
+    "concelho": "Palmela",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@cm-palmela.pt"
+  },
+  {
+    "codigo_dico": "1509",
+    "concelho": "Santiago do Cacém",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@cm-santiagocacem.pt"
+  },
+  {
+    "codigo_dico": "1510",
+    "concelho": "Seixal",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "camara.geral@cm-seixal.pt"
+  },
+  {
+    "codigo_dico": "1511",
+    "concelho": "Sesimbra",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@cm-sesimbra.pt"
+  },
+  {
+    "codigo_dico": "1512",
+    "concelho": "Setúbal",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "gap@mun-setubal.pt"
+  },
+  {
+    "codigo_dico": "1513",
+    "concelho": "Sines",
+    "distrito_regiao": "Setúbal",
+    "ilha": null,
+    "email": "geral@mun-sines.pt"
+  },
+  {
+    "codigo_dico": "1601",
+    "concelho": "Arcos de Valdevez",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@cmav.pt"
+  },
+  {
+    "codigo_dico": "1602",
+    "concelho": "Caminha",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@cm-caminha.pt"
+  },
+  {
+    "codigo_dico": "1603",
+    "concelho": "Melgaço",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@cm-melgaco.pt"
+  },
+  {
+    "codigo_dico": "1604",
+    "concelho": "Monção",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "gap@cm-moncao.pt"
+  },
+  {
+    "codigo_dico": "1605",
+    "concelho": "Paredes de Coura",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@paredesdecoura.pt"
+  },
+  {
+    "codigo_dico": "1606",
+    "concelho": "Ponte da Barca",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@cmpb.pt"
+  },
+  {
+    "codigo_dico": "1607",
+    "concelho": "Ponte de Lima",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@cm-pontedelima.pt"
+  },
+  {
+    "codigo_dico": "1608",
+    "concelho": "Valença",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@cm-valenca.pt"
+  },
+  {
+    "codigo_dico": "1609",
+    "concelho": "Viana do Castelo",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "cmviana@cm-viana-castelo.pt"
+  },
+  {
+    "codigo_dico": "1610",
+    "concelho": "Vila Nova de Cerveira",
+    "distrito_regiao": "Viana do Castelo",
+    "ilha": null,
+    "email": "geral@cm-vncerveira.pt"
+  },
+  {
+    "codigo_dico": "1701",
+    "concelho": "Alijó",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-alijo.pt"
+  },
+  {
+    "codigo_dico": "1702",
+    "concelho": "Boticas",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "municipio@cm-boticas.pt"
+  },
+  {
+    "codigo_dico": "1703",
+    "concelho": "Chaves",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "municipio@chaves.pt"
+  },
+  {
+    "codigo_dico": "1704",
+    "concelho": "Mesão Frio",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-mesaofrio.pt"
+  },
+  {
+    "codigo_dico": "1705",
+    "concelho": "Mondim de Basto",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-mondimdebasto.pt"
+  },
+  {
+    "codigo_dico": "1706",
+    "concelho": "Montalegre",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "municipio@cm-montalegre.pt"
+  },
+  {
+    "codigo_dico": "1707",
+    "concelho": "Murça",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-murca.pt"
+  },
+  {
+    "codigo_dico": "1708",
+    "concelho": "Peso da Régua",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "cmregua@cmpr.pt"
+  },
+  {
+    "codigo_dico": "1709",
+    "concelho": "Ribeira de Pena",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-rpena.pt"
+  },
+  {
+    "codigo_dico": "1710",
+    "concelho": "Sabrosa",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-sabrosa.pt"
+  },
+  {
+    "codigo_dico": "1711",
+    "concelho": "Santa Marta de Penaguião",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-smpenaguiao.pt"
+  },
+  {
+    "codigo_dico": "1712",
+    "concelho": "Valpaços",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "municipio@valpacos.pt"
+  },
+  {
+    "codigo_dico": "1713",
+    "concelho": "Vila Pouca de Aguiar",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-vpaguiar.pt"
+  },
+  {
+    "codigo_dico": "1714",
+    "concelho": "Vila Real",
+    "distrito_regiao": "Vila Real",
+    "ilha": null,
+    "email": "geral@cm-vilareal.pt"
+  },
+  {
+    "codigo_dico": "1801",
+    "concelho": "Armamar",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-armamar.pt"
+  },
+  {
+    "codigo_dico": "1802",
+    "concelho": "Carregal do Sal",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-carregal.pt"
+  },
+  {
+    "codigo_dico": "1803",
+    "concelho": "Castro Daire",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-castrodaire.pt"
+  },
+  {
+    "codigo_dico": "1804",
+    "concelho": "Cinfães",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-cinfaes.pt"
+  },
+  {
+    "codigo_dico": "1805",
+    "concelho": "Lamego",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-lamego.pt"
+  },
+  {
+    "codigo_dico": "1806",
+    "concelho": "Mangualde",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cmmangualde.pt"
+  },
+  {
+    "codigo_dico": "1807",
+    "concelho": "Moimenta da Beira",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-moimenta.pt"
+  },
+  {
+    "codigo_dico": "1808",
+    "concelho": "Mortágua",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "mortagua@cm-mortagua.pt"
+  },
+  {
+    "codigo_dico": "1809",
+    "concelho": "Nelas",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-nelas.pt"
+  },
+  {
+    "codigo_dico": "1810",
+    "concelho": "Oliveira de Frades",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-ofrades.pt"
+  },
+  {
+    "codigo_dico": "1811",
+    "concelho": "Penalva do Castelo",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-penalvadocastelo.pt"
+  },
+  {
+    "codigo_dico": "1812",
+    "concelho": "Penedono",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-penedono.pt"
+  },
+  {
+    "codigo_dico": "1813",
+    "concelho": "Resende",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-resende.pt"
+  },
+  {
+    "codigo_dico": "1814",
+    "concelho": "Santa Comba Dão",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-santacombadao.pt"
+  },
+  {
+    "codigo_dico": "1815",
+    "concelho": "São João da Pesqueira",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "cmsjp@sjpesqueira.pt"
+  },
+  {
+    "codigo_dico": "1816",
+    "concelho": "São Pedro do Sul",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-spsul.pt"
+  },
+  {
+    "codigo_dico": "1817",
+    "concelho": "Sátão",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-satao.pt"
+  },
+  {
+    "codigo_dico": "1818",
+    "concelho": "Sernancelhe",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-sernancelhe.pt"
+  },
+  {
+    "codigo_dico": "1819",
+    "concelho": "Tabuaço",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "cm-tabuaco@cm-tabuaco.pt"
+  },
+  {
+    "codigo_dico": "1820",
+    "concelho": "Tarouca",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "camara@cm-tarouca.pt"
+  },
+  {
+    "codigo_dico": "1821",
+    "concelho": "Tondela",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-tondela.pt"
+  },
+  {
+    "codigo_dico": "1822",
+    "concelho": "Vila Nova de Paiva",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-vnpaiva.pt"
+  },
+  {
+    "codigo_dico": "1823",
+    "concelho": "Viseu",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cmviseu.pt"
+  },
+  {
+    "codigo_dico": "1824",
+    "concelho": "Vouzela",
+    "distrito_regiao": "Viseu",
+    "ilha": null,
+    "email": "geral@cm-vouzela.pt"
+  },
+  {
+    "codigo_dico": "3101",
+    "concelho": "Calheta",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "camara@cmcalheta.pt"
+  },
+  {
+    "codigo_dico": "3102",
+    "concelho": "Câmara de Lobos",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "geral@cm-camaradelobos.pt"
+  },
+  {
+    "codigo_dico": "3103",
+    "concelho": "Funchal",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "cmf@cm-funchal.pt"
+  },
+  {
+    "codigo_dico": "3104",
+    "concelho": "Machico",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "gabinete.apoio@cm-machico.pt"
+  },
+  {
+    "codigo_dico": "3105",
+    "concelho": "Ponta do Sol",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "presidencia@cm-pontadosol.pt"
+  },
+  {
+    "codigo_dico": "3106",
+    "concelho": "Porto Moniz",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "geral@portomoniz.pt"
+  },
+  {
+    "codigo_dico": "3107",
+    "concelho": "Ribeira Brava",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "geral@cm-ribeirabrava.pt"
+  },
+  {
+    "codigo_dico": "3108",
+    "concelho": "Santa Cruz",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "geral@cm-santacruz.pt"
+  },
+  {
+    "codigo_dico": "3109",
+    "concelho": "Santana",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "gap@cm-santana.com"
+  },
+  {
+    "codigo_dico": "3110",
+    "concelho": "São Vicente",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha da Madeira",
+    "email": "recursos.humanos@cm-saovicente.pt"
+  },
+  {
+    "codigo_dico": "3201",
+    "concelho": "Porto Santo",
+    "distrito_regiao": "R. A. da Madeira",
+    "ilha": "Ilha de Porto Santo",
+    "email": "geral@cm-portosanto.pt"
+  },
+  {
+    "codigo_dico": "4101",
+    "concelho": "Vila do Porto",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de Santa Maria",
+    "email": "geral@cm-viladoporto.pt"
+  },
+  {
+    "codigo_dico": "4201",
+    "concelho": "Lagoa",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Miguel",
+    "email": "geral@lagoa-acores.pt"
+  },
+  {
+    "codigo_dico": "4202",
+    "concelho": "Nordeste",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Miguel",
+    "email": "geral@cmnordeste.pt"
+  },
+  {
+    "codigo_dico": "4203",
+    "concelho": "Ponta Delgada",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Miguel",
+    "email": "geral@mpdelgada.pt"
+  },
+  {
+    "codigo_dico": "4204",
+    "concelho": "Povoação",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Miguel",
+    "email": "geral@cm-povoacao.pt"
+  },
+  {
+    "codigo_dico": "4205",
+    "concelho": "Ribeira Grande",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Miguel",
+    "email": "geralcmrg@cm-ribeiragrande.pt"
+  },
+  {
+    "codigo_dico": "4206",
+    "concelho": "Vila Franca do Campo",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Miguel",
+    "email": "geral@cmvfc.pt"
+  },
+  {
+    "codigo_dico": "4301",
+    "concelho": "Angra do Heroísmo",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha Terceira",
+    "email": "angra@cmah.pt"
+  },
+  {
+    "codigo_dico": "4302",
+    "concelho": "Praia da Vitória",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha Terceira",
+    "email": "geral@cmpv.pt"
+  },
+  {
+    "codigo_dico": "4401",
+    "concelho": "Santa Cruz da Graciosa",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha da Graciosa",
+    "email": "geral@cm-graciosa.pt"
+  },
+  {
+    "codigo_dico": "4501",
+    "concelho": "Calheta de S. Jorge",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Jorge",
+    "email": "geral@cm-calheta.pt"
+  },
+  {
+    "codigo_dico": "4502",
+    "concelho": "Velas",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha de São Jorge",
+    "email": "geral@cmvelas.pt"
+  },
+  {
+    "codigo_dico": "4601",
+    "concelho": "Lajes do Pico",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha do Pico",
+    "email": "recursoshumanos@cm-lajesdopico.pt"
+  },
+  {
+    "codigo_dico": "4602",
+    "concelho": "Madalena",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha do Pico",
+    "email": "geral@cm-madalena.pt"
+  },
+  {
+    "codigo_dico": "4603",
+    "concelho": "São Roque do Pico",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha do Pico",
+    "email": "geral@cm-saoroquedopico.pt"
+  },
+  {
+    "codigo_dico": "4701",
+    "concelho": "Horta",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha do Faial",
+    "email": "geral@cmhorta.pt"
+  },
+  {
+    "codigo_dico": "4801",
+    "concelho": "Lajes das Flores",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha das Flores",
+    "email": "geral@cmlajesdasflores.pt"
+  },
+  {
+    "codigo_dico": "4802",
+    "concelho": "Santa Cruz das Flores",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha das Flores",
+    "email": "geral@cmscflores.pt"
+  },
+  {
+    "codigo_dico": "4901",
+    "concelho": "Corvo",
+    "distrito_regiao": "R. A. dos Açores",
+    "ilha": "Ilha do Corvo",
+    "email": "geral@cm-corvo.pt"
+  }
+]

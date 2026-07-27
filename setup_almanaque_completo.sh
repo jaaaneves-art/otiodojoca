@@ -27,8 +27,8 @@ mkdir -p "app/perfil/editar"
 mkdir -p "app/forum/[slug]"
 mkdir -p "app/forum/topico/[id]"
 mkdir -p "app/forum/pesquisa"
-mkdir -p "app/feira"
-mkdir -p "app/feira/[id]"
+mkdir -p "app/mercado-da-terra"
+mkdir -p "app/mercado-da-terra/[id]"
 mkdir -p "components/ui"
 mkdir -p "components/auth"
 mkdir -p "components/profile"
@@ -1189,7 +1189,7 @@ export function NewAdForm() {
     if (adError || !ad) {
       setError("Erro ao criar anuncio. Tenta novamente.");
     } else {
-      router.push(`/feira/${ad.id}`);
+      router.push(`/mercado-da-terra/${ad.id}`);
       router.refresh();
     }
   }
@@ -1298,7 +1298,7 @@ export function AdCard({ ad }: { ad: Ad }) {
   };
 
   return (
-    <Link href={`/feira/${ad.id}`}>
+    <Link href={`/mercado-da-terra/${ad.id}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
         <CardContent className="p-6">
           <div className="flex justify-between items-start">
@@ -1394,7 +1394,7 @@ export default async function HomePage() {
                 <Link href="/forum">Forum</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/feira">Feira</Link>
+                <Link href="/mercado-da-terra">Feira</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/perfil">Perfil</Link>
@@ -1444,7 +1444,7 @@ export default async function HomePage() {
             icon={<ShoppingBag className="w-8 h-8" />}
             title="Feira da Terra"
             description="Compra, vende ou troca produtos locais."
-            href="/feira"
+            href="/mercado-da-terra"
           />
           <FeatureCard
             icon={<Calendar className="w-8 h-8" />}
@@ -1588,7 +1588,7 @@ export default async function ProfilePage() {
             <Link href="/forum" className="text-terra-600 hover:text-terra-800">
               <MessageSquare className="w-5 h-5" />
             </Link>
-            <Link href="/feira" className="text-terra-600 hover:text-terra-800">
+            <Link href="/mercado-da-terra" className="text-terra-600 hover:text-terra-800">
               <ShoppingBag className="w-5 h-5" />
             </Link>
             <LogoutButton />
@@ -2064,7 +2064,7 @@ echo "✅ Paginas do forum criadas"
 echo ""
 echo "🛒 A criar paginas da Feira da Terra..."
 
-cat > app/feira/page.tsx << 'FPEOF'
+cat > app/mercado-da-terra/page.tsx << 'FPEOF'
 import { createClient } from "@/lib/supabase/server";
 import { AdCard } from "@/components/marketplace/ad-card";
 import { NewAdForm } from "@/components/marketplace/new-ad-form";
@@ -2145,7 +2145,7 @@ export default async function FeiraPage() {
 }
 FPEOF
 
-cat > "app/feira/[id]/page.tsx" << 'FDCPEOF'
+cat > "app/mercado-da-terra/[id]/page.tsx" << 'FDCPEOF'
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -2182,7 +2182,7 @@ export default async function AdPage({
       <nav className="bg-white border-b border-terra-200 px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/feira" className="text-terra-600 hover:text-terra-800">
+            <Link href="/mercado-da-terra" className="text-terra-600 hover:text-terra-800">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-xl font-bold text-terra-800">Anuncio</h1>
