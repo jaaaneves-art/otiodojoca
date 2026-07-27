@@ -62,7 +62,7 @@ export default async function AdPage({ params }: { params: { id: string } }) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 pb-8 border-b border-terra-200">
             <div>
               <p className="text-sm text-terra-600">Localização</p>
-              <p className="font-semibold text-terra-900">📍 {ad.municipality}</p>
+              <p className="font-semibold text-terra-900">📍 {ad.location}</p>
             </div>
             <div>
               <p className="text-sm text-terra-600">Data de Publicação</p>

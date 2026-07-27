@@ -15,6 +15,7 @@ export async function createAd(formData: FormData) {
   const description = formData.get("description") as string;
   const price = formData.get("price") as string;
   const priceType = formData.get("priceType") as string;
+  const type = (formData.get("type") as string) || "sale";
   const categoryId = formData.get("categoryId") as string;
   const location = formData.get("location") as string;
   const contactMethod = formData.get("contactMethod") as string;
@@ -28,6 +29,7 @@ export async function createAd(formData: FormData) {
         description,
         price: priceType === "free" || !price ? null : parseFloat(price),
         price_type: priceType,
+        type,
         category_id: categoryId ? parseInt(categoryId) : null,
         location,
         contact_method: contactMethod,
@@ -57,6 +59,7 @@ export async function updateAd(id: number, formData: FormData) {
   const description = formData.get("description") as string;
   const price = formData.get("price") as string;
   const priceType = formData.get("priceType") as string;
+  const type = (formData.get("type") as string) || "sale";
   const categoryId = formData.get("categoryId") as string;
   const location = formData.get("location") as string;
   const contactMethod = formData.get("contactMethod") as string;
@@ -68,6 +71,7 @@ export async function updateAd(id: number, formData: FormData) {
       description,
       price: priceType === "free" || !price ? null : parseFloat(price),
       price_type: priceType,
+      type,
       category_id: categoryId ? parseInt(categoryId) : null,
       location,
       contact_method: contactMethod,
@@ -82,3 +86,5 @@ export async function updateAd(id: number, formData: FormData) {
 
   redirect(`/mercado-da-terra/${id}`);
 }
+
+
