@@ -70,7 +70,7 @@ export default async function CategoryPage({
         )}
 
         <h2 className="text-lg font-semibold text-terra-800 mb-4">
-          Topicos ({threads?.length || 0})
+          Tópicos ({threads?.length || 0})
         </h2>
 
         {threads && threads.length > 0 ? (

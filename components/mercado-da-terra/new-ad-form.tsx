@@ -40,7 +40,7 @@ export function NewAdForm() {
     setLoading(false);
 
     if (adError || !ad) {
-      setError("Erro ao criar anuncio. Tenta novamente.");
+      setError("Erro ao criar anúncio. Tenta novamente.");
     } else {
       router.push(`/mercado-da-terra/${ad.id}`);
       router.refresh();
@@ -50,12 +50,12 @@ export function NewAdForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Novo Anuncio</CardTitle>
+        <CardTitle>Novo Anúncio</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Titulo</label>
+            <label className="text-sm font-medium">Título</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -64,7 +64,7 @@ export function NewAdForm() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Descricao</label>
+            <label className="text-sm font-medium">Descrição</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -119,10 +119,11 @@ export function NewAdForm() {
           </div>
           {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
           <Button type="submit" disabled={loading}>
-            {loading ? "A publicar..." : "Publicar anuncio"}
+            {loading ? "A publicar..." : "Publicar anúncio"}
           </Button>
         </form>
       </CardContent>
     </Card>
   );
 }
+

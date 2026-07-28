@@ -308,7 +308,7 @@ function New-OpfMarkdownDocumentObject {
         implementacao de ShouldProcess nao e aplicavel.
 
         .PARAMETER Title
-        Titulo opcional associado ao documento (uso informativo/metadados).
+        Título opcional associado ao documento (uso informativo/metadados).
 
         .OUTPUTS
         OpfMarkdownDocument
@@ -649,7 +649,7 @@ function Get-OpfInlineLink {
         Endereco de destino.
 
         .PARAMETER Title
-        Titulo opcional (tooltip). Ignorado quando vazio.
+        Título opcional (tooltip). Ignorado quando vazio.
 
         .PARAMETER AsImage
         Quando presente, produz a forma de imagem, prefixada por "!".
@@ -836,7 +836,7 @@ function New-MarkdownDocument {
         devolve o documento Markdown gerado.
 
         .PARAMETER Title
-        Titulo opcional do documento. Se fornecido, e escrito imediatamente
+        Título opcional do documento. Se fornecido, e escrito imediatamente
         como um cabecalho de nivel 1 no topo do documento.
 
         .EXAMPLE
@@ -1830,7 +1830,7 @@ function Add-MarkdownLink {
         Endereco de destino do link.
 
         .PARAMETER Title
-        Titulo opcional (tooltip) do link.
+        Título opcional (tooltip) do link.
 
         .PARAMETER AppendNewLine
         Quando presente, adiciona uma quebra de paragrafo apos o link.
@@ -1910,7 +1910,7 @@ function Add-MarkdownImage {
         Endereco (caminho ou URL) da imagem.
 
         .PARAMETER Title
-        Titulo opcional (tooltip) da imagem.
+        Título opcional (tooltip) da imagem.
 
         .EXAMPLE
         $doc = Add-MarkdownImage -Document $doc -AltText 'Logotipo' -Url './logo.png'
@@ -2049,7 +2049,7 @@ function Add-MarkdownTOC {
         conteudos.
 
         .PARAMETER Title
-        Titulo da propria seccao de indice, escrito como cabecalho de nivel
+        Título da propria seccao de indice, escrito como cabecalho de nivel
         2. Por omissao "Table of Contents". Um valor vazio omite o
         cabecalho.
 
@@ -2199,7 +2199,7 @@ function ConvertTo-MarkdownText {
         correspondentes ao estilo pedido. Suporta os estilos 'Bold',
         'Italic', 'BoldItalic', 'Strikethrough' e 'None'.
 
-        Nao altera o documento: devolve texto, para ser usado como argumento
+        Não altera o documento: devolve texto, para ser usado como argumento
         de qualquer funcao Add-Markdown*.
 
         .PARAMETER Text
@@ -2339,3 +2339,4 @@ Export-ModuleMember -Function @(
 )
 
 #endregion Module Exports
+

@@ -1021,12 +1021,12 @@ export function NewThreadForm({ categoryId }: { categoryId: number }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Novo Topico</CardTitle>
+        <CardTitle>Novo Tópico</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Titulo</label>
+            <label className="text-sm font-medium">Título</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -1187,7 +1187,7 @@ export function NewAdForm() {
     setLoading(false);
 
     if (adError || !ad) {
-      setError("Erro ao criar anuncio. Tenta novamente.");
+      setError("Erro ao criar anúncio. Tenta novamente.");
     } else {
       router.push(`/mercado-da-terra/${ad.id}`);
       router.refresh();
@@ -1202,7 +1202,7 @@ export function NewAdForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm font-medium">Titulo</label>
+            <label className="text-sm font-medium">Título</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -1211,7 +1211,7 @@ export function NewAdForm() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Descricao</label>
+            <label className="text-sm font-medium">Descrição</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -1266,7 +1266,7 @@ export function NewAdForm() {
           </div>
           {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
           <Button type="submit" disabled={loading}>
-            {loading ? "A publicar..." : "Publicar anuncio"}
+            {loading ? "A publicar..." : "Publicar anúncio"}
           </Button>
         </form>
       </CardContent>
@@ -1391,7 +1391,7 @@ export default async function HomePage() {
           {user ? (
             <div className="flex items-center gap-3">
               <Button asChild variant="outline" size="sm">
-                <Link href="/forum">Forum</Link>
+                <Link href="/forum">Fórum</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/mercado-da-terra">Feira</Link>
@@ -1420,11 +1420,11 @@ export default async function HomePage() {
           </h2>
           <p className="text-xl text-terra-600 max-w-2xl mx-auto mb-8">
             A comunidade portuguesa que partilha conhecimento sobre hortas,
-            jardins, animais e tradicoes da terra.
+            jardins, animais e tradições da terra.
           </p>
           {user ? (
             <Button asChild size="lg">
-              <Link href="/forum">Ir para o Forum</Link>
+              <Link href="/forum">Ir para o Fórum</Link>
             </Button>
           ) : (
             <Button asChild size="lg">
@@ -1436,7 +1436,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-12">
           <FeatureCard
             icon={<MessageSquare className="w-8 h-8" />}
-            title="Forum"
+            title="Fórum"
             description="Pergunta, responde e partilha conhecimento sobre cultivo."
             href="/forum"
           />
@@ -1448,15 +1448,15 @@ export default async function HomePage() {
           />
           <FeatureCard
             icon={<Calendar className="w-8 h-8" />}
-            title="Calendario"
-            description="Calendario agricola personalizado para a tua regiao."
+            title="Calendário"
+            description="Calendário agrícola personalizado para a tua regiao."
             href="#"
             comingSoon
           />
           <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
             title="Almanaque"
-            description="Artigos e guias sobre culturas e tradicoes."
+            description="Artigos e guias sobre culturas e tradições."
             href="#"
             comingSoon
           />
@@ -1645,7 +1645,7 @@ export default async function ProfilePage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold text-terra-700">0</p>
-                    <p className="text-sm text-terra-500">Topicos</p>
+                    <p className="text-sm text-terra-500">Tópicos</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-terra-700">0</p>
@@ -1739,7 +1739,7 @@ import { SearchBar } from "@/components/forum/search-bar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default async function ForumPage() {
+export default async function FórumPage() {
   const supabase = createClient();
 
   const { data: mainCategories } = await supabase
@@ -1765,7 +1765,7 @@ export default async function ForumPage() {
           <div className="flex items-center gap-4">
             <Link href="/" className="text-xl font-bold text-terra-800">Almanaque</Link>
             <span className="text-terra-300">/</span>
-            <span className="text-terra-600">Forum</span>
+            <span className="text-terra-600">Fórum</span>
           </div>
           <div className="flex items-center gap-3">
             <SearchBar />
@@ -1777,7 +1777,7 @@ export default async function ForumPage() {
       </nav>
 
       <main className="max-w-5xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-terra-900 mb-2">Forum</h1>
+        <h1 className="text-3xl font-bold text-terra-900 mb-2">Fórum</h1>
         <p className="text-terra-600 mb-8">Partilha conhecimento, faz perguntas e aprende com a comunidade.</p>
 
         {categoriesWithCount?.map((category: any) => (
@@ -1873,7 +1873,7 @@ export default async function CategoryPage({
         )}
 
         <h2 className="text-lg font-semibold text-terra-800 mb-4">
-          Topicos ({threads?.length || 0})
+          Tópicos ({threads?.length || 0})
         </h2>
 
         {threads && threads.length > 0 ? (
@@ -1915,7 +1915,7 @@ export default async function ThreadPage({
     .single();
 
   if (!thread) {
-    return <div className="p-8 text-center">Topico nao encontrado</div>;
+    return <div className="p-8 text-center">Tópico nao encontrado</div>;
   }
 
   const { data: posts } = await supabase
@@ -1962,7 +1962,7 @@ export default async function ThreadPage({
         {user ? (
           thread.is_locked ? (
             <div className="p-4 bg-terra-100 rounded-lg text-center text-terra-600">
-              Este topico esta fechado. Nao e possivel responder.
+              Este topico esta fechado. Não e possivel responder.
             </div>
           ) : (
             <ReplyForm threadId={Number(params.id)} />
@@ -2096,7 +2096,7 @@ export default async function FeiraPage() {
           </div>
           <div className="flex items-center gap-3">
             <Button asChild variant="outline" size="sm">
-              <Link href="/forum">Forum</Link>
+              <Link href="/forum">Fórum</Link>
             </Button>
             <Button asChild variant="outline" size="sm">
               <Link href="/perfil">Perfil</Link>
@@ -2119,7 +2119,7 @@ export default async function FeiraPage() {
               <Link href="/login" className="font-medium underline">Entra</Link>{" "}
               ou{" "}
               <Link href="/registo" className="font-medium underline">regista-te</Link>{" "}
-              para criar um anuncio.
+              para criar um anúncio.
             </p>
           </div>
         )}
@@ -2136,7 +2136,7 @@ export default async function FeiraPage() {
           </div>
         ) : (
           <p className="text-terra-500 text-center py-12">
-            Ainda nao ha anuncios. Se o primeiro a publicar!
+            Ainda nao ha anúncios. Se o primeiro a publicar!
           </p>
         )}
       </main>
@@ -2219,7 +2219,7 @@ export default async function AdPage({
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-terra-500">Localizacao</p>
-              <p className="font-medium">{ad.location || "Nao especificada"}</p>
+              <p className="font-medium">{ad.location || "Não especificada"}</p>
             </div>
             <div>
               <p className="text-terra-500">Contacto</p>
@@ -2269,3 +2269,4 @@ echo ""
 echo "6. No Supabase, corre o SQL completo (Fase 1 + 2 + 3)"
 echo ""
 echo "============================================"
+

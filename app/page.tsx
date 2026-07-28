@@ -15,7 +15,7 @@ export default async function HomePage() {
           {user ? (
             <div className="flex items-center gap-3">
               <Button asChild variant="outline" size="sm">
-                <Link href="/forum">Forum</Link>
+                <Link href="/forum">Fórum</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/mercado-da-terra">Mercado da Terra</Link>
@@ -44,11 +44,11 @@ export default async function HomePage() {
           </h2>
           <p className="text-xl text-terra-600 max-w-2xl mx-auto mb-8">
             A comunidade portuguesa que partilha conhecimento sobre hortas,
-            jardins, animais e tradicoes da terra.
+            jardins, animais e tradições da terra.
           </p>
           {user ? (
             <Button asChild size="lg">
-              <Link href="/forum">Ir para o Forum</Link>
+              <Link href="/forum">Ir para o Fórum</Link>
             </Button>
           ) : (
             <Button asChild size="lg">
@@ -60,7 +60,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-12">
           <FeatureCard
             icon={<MessageSquare className="w-8 h-8" />}
-            title="Forum"
+            title="Fórum"
             description="Pergunta, responde e partilha conhecimento sobre cultivo."
             href="/forum"
           />
@@ -72,15 +72,15 @@ export default async function HomePage() {
           />
           <FeatureCard
             icon={<Calendar className="w-8 h-8" />}
-            title="Calendario"
-            description="Calendario agricola personalizado para a tua regiao."
+            title="Calendário"
+            description="Calendário agrícola personalizado para a tua regiao."
             href="#"
             comingSoon
           />
           <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
             title="O Tio do Joca"
-            description="Artigos e guias sobre culturas e tradicoes."
+            description="Artigos e guias sobre culturas e tradições."
             href="#"
             comingSoon
           />
@@ -118,3 +118,4 @@ function FeatureCard({
     </Link>
   );
 }
+

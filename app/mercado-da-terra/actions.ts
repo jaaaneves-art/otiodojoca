@@ -3,6 +3,24 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+// Constrói o objeto details conforme o tipo de anúncio
+function buildDetails(type: string, formData: FormData): Record<string, any> {
+  const details: Record<string, any> = {};
+
+  if (type === "troca" || type === "procura") {
+    const seeking = formData.get("seeking") as string;
+    const seeking_description = formData.get("seeking_description") as string;
+    if (seeking) {
+      details.seeking = seeking;
+    }
+    if (seeking_description) {
+      details.seeking_description = seeking_description;
+    }
+  }
+
+  return details;
+}
+
 export async function createAd(formData: FormData) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -19,6 +37,7 @@ export async function createAd(formData: FormData) {
   const categoryId = formData.get("categoryId") as string;
   const location = formData.get("location") as string;
   const contactMethod = formData.get("contactMethod") as string;
+  const details = buildDetails(type, formData);
 
   const { data: ad, error } = await supabase
     .from("marketplace_ads")
@@ -33,6 +52,7 @@ export async function createAd(formData: FormData) {
         category_id: categoryId ? parseInt(categoryId) : null,
         location,
         contact_method: contactMethod,
+        details,
         status: "active",
       },
     ])
@@ -63,6 +83,7 @@ export async function updateAd(id: number, formData: FormData) {
   const categoryId = formData.get("categoryId") as string;
   const location = formData.get("location") as string;
   const contactMethod = formData.get("contactMethod") as string;
+  const details = buildDetails(type, formData);
 
   const { error } = await supabase
     .from("marketplace_ads")
@@ -75,6 +96,7 @@ export async function updateAd(id: number, formData: FormData) {
       category_id: categoryId ? parseInt(categoryId) : null,
       location,
       contact_method: contactMethod,
+      details,
     })
     .eq("id", id)
     .eq("author_id", user.id);
@@ -86,5 +108,6 @@ export async function updateAd(id: number, formData: FormData) {
 
   redirect(`/mercado-da-terra/${id}`);
 }
+
 
 

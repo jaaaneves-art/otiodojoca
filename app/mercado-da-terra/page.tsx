@@ -21,7 +21,7 @@ export default async function FeiraPage() {
           <div className="flex gap-3">
             {user && (
               <>
-                <Link href="/mercado-da-terra/meus-anuncios">
+                <Link href="/mercado-da-terra/meus-anúncios">
                   <button className="border border-terra-200 text-terra-700 font-medium py-2 px-4 rounded-lg hover:bg-terra-50">
                     Meus Anúncios
                   </button>
@@ -143,3 +143,4 @@ export default async function FeiraPage() {
     </div>
   );
 }
+

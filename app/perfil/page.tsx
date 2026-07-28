@@ -94,7 +94,7 @@ export default async function ProfilePage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold text-terra-700">0</p>
-                    <p className="text-sm text-terra-500">Topicos</p>
+                    <p className="text-sm text-terra-500">Tópicos</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-terra-700">0</p>
@@ -145,3 +145,4 @@ export default async function ProfilePage() {
     </div>
   );
 }
+

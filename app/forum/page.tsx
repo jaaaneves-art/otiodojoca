@@ -4,7 +4,7 @@ import { SearchBar } from "@/components/forum/search-bar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default async function ForumPage() {
+export default async function FórumPage() {
   const supabase = createClient();
 
   const { data: mainCategories } = await supabase
@@ -30,7 +30,7 @@ export default async function ForumPage() {
           <div className="flex items-center gap-4">
             <Link href="/" className="text-xl font-bold text-terra-800">Almanaque</Link>
             <span className="text-terra-300">/</span>
-            <span className="text-terra-600">Forum</span>
+            <span className="text-terra-600">Fórum</span>
           </div>
           <div className="flex items-center gap-3">
             <SearchBar />
@@ -42,7 +42,7 @@ export default async function ForumPage() {
       </nav>
 
       <main className="max-w-5xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-terra-900 mb-2">Forum</h1>
+        <h1 className="text-3xl font-bold text-terra-900 mb-2">Fórum</h1>
         <p className="text-terra-600 mb-8">Partilha conhecimento, faz perguntas e aprende com a comunidade.</p>
 
         {categoriesWithCount?.map((category: any) => (
@@ -63,3 +63,4 @@ export default async function ForumPage() {
     </div>
   );
 }
+

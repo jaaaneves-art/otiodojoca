@@ -94,17 +94,17 @@ export function AdForm({
 
       <MunicipioAutocomplete municipios={municipios} valorInicial={inicial?.location ?? ""} />
 
-      {mostra("seeking") && (
+      {mostra("wantsToReceive") && (
         <div>
-          <label className="text-sm font-medium">O que Procuro *</label>
-          <input name="seeking" defaultValue={inicial?.title ?? ""} placeholder="Ex: Milho" required className="w-full border rounded-lg p-2 mt-1" />
+          <label className="text-sm font-medium">O que Preciso *</label>
+          <textarea name="wantsToReceive" rows={3} placeholder="Descreve o que pretendes receber em troca..." className="w-full border rounded-lg p-2 mt-1" />
         </div>
       )}
 
-      {mostra("seeking_description") && (
+      {mostra("seeking") && (
         <div>
-          <label className="text-sm font-medium">Descrição do que Procuro *</label>
-          <textarea name="seeking_description" rows={3} placeholder="Descreve o que procuras..." required className="w-full border rounded-lg p-2 mt-1" />
+          <label className="text-sm font-medium">Meu Orçamento *</label>
+          <textarea name="seeking" rows={3} placeholder="Descreve o teu orçamento..." className="w-full border rounded-lg p-2 mt-1" />
         </div>
       )}
 

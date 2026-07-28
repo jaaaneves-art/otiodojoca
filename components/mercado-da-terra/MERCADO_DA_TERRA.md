@@ -26,7 +26,7 @@ app/
 │   │   └── page.tsx         # Detalhe do anúncio
 │   ├── novo/                # Criar novo anúncio
 │   │   └── page.tsx
-│   ├── meus-anuncios/        # Dashboard do vendedor
+│   ├── meus-anúncios/        # Dashboard do vendedor
 │   │   └── page.tsx
 │   └── categorias/           # Listagem por categoria
 │       └── [categoria]/page.tsx
@@ -272,4 +272,5 @@ CREATE TABLE marketplace_categories (
 - Taxa de conversão (anúncios → vendas)
 - Satisfação do utilizador (reviews)
 - Retenção de vendedores
+
 

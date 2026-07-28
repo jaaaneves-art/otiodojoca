@@ -99,7 +99,7 @@ app/
 │   ├── novo/
 │   │   ├── page.tsx                    # Criar novo anúncio
 │   │   └── layout.tsx
-│   ├── meus-anuncios/
+│   ├── meus-anúncios/
 │   │   ├── page.tsx                    # Dashboard do vendedor
 │   │   └── [id]/
 │   │       └── editar/
@@ -355,9 +355,9 @@ export default async function NovoAnuncioPage() {
 }
 ```
 
-### 5.4 Página de Meus Anúncios (/mercado-da-terra/meus-anuncios)
+### 5.4 Página de Meus Anúncios (/mercado-da-terra/meus-anúncios)
 
-**arquivo: `app/mercado-da-terra/meus-anuncios/page.tsx`**
+**arquivo: `app/mercado-da-terra/meus-anúncios/page.tsx`**
 
 ```tsx
 import { createClient } from '@/lib/supabase/server';
@@ -661,4 +661,5 @@ jobs:
 - [Next.js Docs](https://nextjs.org/docs)
 - [Tailwind CSS](https://tailwindcss.com)
 - [shadcn/ui](https://ui.shadcn.com)
+
 

@@ -30,5 +30,7 @@ Desenvolver a plataforma OTJ (O Tio do Joca), um ecossistema digital para agricu
 ## Próximo passo
 
 
-Adicionar upload de imagens e botao de apagar anuncio no Mercado da Terra
+
+
+F2: tornar o formulario dinamico — mostrar/esconder campos (ex: preco) conforme os fields do tipo escolhido em AD_TYPES
 

@@ -23,7 +23,7 @@ export default async function ThreadPage({
     .single();
 
   if (!thread) {
-    return <div className="p-8 text-center">Topico nao encontrado</div>;
+    return <div className="p-8 text-center">Tópico nao encontrado</div>;
   }
 
   const { data: posts } = await supabase
@@ -70,7 +70,7 @@ export default async function ThreadPage({
         {user ? (
           thread.is_locked ? (
             <div className="p-4 bg-terra-100 rounded-lg text-center text-terra-600">
-              Este topico esta fechado. Nao e possivel responder.
+              Este topico esta fechado. Não e possivel responder.
             </div>
           ) : (
             <ReplyForm threadId={Number(params.id)} />

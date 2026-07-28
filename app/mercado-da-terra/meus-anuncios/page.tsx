@@ -20,6 +20,17 @@ export default async function MeusAnunciosPage() {
   const soldAds = ads?.filter(ad => ad.status === "sold") || [];
   const otherAds = ads?.filter(ad => !["active", "sold"].includes(ad.status)) || [];
 
+  // Função para mostrar preço conforme tipo
+  const renderPrice = (ad: any) => {
+    if (ad.type === 'procura') {
+      return `€${ad.price?.toFixed(2)}`;
+    }
+    if (ad.type === 'offer' || ad.type === 'troca') {
+      return 'Grátis';
+    }
+    return ad.price_type === 'free' ? 'Grátis' : `€${ad.price?.toFixed(2)}`;
+  };
+
   return (
     <div className="min-h-screen bg-terra-50">
       <nav className="bg-white border-b border-terra-200 px-6 py-4">
@@ -54,7 +65,7 @@ export default async function MeusAnunciosPage() {
                   </div>
                   <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
                   <p className="text-lg font-bold text-terra-700 mb-3">
-                    {ad.price_type === 'free' ? 'Grátis' : `€${ad.price?.toFixed(2)}`}
+                    {renderPrice(ad)}
                   </p>
                   <p className="text-sm text-terra-500 mb-4">📍 {ad.location}</p>
                   <div className="flex gap-2">
@@ -86,7 +97,7 @@ export default async function MeusAnunciosPage() {
                   </div>
                   <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
                   <p className="text-lg font-bold text-terra-700 mb-3">
-                    {ad.price_type === 'free' || ad.price == null ? 'Gratis' : '€' + ad.price.toFixed(2)}
+                    {renderPrice(ad)}
                   </p>
                   <p className="text-sm text-terra-500">📍 {ad.location}</p>
                 </div>
@@ -110,4 +121,3 @@ export default async function MeusAnunciosPage() {
     </div>
   );
 }
-

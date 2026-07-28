@@ -216,11 +216,11 @@ $$ LANGUAGE plpgsql;
 -- ============================================
 
 INSERT INTO marketplace_categories (name, slug, description, icon) VALUES
-  ('Produtos Agrícolas', 'produtos-agricolas', 'Cereais, frutas, hortaliças e tubérculos', '🌾'),
+  ('Produtos Agrícolas', 'produtos-agrícolas', 'Cereais, frutas, hortaliças e tubérculos', '🌾'),
   ('Animais e Pecuária', 'animais-pecuaria', 'Bovinos, ovinos, caprinos e aves', '🐄'),
   ('Produtos Alimentares', 'produtos-alimentares', 'Lacticínios, carnes, embutidos e conservas', '🍖'),
   ('Artesanato Rural', 'artesanato-rural', 'Cerâmica, tecelagem e produtos artesanais', '🏺'),
-  ('Maquinaria Agrícola', 'maquinaria-agricola', 'Tratores, ferramentas e equipamento', '🚜'),
+  ('Maquinaria Agrícola', 'maquinaria-agrícola', 'Tratores, ferramentas e equipamento', '🚜'),
   ('Sementes e Mudas', 'sementes-mudas', 'Sementes, mudas, fertilizantes e pesticidas', '🌱'),
   ('Experiências Rurais', 'experiencias-rurais', 'Cursos, workshops e agriturismo', '🎓')
 ON CONFLICT (name) DO NOTHING;
@@ -310,3 +310,4 @@ GROUP BY user_id;
 -- TODO: Configurar alertas para anúncios reportados com status 'pending'
 -- TODO: Implementar notificações em tempo real para mensagens
 -- TODO: Configurar políticas de moderation automática
+

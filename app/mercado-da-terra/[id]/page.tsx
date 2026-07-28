@@ -46,11 +46,23 @@ export default async function AdPage({ params }: { params: { id: string } }) {
             </span>
           </div>
 
-          {/* Preço */}
-          <div className="text-2xl font-bold text-terra-700 mb-6">
-            {ad.price_type === 'free' || ad.price == null ? 'Grátis' : '€' + ad.price.toFixed(2)}
-            {ad.price_type === 'negotiable' && ad.price != null && ' (negociável)'}
-          </div>
+          {/* Preço ou Pretendo Receber ou O que Procuro */}
+          {ad.type === 'troca' ? (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-600 font-semibold mb-1">💱 Pretendo Receber</p>
+              <p className="text-lg text-blue-900">{ad.details?.wantsToReceive || 'Não especificado'}</p>
+            </div>
+          ) : ad.type === 'procura' ? (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-purple-600 font-semibold mb-1">🔍 O que Procuro</p>
+              <p className="text-lg text-purple-900">{ad.details?.seeking || 'Não especificado'}</p>
+            </div>
+          ) : (
+            <div className="text-2xl font-bold text-terra-700 mb-6">
+              {ad.price_type === 'free' || ad.price == null ? 'Grátis' : '€' + ad.price.toFixed(2)}
+              {ad.price_type === 'negotiable' && ad.price != null && ' (negociável)'}
+            </div>
+          )}
 
           {/* Descrição */}
           <div className="mb-8 pb-8 border-b border-terra-200">
@@ -118,4 +130,3 @@ export default async function AdPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
