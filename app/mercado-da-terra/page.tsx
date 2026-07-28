@@ -116,10 +116,10 @@ export default async function FeiraPage() {
                       {/* Footer */}
                       <div>
                         <p className="text-lg font-bold text-terra-700 mb-2">
-                          {ad.price_type === "free" ? "Grátis" : `€${ad.price?.toFixed(2)}`}
-                          {ad.price_type === "negotiable" && " (neg.)"}
+                          {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
+                          {ad.price_type === "negotiable" && ad.price != null && " (neg.)"}
                         </p>
-                        <p className="text-xs text-terra-500">📍 {ad.municipality}</p>
+                        <p className="text-xs text-terra-500">📍 {ad.location}</p>
                       </div>
                     </div>
                   </div>

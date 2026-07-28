@@ -7,8 +7,8 @@ interface Municipio {
   distrito_regiao: string;
 }
 
-export function MunicipioAutocomplete({ municipios }: { municipios: Municipio[] }) {
-  const [texto, setTexto] = useState("");
+export function MunicipioAutocomplete({ municipios, valorInicial = "" }: { municipios: Municipio[]; valorInicial?: string }) {
+  const [texto, setTexto] = useState(valorInicial);
   const [aberto, setAberto] = useState(false);
 
   const sugestoes =
@@ -54,3 +54,4 @@ export function MunicipioAutocomplete({ municipios }: { municipios: Municipio[] 
     </div>
   );
 }
+

@@ -48,8 +48,8 @@ export default async function AdPage({ params }: { params: { id: string } }) {
 
           {/* Preço */}
           <div className="text-2xl font-bold text-terra-700 mb-6">
-            {ad.price_type === 'free' ? 'Grátis' : `€${ad.price?.toFixed(2)}`}
-            {ad.price_type === 'negotiable' && ' (negociável)'}
+            {ad.price_type === 'free' || ad.price == null ? 'Grátis' : '€' + ad.price.toFixed(2)}
+            {ad.price_type === 'negotiable' && ad.price != null && ' (negociável)'}
           </div>
 
           {/* Descrição */}
@@ -118,3 +118,4 @@ export default async function AdPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
