@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContactSellerForm from "@/components/mercado-da-terra/contact-seller-form";
+import FavoriteButton from "@/components/mercado-da-terra/favorite-button";
 
 export default async function AdPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -26,6 +27,18 @@ export default async function AdPage({ params }: { params: { id: string } }) {
     .order("sort_order", { ascending: true });
 
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Verificar se este anúncio é favorito do utilizador
+  let isFav = false;
+  if (user) {
+    const { data: fav } = await supabase
+      .from("marketplace_favorites")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("ad_id", ad.id)
+      .maybeSingle();
+    isFav = !!fav;
+  }
 
   return (
     <div className="min-h-screen bg-terra-50">
@@ -151,13 +164,14 @@ export default async function AdPage({ params }: { params: { id: string } }) {
             )}
           </div>
 
-          {/* Botões / Contactar */}
+          {/* Botões / Contactar / Guardar */}
           <div className="flex flex-col md:flex-row gap-3">
             <ContactSellerForm
               adId={ad.id}
               sellerId={ad.author_id}
               currentUserId={user?.id}
             />
+            <FavoriteButton adId={ad.id} isFavorite={isFav} isLoggedIn={!!user} variant="detail" />
             <Link href="/mercado-da-terra" className="flex-1">
               <button className="w-full border border-terra-200 text-terra-700 font-medium py-3 px-4 rounded-lg hover:bg-terra-50">
                 Voltar à Lista

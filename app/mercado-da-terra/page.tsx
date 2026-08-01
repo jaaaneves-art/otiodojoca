@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import MarketplaceFiltros from "@/components/mercado-da-terra/marketplace-filtros";
+import FavoriteButton from "@/components/mercado-da-terra/favorite-button";
 
 interface SearchParams {
   q?: string;
@@ -40,6 +41,8 @@ export default async function FeiraPage({ searchParams }: { searchParams: Search
 
   const { data: ads } = await query.order("created_at", { ascending: false });
 
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data: categories } = await supabase
     .from("marketplace_categories")
     .select("id, name")
@@ -64,6 +67,16 @@ export default async function FeiraPage({ searchParams }: { searchParams: Search
     });
   }
 
+  // Favoritos do utilizador (set de ad_ids)
+  const favoriteIds = new Set<number>();
+  if (user) {
+    const { data: favs } = await supabase
+      .from("marketplace_favorites")
+      .select("ad_id")
+      .eq("user_id", user.id);
+    favs?.forEach((f: any) => favoriteIds.add(f.ad_id));
+  }
+
   const vendaAds = ads?.filter(ad => ad.type === "sale") || [];
   const ofertaAds = ads?.filter(ad => ad.type === "offer") || [];
   const procuraAds = ads?.filter(ad => ad.type === "troca") || [];
@@ -74,52 +87,56 @@ export default async function FeiraPage({ searchParams }: { searchParams: Search
 
   const renderAdCard = (ad: any, showSecondary?: boolean) => {
     const firstPhoto = photosMap[ad.id];
+    const isFav = favoriteIds.has(ad.id);
 
     return (
-      <Link key={ad.id} href={`/mercado-da-terra/${ad.id}`}>
-        <div className="bg-white rounded-lg border border-terra-200 hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
-          {firstPhoto ? (
-            <div className="w-full h-40 bg-terra-100">
-              <img src={firstPhoto} alt={ad.title} className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-full h-40 bg-terra-100 flex items-center justify-center text-4xl">
-              📦
-            </div>
-          )}
+      <div key={ad.id} className="relative">
+        <FavoriteButton adId={ad.id} isFavorite={isFav} isLoggedIn={!!user} variant="card" />
+        <Link href={`/mercado-da-terra/${ad.id}`}>
+          <div className="bg-white rounded-lg border border-terra-200 hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
+            {firstPhoto ? (
+              <div className="w-full h-40 bg-terra-100">
+                <img src={firstPhoto} alt={ad.title} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-full h-40 bg-terra-100 flex items-center justify-center text-4xl">
+                📦
+              </div>
+            )}
 
-          <div className="p-4 flex-1 flex flex-col justify-between">
-            <div>
-              <p className="text-xs text-terra-500 uppercase tracking-wide mb-2">{ad.category}</p>
-              {showSecondary ? (
-                <>
-                  <h3 className="font-semibold text-terra-800 line-clamp-2 mb-2">
-                    🔍 {ad.details?.seeking || ad.title}
-                  </h3>
-                  <p className="text-sm text-terra-600 line-clamp-2 mb-3">{ad.details?.seeking_description}</p>
-                </>
-              ) : (
-                <>
-                  <h3 className="font-semibold text-terra-800 line-clamp-2 mb-2">{ad.title}</h3>
-                  <p className="text-sm text-terra-600 line-clamp-2 mb-3">{ad.description}</p>
-                </>
-              )}
-            </div>
+            <div className="p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <p className="text-xs text-terra-500 uppercase tracking-wide mb-2">{ad.category}</p>
+                {showSecondary ? (
+                  <>
+                    <h3 className="font-semibold text-terra-800 line-clamp-2 mb-2">
+                      🔍 {ad.details?.seeking || ad.title}
+                    </h3>
+                    <p className="text-sm text-terra-600 line-clamp-2 mb-3">{ad.details?.seeking_description}</p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-semibold text-terra-800 line-clamp-2 mb-2">{ad.title}</h3>
+                    <p className="text-sm text-terra-600 line-clamp-2 mb-3">{ad.description}</p>
+                  </>
+                )}
+              </div>
 
-            <div>
-              {(ad.type === "sale" || ad.type === "troca") ? (
-                <p className="text-lg font-bold text-terra-700 mb-2">
-                  {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
-                  {ad.price_type === "negotiable" && ad.price != null && " (neg.)"}
-                </p>
-              ) : (
-                <p className="text-lg font-bold text-terra-700 mb-2">Grátis</p>
-              )}
-              <p className="text-xs text-terra-500">📍 {ad.location}</p>
+              <div>
+                {(ad.type === "sale" || ad.type === "troca") ? (
+                  <p className="text-lg font-bold text-terra-700 mb-2">
+                    {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
+                    {ad.price_type === "negotiable" && ad.price != null && " (neg.)"}
+                  </p>
+                ) : (
+                  <p className="text-lg font-bold text-terra-700 mb-2">Grátis</p>
+                )}
+                <p className="text-xs text-terra-500">📍 {ad.location}</p>
+              </div>
             </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+      </div>
     );
   };
 

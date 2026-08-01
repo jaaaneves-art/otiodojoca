@@ -5,11 +5,9 @@ export default async function MarketplaceNavbar() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Contar mensagens não lidas do utilizador (em todas as suas conversas)
   let unreadTotal = 0;
 
   if (user) {
-    // Buscar IDs das conversas do utilizador
     const { data: convs } = await supabase
       .from("marketplace_conversations")
       .select("id")
@@ -39,10 +37,17 @@ export default async function MarketplaceNavbar() {
         <div className="flex gap-3 items-center">
           {user ? (
             <>
-              {/* Link Mensagens com badge */}
+              {/* Favoritos */}
+              <Link href="/mercado-da-terra/favoritos">
+                <button className="border border-terra-200 text-terra-700 font-medium py-2 px-4 rounded-lg hover:bg-terra-50 flex items-center gap-1">
+                  ❤️ <span className="hidden sm:inline">Favoritos</span>
+                </button>
+              </Link>
+
+              {/* Mensagens com badge */}
               <Link href="/mercado-da-terra/messages" className="relative">
                 <button className="border border-terra-200 text-terra-700 font-medium py-2 px-4 rounded-lg hover:bg-terra-50 flex items-center gap-2">
-                  💬 Mensagens
+                  💬 <span className="hidden sm:inline">Mensagens</span>
                   {unreadTotal > 0 && (
                     <span className="bg-terra-600 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
                       {unreadTotal > 99 ? "99+" : unreadTotal}
