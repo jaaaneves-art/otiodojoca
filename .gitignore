@@ -34,3 +34,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Backups locais da BD
+backup-*.sql
+backups/
+
+# Temporarios do Supabase CLI
+supabase/.temp/
+
+# Notas e relatorios (nao vao para o repo de codigo)
+FASE5-FINAL.md
+PROJECT STATUS REPORT otj.md
+# *.txt de relatorio
+*Relat*rio*.txt
+
+# Bundle de backup do Git
+otj.bundle

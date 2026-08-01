@@ -10,8 +10,6 @@ create extension if not exists pgcrypto;
 -- Tipo: papel do utilizador
 -- =====================================================
 
-drop type if exists public.user_role cascade;
-
 create type public.user_role as enum (
     'admin',
     'moderator',
