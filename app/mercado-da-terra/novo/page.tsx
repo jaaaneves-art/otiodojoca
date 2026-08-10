@@ -1,12 +1,98 @@
-import { createAd } from "../actions";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { AdForm } from "@/components/mercado-da-terra/ad-form";
+import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar";
 
-export default async function NovoAnuncioPage() {
+async function createAd(formData: FormData) {
+  "use server";
+
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  if (!user) {
+    throw new Error("Não autenticado");
+  }
+
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const type = formData.get("type") as string;
+  const categoryId = formData.get("categoryId") as string;
+  const location = formData.get("location") as string;
+  const contactMethod = formData.get("contactMethod") as string;
+  const priceType = formData.get("priceType") as string;
+  const price = formData.get("price") ? parseFloat(formData.get("price") as string) : null;
+  const seeking = formData.get("seeking") as string | null;
+  const seekingDescription = formData.get("seeking_description") as string | null;
+  const imageCount = parseInt(formData.get("image_count") as string) || 0;
+
+  const details = (seeking || seekingDescription) 
+    ? { seeking: seeking || "", seeking_description: seekingDescription || "" }
+    : {};
+
+  const { data: ad, error: adError } = await supabase
+    .from("marketplace_ads")
+    .insert({
+      author_id: user.id,
+      title,
+      description,
+      type,
+      category_id: parseInt(categoryId),
+      location,
+      contact_method: contactMethod,
+      price_type: priceType,
+      price,
+      status: "active",
+      details: details,
+    })
+    .select("id")
+    .single();
+
+  if (adError || !ad) {
+    throw new Error("Erro ao criar anúncio: " + adError?.message);
+  }
+
+  console.log(`✅ Anúncio ${ad.id} criado`);
+
+  for (let i = 0; i < imageCount; i++) {
+    const file = formData.get(`image_${i}`) as File;
+    if (!file) continue;
+
+    console.log(`📤 Upload imagem ${i + 1}/${imageCount}: ${file.name}`);
+
+    const fileName = `${ad.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from("marketplace-photos")
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error(`❌ Erro upload:`, uploadError);
+      continue;
+    }
+
+    const { data: photoUrl } = supabase.storage
+      .from("marketplace-photos")
+      .getPublicUrl(fileName);
+
+    await supabase
+      .from("marketplace_photos")
+      .insert({
+        ad_id: ad.id,
+        storage_path: photoUrl.publicUrl,
+        sort_order: i,
+      });
+
+    console.log(`✅ Foto ${i + 1} OK`);
+  }
+
+  redirect(`/mercado-da-terra/${ad.id}`);
+}
+
+export default async function NovoAnuncioPage() {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     redirect("/login");
   }
@@ -16,76 +102,35 @@ export default async function NovoAnuncioPage() {
     .select("id, name")
     .order("name");
 
+  const { data: municipios } = await supabase
+    .from("municipios")
+    .select("nome, distrito_regiao")
+    .order("nome");
+
   return (
-    <div className="min-h-screen bg-terra-50">
-      <nav className="bg-white border-b border-terra-200 px-6 py-4">
-        <div className="max-w-2xl mx-auto">
-          <Link href="/mercado-da-terra" className="text-terra-600 hover:text-terra-800">
-            Voltar
-          </Link>
-        </div>
-      </nav>
-
-      <main className="max-w-2xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-terra-900 mb-2">Publicar Novo Anuncio</h1>
-        <p className="text-terra-600 mb-8">Preenche o formulario para publicar</p>
-
-        <form action={createAd} className="bg-white p-6 rounded-lg border border-terra-200 space-y-4">
-          <div>
-            <label className="text-sm font-medium">Titulo *</label>
-            <input name="title" placeholder="Ex: Batatas caseiras" required className="w-full border rounded-lg p-2 mt-1" />
+    <>
+      <MarketplaceNavbar />
+      <div className="min-h-screen bg-terra-50">
+        <main className="max-w-2xl mx-auto p-6">
+          <div className="mb-6">
+            <Link href="/mercado-da-terra" className="text-terra-600 hover:text-terra-800">
+              ← Voltar ao Mercado
+            </Link>
           </div>
 
-          <div>
-            <label className="text-sm font-medium">Descricao *</label>
-            <textarea name="description" rows={4} placeholder="Descreve o produto..." required className="w-full border rounded-lg p-2 mt-1" />
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-terra-900">Novo Anúncio</h1>
+            <p className="text-terra-600 mt-2">Publica um novo produto, serviço ou oferta</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Categoria *</label>
-              <select name="categoryId" required className="w-full border rounded-lg p-2 mt-1">
-                <option value="">Seleciona</option>
-                {categories?.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Tipo de Preco *</label>
-              <select name="priceType" defaultValue="fixed" className="w-full border rounded-lg p-2 mt-1">
-                <option value="fixed">Preco Fixo</option>
-                <option value="negotiable">Negociavel</option>
-                <option value="free">Gratis</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Preco (EUR)</label>
-            <input type="number" step="0.01" name="price" placeholder="0.00" className="w-full border rounded-lg p-2 mt-1" />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Localidade *</label>
-            <input name="location" placeholder="Ex: Aveiro" required className="w-full border rounded-lg p-2 mt-1" />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Contacto *</label>
-            <select name="contactMethod" required className="w-full border rounded-lg p-2 mt-1">
-              <option value="message">Mensagem</option>
-              <option value="phone">Telefone</option>
-              <option value="email">Email</option>
-            </select>
-          </div>
-
-          <button type="submit" className="w-full bg-terra-600 text-white font-medium py-2 rounded-lg hover:bg-terra-700">
-            Publicar Anuncio
-          </button>
-        </form>
-      </main>
-    </div>
+          <AdForm
+            categories={categories || []}
+            municipios={municipios || []}
+            action={createAd}
+            submitLabel="Publicar Anúncio"
+          />
+        </main>
+      </div>
+    </>
   );
 }

@@ -11,14 +11,14 @@ export default async function HomePage() {
     <div className="min-h-screen bg-terra-50">
       <nav className="bg-white border-b border-terra-200 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-terra-800">Almanaque</h1>
+          <h1 className="text-2xl font-bold text-terra-800">O Tio do Joca</h1>
           {user ? (
             <div className="flex items-center gap-3">
               <Button asChild variant="outline" size="sm">
                 <Link href="/forum">Forum</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/mercado-da-terra">Feira</Link>
+                <Link href="/mercado-da-terra">Mercado da Terra</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/perfil">Perfil</Link>
@@ -40,7 +40,7 @@ export default async function HomePage() {
       <main className="max-w-5xl mx-auto p-6">
         <div className="text-center py-16">
           <h2 className="text-5xl font-bold text-terra-900 mb-4">
-            Comunidade do Almanaque
+            O Tio do Joca
           </h2>
           <p className="text-xl text-terra-600 max-w-2xl mx-auto mb-8">
             A comunidade portuguesa que partilha conhecimento sobre hortas,
@@ -66,7 +66,7 @@ export default async function HomePage() {
           />
           <FeatureCard
             icon={<ShoppingBag className="w-8 h-8" />}
-            title="Feira da Terra"
+            title="Mercado da Terra"
             description="Compra, vende ou troca produtos locais."
             href="/mercado-da-terra"
           />
@@ -79,7 +79,7 @@ export default async function HomePage() {
           />
           <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
-            title="Almanaque"
+            title="O Tio do Joca"
             description="Artigos e guias sobre culturas e tradicoes."
             href="#"
             comingSoon
