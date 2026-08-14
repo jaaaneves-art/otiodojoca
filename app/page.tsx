@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ShoppingBag, Calendar, BookOpen } from "lucide-react";
+import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus } from "lucide-react";
 
 export default async function HomePage() {
   const supabase = createClient();
@@ -69,6 +69,25 @@ export default async function HomePage() {
             title="Mercado da Terra"
             description="Compra, vende ou troca produtos locais."
             href="/mercado-da-terra"
+          />
+          <FeatureCard
+            icon={<UtensilsCrossed className="w-8 h-8" />}
+            title="Comer"
+            description="Descobre restaurantes e sabores da regiao."
+            href="/comer"
+          />
+          <FeatureCard
+            icon={<BedDouble className="w-8 h-8" />}
+            title="Alojamento"
+            description="Casas rurais, pousadas e sitios para pernoitar."
+            href="/alojamento"
+          />
+          <FeatureCard
+            icon={<Bus className="w-8 h-8" />}
+            title="Viagens"
+            description="Bilhetes de autocarro para a diaspora portuguesa na Europa."
+            href="#"
+            comingSoon
           />
           <FeatureCard
             icon={<Calendar className="w-8 h-8" />}

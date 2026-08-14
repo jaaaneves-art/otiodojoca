@@ -34,3 +34,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backups e ficheiros temporarios da sessao
+*.backup
+data.db
+
+# relatorios e auditorias locais (nao versionar)
+AUDITORIA-*.txt
+CORRECAO-*.txt
+TESTE-*.txt
+/relatorios/
+/docs/diagnosticos/
