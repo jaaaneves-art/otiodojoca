@@ -8,7 +8,6 @@ import { obterCoordenadasPorCodigoPostal } from "@/lib/calendario/geocoding";
 interface Municipio {
   id: number;
   nome: string;
-  distrito_regiao: string;
 }
 
 interface Freguesia {
@@ -58,7 +57,7 @@ export default function LocalizacaoCascata({ onSelect }: Props) {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("municipios")
-        .select("id, nome, distrito_regiao")
+        .select("id, nome")
         .order("nome");
 
       if (error) {
@@ -85,11 +84,7 @@ export default function LocalizacaoCascata({ onSelect }: Props) {
 
   const municipiosFiltrados = municipioTexto.trim()
     ? municipios
-        .filter(
-          (m) =>
-            m.nome.toLowerCase().includes(municipioTexto.toLowerCase()) ||
-            m.distrito_regiao.toLowerCase().includes(municipioTexto.toLowerCase()),
-        )
+        .filter((m) => m.nome.toLowerCase().includes(municipioTexto.toLowerCase()))
         .slice(0, 10)
     : [];
 
@@ -254,7 +249,6 @@ export default function LocalizacaoCascata({ onSelect }: Props) {
                     className="w-full text-left px-4 py-2.5 hover:bg-slate-50 border-b last:border-b-0"
                   >
                     <div className="font-medium">{m.nome}</div>
-                    <div className="text-xs text-slate-500">{m.distrito_regiao}</div>
                   </button>
                 ))}
               </div>

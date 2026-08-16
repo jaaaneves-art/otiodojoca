@@ -8,19 +8,34 @@ import { infoLua, estaCrescente } from "@/lib/calendario/lua";
 import { TRADICAO, SEMEAR_POR_TIPO, REGIOES, NOTA_CIENTIFICA } from "@/lib/calendario/tradicao";
 import LuaReal from "@/components/calendario/lua-real";
 import MeteorologiaCalendario from "@/components/calendario/meteorologia-calendario";
+import AstroCalendario from "@/components/calendario/astro-calendario";
+import { eventosAstro, ehDeDia, type EventosAstro } from "@/lib/calendario/astro";
 import {
   obterPrevisaoMeteorologica,
+  descricaoTempo,
   type PrevisaoMeteorologica,
 } from "@/lib/calendario/meteorologia";
+
+// Portugal continental é estreito em latitude (~5°): esta coordenada serve
+// de aproximação para decidir dia/noite enquanto não há localização real.
+const COORDENADAS_PORTUGAL_DEFEITO = { latitude: 38.7167, longitude: -9.1393 };
 
 const NOMES_DIAS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const NOMES_MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 
-function diasAPartirDe(base: Date, n: number) {
+function diasAPartirDe(
+  base: Date,
+  n: number,
+  localizacao: { latitude: number; longitude: number } | null,
+) {
   const dias = [];
   for (let i = 0; i < n; i++) {
     const d = new Date(base.getTime() + i * 86400000);
-    dias.push({ data: d, info: infoLua(d) });
+    dias.push({
+      data: d,
+      info: infoLua(d),
+      astro: localizacao ? eventosAstro(d, localizacao.latitude, localizacao.longitude) : null,
+    });
   }
   return dias;
 }
@@ -71,7 +86,18 @@ export default function CalendarioPage() {
   const hojeInfo = infoLua(hoje);
   const tradHoje = TRADICAO[hojeInfo.fase];
   const regiaoSel = REGIOES.find((r) => r.id === regiao)!;
-  const proximos = diasAPartirDe(hoje, 14);
+  const coordenadas =
+    localizacao?.latitude != null && localizacao?.longitude != null
+      ? { latitude: localizacao.latitude, longitude: localizacao.longitude }
+      : null;
+  const astroHoje: EventosAstro | null = coordenadas
+    ? eventosAstro(hoje, coordenadas.latitude, coordenadas.longitude)
+    : null;
+  const proximos = diasAPartirDe(hoje, 14, coordenadas);
+
+  const coordenadasParaCeu = coordenadas ?? COORDENADAS_PORTUGAL_DEFEITO;
+  const deDia = ehDeDia(hoje, coordenadasParaCeu.latitude, coordenadasParaCeu.longitude);
+  const tempoAtual = previsao ? descricaoTempo(previsao.atual.codigoTempo) : null;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -90,14 +116,26 @@ export default function CalendarioPage() {
         <div className="relative max-w-4xl mx-auto px-4 pt-6 pb-12">
           <a href="/" className="text-slate-300 hover:text-white text-sm">← Início</a>
           <div className="flex flex-col items-center text-center mt-6">
-            <LuaReal
-              iluminacao={hojeInfo.iluminacao}
-              crescente={estaCrescente(hojeInfo.fase)}
-              idadeDias={hojeInfo.idadeDias}
-              tamanho={200}
-            />
+            {deDia ? (
+              <div
+                className="rounded-full flex items-center justify-center bg-gradient-to-b from-amber-300 to-orange-400 shadow-lg shadow-amber-500/30"
+                style={{ width: 200, height: 200 }}
+              >
+                <span style={{ fontSize: 96 }} aria-label={tempoAtual?.texto ?? "Sol"}>
+                  {tempoAtual?.icone ?? "☀️"}
+                </span>
+              </div>
+            ) : (
+              <LuaReal
+                iluminacao={hojeInfo.iluminacao}
+                crescente={estaCrescente(hojeInfo.fase)}
+                idadeDias={hojeInfo.idadeDias}
+                tamanho={200}
+              />
+            )}
             <div className="mt-6 text-sm text-slate-300 uppercase tracking-widest">
               Hoje · {formatarDataLonga(hoje)}
+              {!coordenadas && <span className="text-slate-400"> · céu aproximado</span>}
             </div>
             <h1 className="text-4xl font-bold mt-2">{hojeInfo.nome}</h1>
             <p className="text-slate-300 mt-2 max-w-md">{tradHoje.resumo}</p>
@@ -110,6 +148,9 @@ export default function CalendarioPage() {
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6 -mt-6">
         <LocalizacaoCalendario onSelect={setLocalizacao} />
+        {localizacao && astroHoje && (
+          <AstroCalendario nomeLocalizacao={localizacao.nome} eventos={astroHoje} />
+        )}
         {localizacao && (
           <>
             {aCarregarPrevisao && (
@@ -184,7 +225,7 @@ export default function CalendarioPage() {
           <h3 className="font-bold text-slate-900 mb-1">Próximos dias</h3>
           <p className="text-xs text-slate-400 mb-4">Toca num dia para ver as recomendações desse dia.</p>
           <div className="space-y-1">
-            {proximos.map(({ data, info }, i) => {
+            {proximos.map(({ data, info, astro }, i) => {
               const trad = TRADICAO[info.fase];
               const estaAberto = aberto === i;
               return (
@@ -215,6 +256,12 @@ export default function CalendarioPage() {
                   {estaAberto && (
                     <div className="bg-slate-50 px-3 pb-4 pt-2">
                       <p className="text-sm text-slate-600 italic mb-3">{trad.resumo}</p>
+                      {astro && (
+                        <p className="text-xs text-slate-500 mb-3 flex flex-wrap gap-x-4 gap-y-1">
+                          <span>🌅 {astro.sol.nascer ?? "—"} · 🌇 {astro.sol.poente ?? "—"}</span>
+                          <span>🌙 {astro.lua.nascer ?? "—"} · 🌌 {astro.lua.poente ?? "—"}</span>
+                        </p>
+                      )}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="bg-white rounded-lg border border-green-100 p-3">
                           <div className="text-xs font-bold text-green-700 mb-2">🌱 Bom para fazer</div>
