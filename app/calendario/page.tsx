@@ -6,7 +6,7 @@ import LocalizacaoCalendario from "@/components/calendario/localizacao-calendari
 import type { Localizacao } from "@/components/entidades/localizacao";
 import { infoLua, estaCrescente } from "@/lib/calendario/lua";
 import { TRADICAO, SEMEAR_POR_TIPO, REGIOES, NOTA_CIENTIFICA } from "@/lib/calendario/tradicao";
-import LuaSVG from "@/components/calendario/lua-svg";
+import LuaReal from "@/components/calendario/lua-real";
 import MeteorologiaCalendario from "@/components/calendario/meteorologia-calendario";
 import {
   obterPrevisaoMeteorologica,
@@ -90,7 +90,12 @@ export default function CalendarioPage() {
         <div className="relative max-w-4xl mx-auto px-4 pt-6 pb-12">
           <a href="/" className="text-slate-300 hover:text-white text-sm">← Início</a>
           <div className="flex flex-col items-center text-center mt-6">
-            <LuaSVG iluminacao={hojeInfo.iluminacao} crescente={estaCrescente(hojeInfo.fase)} tamanho={200} />
+            <LuaReal
+              iluminacao={hojeInfo.iluminacao}
+              crescente={estaCrescente(hojeInfo.fase)}
+              idadeDias={hojeInfo.idadeDias}
+              tamanho={200}
+            />
             <div className="mt-6 text-sm text-slate-300 uppercase tracking-widest">
               Hoje · {formatarDataLonga(hoje)}
             </div>
@@ -192,7 +197,12 @@ export default function CalendarioPage() {
                     }
                   >
                     <div className="w-9 h-9 flex-shrink-0">
-                      <LuaSVG iluminacao={info.iluminacao} crescente={estaCrescente(info.fase)} tamanho={36} />
+                      <LuaReal
+                        iluminacao={info.iluminacao}
+                        crescente={estaCrescente(info.fase)}
+                        idadeDias={info.idadeDias}
+                        tamanho={36}
+                      />
                     </div>
                     <span className="text-sm text-slate-500 w-24">
                       {NOMES_DIAS[data.getDay()]}, {data.getDate()}/{data.getMonth() + 1}

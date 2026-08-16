@@ -20,7 +20,7 @@ export interface InfoLua {
   idadeDias: number; // dias desde a última lua nova
 }
 
-const CICLO_SINODICO = 29.53058867;
+export const CICLO_SINODICO = 29.53058867;
 
 // Lua nova de referência: 6 de janeiro de 2000, 18:14 UTC (JD 2451550.1)
 const LUA_NOVA_REF = Date.UTC(2000, 0, 6, 18, 14, 0);
