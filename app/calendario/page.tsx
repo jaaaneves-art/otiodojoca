@@ -10,6 +10,8 @@ import LuaReal from "@/components/calendario/lua-real";
 import MeteorologiaCalendario from "@/components/calendario/meteorologia-calendario";
 import AstroCalendario from "@/components/calendario/astro-calendario";
 import { eventosAstro, ehDeDia, type EventosAstro } from "@/lib/calendario/astro";
+import AlmanaqueDiaCalendario from "@/components/calendario/almanaque-dia";
+import { getAlmanaqueDia } from "@/lib/calendario/almanaque";
 import {
   obterPrevisaoMeteorologica,
   descricaoTempo,
@@ -35,6 +37,7 @@ function diasAPartirDe(
       data: d,
       info: infoLua(d),
       astro: localizacao ? eventosAstro(d, localizacao.latitude, localizacao.longitude) : null,
+      almanaque: getAlmanaqueDia(d),
     });
   }
   return dias;
@@ -98,6 +101,7 @@ export default function CalendarioPage() {
   const coordenadasParaCeu = coordenadas ?? COORDENADAS_PORTUGAL_DEFEITO;
   const deDia = ehDeDia(hoje, coordenadasParaCeu.latitude, coordenadasParaCeu.longitude);
   const tempoAtual = previsao ? descricaoTempo(previsao.atual.codigoTempo) : null;
+  const almanaqueHoje = getAlmanaqueDia(hoje);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -198,6 +202,14 @@ export default function CalendarioPage() {
           </div>
         </div>
 
+        {/* Almanaque do dia */}
+        {almanaqueHoje && (
+          <div className="bg-white rounded-2xl border shadow-sm p-6">
+            <h3 className="font-bold text-slate-900 mb-4">Almanaque do dia</h3>
+            <AlmanaqueDiaCalendario dia={almanaqueHoje} />
+          </div>
+        )}
+
         {/* Região */}
         <div className="bg-white rounded-2xl border shadow-sm p-6">
           <h3 className="font-bold text-slate-900 mb-3">A tua região</h3>
@@ -225,7 +237,7 @@ export default function CalendarioPage() {
           <h3 className="font-bold text-slate-900 mb-1">Próximos dias</h3>
           <p className="text-xs text-slate-400 mb-4">Toca num dia para ver as recomendações desse dia.</p>
           <div className="space-y-1">
-            {proximos.map(({ data, info, astro }, i) => {
+            {proximos.map(({ data, info, astro, almanaque }, i) => {
               const trad = TRADICAO[info.fase];
               const estaAberto = aberto === i;
               return (
@@ -284,6 +296,11 @@ export default function CalendarioPage() {
                           </ul>
                         </div>
                       </div>
+                      {almanaque && (
+                        <div className="mt-3 pt-3 border-t border-slate-200">
+                          <AlmanaqueDiaCalendario dia={almanaque} compacto />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
