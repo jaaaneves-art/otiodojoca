@@ -93,8 +93,7 @@ export default async function HomePage() {
             icon={<Calendar className="w-8 h-8" />}
             title="Calendario"
             description="Calendario agricola personalizado para a tua regiao."
-            href="#"
-            comingSoon
+            href="/calendario"
           />
           <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
