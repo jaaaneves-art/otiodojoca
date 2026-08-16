@@ -2,36 +2,14 @@
 
 import { useState } from "react";
 import type { Localizacao } from "@/components/entidades/localizacao";
+import LocalizacaoCascata from "@/components/calendario/localizacao-cascata";
 
 interface Props {
-  localizacoes: Localizacao[];
   onSelect: (local: Localizacao | null) => void;
 }
 
-export default function LocalizacaoCalendario({
-  localizacoes,
-  onSelect,
-}: Props) {
+export default function LocalizacaoCalendario({ onSelect }: Props) {
   const [modo, setModo] = useState<"escolher" | "gps">("escolher");
-  const [texto, setTexto] = useState("");
-
-  const resultados = texto.trim()
-    ? localizacoes
-        .filter((local) =>
-          [
-            local.nome,
-            local.localidade,
-            local.municipio,
-            local.distrito,
-            local.codigo_postal,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase()
-            .includes(texto.toLowerCase())
-        )
-        .slice(0, 10)
-    : [];
 
   function usarGPS() {
     if (!navigator.geolocation) {
@@ -88,7 +66,10 @@ export default function LocalizacaoCalendario({
 
         <button
           type="button"
-          onClick={() => setModo("escolher")}
+          onClick={() => {
+            setModo("escolher");
+            onSelect(null);
+          }}
           className={
             "px-4 py-2 rounded-full text-sm font-medium " +
             (modo === "escolher"
@@ -96,51 +77,11 @@ export default function LocalizacaoCalendario({
               : "bg-slate-100 text-slate-700 hover:bg-slate-200")
           }
         >
-          🔎 Escolher localização
+          🔎 Escolher município e freguesia
         </button>
       </div>
 
-      {modo === "escolher" && (
-        <div className="relative">
-          <input
-            type="text"
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            placeholder="Freguesia, localidade, município ou código postal..."
-            className="w-full border rounded-lg p-3"
-          />
-
-          {resultados.length > 0 && (
-            <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border rounded-lg shadow-lg max-h-64 overflow-y-auto">
-              {resultados.map((local) => (
-                <button
-                  key={local.id}
-                  type="button"
-                  onClick={() => {
-                    setTexto(local.nome);
-                    onSelect(local);
-                  }}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-50 border-b last:border-b-0"
-                >
-                  <div className="font-medium">
-                    📍 {local.nome}
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    {[
-                      local.codigo_postal,
-                      local.localidade,
-                      local.municipio,
-                      local.distrito,
-                    ]
-                      .filter(Boolean)
-                      .join(" • ")}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {modo === "escolher" && <LocalizacaoCascata onSelect={onSelect} />}
 
       {modo === "gps" && (
         <p className="text-sm text-slate-600">

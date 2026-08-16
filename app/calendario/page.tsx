@@ -7,7 +7,6 @@ import type { Localizacao } from "@/components/entidades/localizacao";
 import { infoLua, estaCrescente } from "@/lib/calendario/lua";
 import { TRADICAO, SEMEAR_POR_TIPO, REGIOES, NOTA_CIENTIFICA } from "@/lib/calendario/tradicao";
 import LuaSVG from "@/components/calendario/lua-svg";
-import { createClient } from "@/lib/supabase/client";
 import MeteorologiaCalendario from "@/components/calendario/meteorologia-calendario";
 import {
   obterPrevisaoMeteorologica,
@@ -33,32 +32,10 @@ function formatarDataLonga(d: Date) {
 export default function CalendarioPage() {
   const [regiao, setRegiao] = useState<"norte" | "centro" | "sul">("centro");
   const [aberto, setAberto] = useState<number | null>(null); // índice do dia expandido
-  const [localizacoes, setLocalizacoes] = useState<Localizacao[]>([]);
   const [localizacao, setLocalizacao] = useState<Localizacao | null>(null);
-  const [erroLocalizacoes, setErroLocalizacoes] = useState(false);
   const [previsao, setPrevisao] = useState<PrevisaoMeteorologica | null>(null);
   const [aCarregarPrevisao, setACarregarPrevisao] = useState(false);
   const [erroPrevisao, setErroPrevisao] = useState(false);
-
-  useEffect(() => {
-    async function carregarLocalizacoes() {
-      const supabase = createClient();
-      const { data, error } = await supabase
-        .from("localizacoes")
-        .select("id, codigo_postal, nome, localidade, municipio, distrito, latitude, longitude")
-        .order("nome");
-
-      if (error) {
-        console.error("Não foi possível carregar as localizações:", error);
-        setErroLocalizacoes(true);
-        return;
-      }
-
-      setLocalizacoes(data ?? []);
-    }
-
-    carregarLocalizacoes();
-  }, []);
 
   useEffect(() => {
     if (localizacao?.latitude == null || localizacao.longitude == null) {
@@ -127,15 +104,7 @@ export default function CalendarioPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6 -mt-6">
-        <LocalizacaoCalendario
-          localizacoes={localizacoes}
-          onSelect={setLocalizacao}
-        />
-        {erroLocalizacoes && (
-          <p className="-mt-3 text-sm text-amber-700">
-            Não foi possível carregar a lista de localizações. Ainda podes usar a tua localização atual.
-          </p>
-        )}
+        <LocalizacaoCalendario onSelect={setLocalizacao} />
         {localizacao && (
           <>
             {aCarregarPrevisao && (
