@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
-// Geocodifica um código postal português (formato 0000-000) usando o
-// Nominatim (OpenStreetMap). Corre no servidor para cumprir a política de
-// uso do Nominatim (User-Agent identificável, sem chamadas diretas do browser).
+// Geocodifica um código postal português (formato 0000-000). Primeiro
+// tenta lib/supabase codigos_postais_geo (cache local, ~196 mil códigos
+// pré-calculados a partir do projeto open-source codigos-postais-pt —
+// ver relatorios/). Se não encontrar, cai no Nominatim (OpenStreetMap).
+// Nominatim corre no servidor para cumprir a sua política de uso
+// (User-Agent identificável, sem chamadas diretas do browser).
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
 const USER_AGENT = "OTiodoJoca-CalendarioLunar/1.0 (uso interno, geocoding pontual)";
@@ -38,6 +42,17 @@ export async function GET(request: NextRequest) {
       { error: "Parâmetro codigo_postal em falta ou inválido (formato 0000-000)." },
       { status: 400 },
     );
+  }
+
+  const supabase = createClient();
+  const { data: cache } = await supabase
+    .from("codigos_postais_geo")
+    .select("latitude, longitude")
+    .eq("codigo_postal", codigoPostal)
+    .maybeSingle();
+
+  if (cache) {
+    return NextResponse.json({ latitude: cache.latitude, longitude: cache.longitude });
   }
 
   let resultado = await pesquisarNominatim(
