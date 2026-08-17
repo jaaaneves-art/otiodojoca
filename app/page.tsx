@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus } from "lucide-react";
+import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout } from "lucide-react";
 
 export default async function HomePage() {
   const supabase = createClient();
@@ -94,6 +94,12 @@ export default async function HomePage() {
             title="Calendario"
             description="Calendario agricola personalizado para a tua regiao."
             href="/calendario"
+          />
+          <FeatureCard
+            icon={<Sprout className="w-8 h-8" />}
+            title="Agenda Agricola"
+            description="Regista as tuas plantacoes e acompanha o ciclo ate a colheita."
+            href="/agenda-agricola"
           />
           <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
