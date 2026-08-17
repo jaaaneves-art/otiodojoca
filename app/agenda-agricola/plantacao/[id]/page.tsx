@@ -3,11 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { infoLua } from "@/lib/calendario/lua";
 import { sugestaoLunar } from "@/lib/agenda-agricola/sugestao-lunar";
-import {
-  adicionarFoto,
-  adicionarNota,
-  atualizarEstadoPlantacao,
-} from "@/lib/agenda-agricola/actions";
+import FichaInterativa from "@/components/agenda-agricola/ficha-interativa";
 import {
   ESTADO_LABEL,
   PROXIMO_ESTADO,
@@ -72,15 +68,7 @@ export default async function FichaPlantacaoPage({ params }: { params: { id: str
       : null;
 
   const proximoEstado = PROXIMO_ESTADO[plantacao.estado];
-  const podeAvancar = Boolean(proximoEstado);
   const podeCancelar = plantacao.estado !== "colhida" && plantacao.estado !== "cancelada";
-
-  const avancarEstado = proximoEstado
-    ? atualizarEstadoPlantacao.bind(null, plantacao.id, proximoEstado)
-    : undefined;
-  const cancelarEstado = atualizarEstadoPlantacao.bind(null, plantacao.id, "cancelada");
-  const adicionarNotaComId = adicionarNota.bind(null, plantacao.id);
-  const adicionarFotoComId = adicionarFoto.bind(null, plantacao.id);
 
   return (
     <div className="min-h-screen bg-terra-50">
@@ -142,81 +130,14 @@ export default async function FichaPlantacaoPage({ params }: { params: { id: str
               {hojeInfo.simbolo} {sugestao}
             </p>
           )}
-
-          {(podeAvancar || podeCancelar) && (
-            <div className="flex gap-2 mt-5">
-              {podeAvancar && avancarEstado && (
-                <form action={avancarEstado}>
-                  <button
-                    type="submit"
-                    className="bg-terra-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-terra-800"
-                  >
-                    Marcar como {ESTADO_LABEL[proximoEstado!]}
-                  </button>
-                </form>
-              )}
-              {podeCancelar && (
-                <form action={cancelarEstado}>
-                  <button
-                    type="submit"
-                    className="text-terra-500 px-4 py-2 rounded-full text-sm hover:bg-terra-100"
-                  >
-                    Cancelar
-                  </button>
-                </form>
-              )}
-            </div>
-          )}
         </div>
 
-        <div className="bg-white rounded-2xl border p-6">
-          <h3 className="font-bold text-terra-900 mb-3">Adicionar nota</h3>
-          <form action={adicionarNotaComId} className="flex gap-2">
-            <input
-              type="text"
-              name="texto"
-              placeholder="Ex: primeiras folhas a aparecer"
-              className="flex-1 border rounded-lg p-2.5 text-sm"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-terra-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-terra-800"
-            >
-              Adicionar
-            </button>
-          </form>
-        </div>
-
-        <div className="bg-white rounded-2xl border p-6">
-          <h3 className="font-bold text-terra-900 mb-3">Adicionar foto</h3>
-          <p className="text-xs text-terra-500 mb-3">
-            Por agora, cola o link de uma foto (upload direto fica para depois).
-          </p>
-          <form action={adicionarFotoComId} className="flex gap-2">
-            <input
-              type="url"
-              name="url"
-              placeholder="https://..."
-              className="flex-1 border rounded-lg p-2.5 text-sm"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-terra-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-terra-800"
-            >
-              Adicionar
-            </button>
-          </form>
-          {plantacao.fotografias.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 mt-4">
-              {plantacao.fotografias.map((url, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={url} alt="" className="rounded-lg aspect-square object-cover" />
-              ))}
-            </div>
-          )}
-        </div>
+        <FichaInterativa
+          plantacaoId={plantacao.id}
+          proximoEstado={proximoEstado}
+          podeCancelar={podeCancelar}
+          fotografias={plantacao.fotografias}
+        />
 
         <div className="bg-white rounded-2xl border p-6">
           <h3 className="font-bold text-terra-900 mb-3">Histórico</h3>
