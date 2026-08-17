@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Info } from "lucide-react";
 import { criarPlantacao } from "@/lib/agenda-agricola/actions";
 import type { CulturaGuia } from "@/lib/agenda-agricola/tipos";
+import CulturaDetalhesModal from "./cultura-detalhes-modal";
 
 function hojeISO() {
   return new Date().toISOString().slice(0, 10);
@@ -14,6 +16,7 @@ export default function NovaPlantacaoForm({ culturas }: { culturas: CulturaGuia[
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const [culturaId, setCulturaId] = useState("");
+  const [modalAberto, setModalAberto] = useState(false);
 
   const culturaSelecionada = culturas.find((c) => String(c.id) === culturaId);
 
@@ -46,22 +49,34 @@ export default function NovaPlantacaoForm({ culturas }: { culturas: CulturaGuia[
 
       <div>
         <label className="block text-sm font-medium text-terra-700 mb-1">Cultura</label>
-        <select
-          name="cultura_id"
-          required
-          value={culturaId}
-          onChange={(e) => setCulturaId(e.target.value)}
-          className="w-full border rounded-lg p-3"
-        >
-          <option value="" disabled>
-            Escolhe uma cultura...
-          </option>
-          {culturas.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nome} ({c.categoria})
+        <div className="flex gap-2">
+          <select
+            name="cultura_id"
+            required
+            value={culturaId}
+            onChange={(e) => setCulturaId(e.target.value)}
+            className="flex-1 border rounded-lg p-3"
+          >
+            <option value="" disabled>
+              Escolhe uma cultura...
             </option>
-          ))}
-        </select>
+            {culturas.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nome} ({c.categoria})
+              </option>
+            ))}
+          </select>
+          {culturaSelecionada && (
+            <button
+              type="button"
+              onClick={() => setModalAberto(true)}
+              title="Ver detalhes desta cultura"
+              className="border rounded-lg px-3 text-terra-600 hover:bg-terra-50 flex-shrink-0"
+            >
+              <Info className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {culturaSelecionada && (
@@ -75,6 +90,13 @@ export default function NovaPlantacaoForm({ culturas }: { culturas: CulturaGuia[
                 : "Ciclo por confirmar"}
           </p>
           {culturaSelecionada.dicas && <p className="mt-1 italic">{culturaSelecionada.dicas}</p>}
+          <button
+            type="button"
+            onClick={() => setModalAberto(true)}
+            className="mt-2 text-terra-600 hover:text-terra-800 underline text-xs font-medium"
+          >
+            Ver informação completa →
+          </button>
         </div>
       )}
 
@@ -118,6 +140,12 @@ export default function NovaPlantacaoForm({ culturas }: { culturas: CulturaGuia[
       >
         {pending ? "A registar..." : "Registar plantação"}
       </button>
+
+      <CulturaDetalhesModal
+        cultura={culturaSelecionada ?? null}
+        open={modalAberto}
+        onOpenChange={setModalAberto}
+      />
     </form>
   );
 }

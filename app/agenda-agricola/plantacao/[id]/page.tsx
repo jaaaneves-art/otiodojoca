@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { infoLua } from "@/lib/calendario/lua";
 import { sugestaoLunar } from "@/lib/agenda-agricola/sugestao-lunar";
 import FichaInterativa from "@/components/agenda-agricola/ficha-interativa";
+import CulturaInfoCard from "@/components/agenda-agricola/cultura-info-card";
 import {
   ESTADO_LABEL,
   PROXIMO_ESTADO,
@@ -131,6 +132,8 @@ export default async function FichaPlantacaoPage({ params }: { params: { id: str
             </p>
           )}
         </div>
+
+        <CulturaInfoCard cultura={plantacao.cultura} />
 
         <FichaInterativa
           plantacaoId={plantacao.id}
