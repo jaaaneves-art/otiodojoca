@@ -10,12 +10,23 @@ interface ReservaFormProps {
   restauranteNome: string;
 }
 
-function getTodayString() {
-  const hoje = new Date();
-  const ano = hoje.getFullYear();
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  const dia = String(hoje.getDate()).padStart(2, '0');
+const LIMITE_ANTECEDENCIA_DIAS = 90;
+
+function paraDataString(data: Date) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
   return `${ano}-${mes}-${dia}`;
+}
+
+function getTodayString() {
+  return paraDataString(new Date());
+}
+
+function getDataMaximaString() {
+  const limite = new Date();
+  limite.setDate(limite.getDate() + LIMITE_ANTECEDENCIA_DIAS);
+  return paraDataString(limite);
 }
 
 export default function ReservaForm({ restauranteId }: ReservaFormProps) {
@@ -60,6 +71,11 @@ export default function ReservaForm({ restauranteId }: ReservaFormProps) {
 
     if (formData.data_reserva < getTodayString()) {
       setErro('Não é possível fazer reservas para o passado.');
+      return;
+    }
+
+    if (formData.data_reserva > getDataMaximaString()) {
+      setErro(`Só é possível reservar com até ${LIMITE_ANTECEDENCIA_DIAS} dias de antecedência.`);
       return;
     }
 
@@ -133,7 +149,7 @@ export default function ReservaForm({ restauranteId }: ReservaFormProps) {
           </div>
           <div>
             <label className={labelCls}>Data</label>
-            <input type="date" name="data_reserva" value={formData.data_reserva} onChange={handleChange} min={getTodayString()} required className={inputCls} />
+            <input type="date" name="data_reserva" value={formData.data_reserva} onChange={handleChange} min={getTodayString()} max={getDataMaximaString()} required className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Hora</label>

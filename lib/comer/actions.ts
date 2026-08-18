@@ -13,12 +13,23 @@ interface CriarReservaParams {
   observacoes: string;
 }
 
-function getTodayString(): string {
-  const hoje = new Date();
-  const ano = hoje.getFullYear();
-  const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  const dia = String(hoje.getDate()).padStart(2, '0');
+const LIMITE_ANTECEDENCIA_DIAS = 90;
+
+function paraDataString(data: Date): string {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
   return `${ano}-${mes}-${dia}`;
+}
+
+function getTodayString(): string {
+  return paraDataString(new Date());
+}
+
+function getDataMaximaString(): string {
+  const limite = new Date();
+  limite.setDate(limite.getDate() + LIMITE_ANTECEDENCIA_DIAS);
+  return paraDataString(limite);
 }
 
 // Validação server-side (segurança) — a validação no cliente pode ser
@@ -26,6 +37,9 @@ function getTodayString(): string {
 function validarDataReserva(dataReservaStr: string): string | null {
   if (dataReservaStr < getTodayString()) {
     return 'Não é possível fazer reservas para o passado.';
+  }
+  if (dataReservaStr > getDataMaximaString()) {
+    return `Só é possível reservar com até ${LIMITE_ANTECEDENCIA_DIAS} dias de antecedência.`;
   }
   return null;
 }
