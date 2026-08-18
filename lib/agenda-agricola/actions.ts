@@ -283,3 +283,113 @@ export async function obterPlantacao(id: number) {
 
   return { sucesso: true, dados: data };
 }
+
+/**
+ * Adicionar nota a uma plantação
+ * Regista um evento "observacao" no histórico com o texto do utilizador.
+ */
+export async function adicionarNota(
+  plantacaoId: number,
+  formData: FormData,
+): Promise<ResultadoAcao> {
+  const auth = await utilizadorAutenticado();
+  if (!auth) return { sucesso: false, erro: "Não autenticado." };
+  const { supabase, user } = auth;
+
+  const texto = (formData.get("texto") as string)?.trim();
+  if (!texto) {
+    return { sucesso: false, erro: "A nota não pode estar vazia." };
+  }
+
+  // Verificar ownership
+  const { data: plantacao } = await supabase
+    .from("plantacoes")
+    .select("utilizador_id")
+    .eq("id", plantacaoId)
+    .single();
+
+  if (!plantacao || plantacao.utilizador_id !== user.id) {
+    return { sucesso: false, erro: "Sem permissão." };
+  }
+
+  const { error } = await supabase.from("plantacao_historico").insert({
+    plantacao_id: plantacaoId,
+    evento: "observacao",
+    notas_utilizador: texto,
+  });
+
+  if (error) {
+    return { sucesso: false, erro: "Não foi possível adicionar a nota." };
+  }
+
+  revalidatePath(`/agenda-agricola/plantacao/${plantacaoId}`);
+  return { sucesso: true };
+}
+
+/**
+ * Adicionar foto a uma plantação
+ * Acrescenta uma entrada ao array JSONB "fotografias" da plantação
+ * e regista um evento "observacao" no histórico.
+ */
+export async function adicionarFoto(
+  plantacaoId: number,
+  formData: FormData,
+): Promise<ResultadoAcao> {
+  const auth = await utilizadorAutenticado();
+  if (!auth) return { sucesso: false, erro: "Não autenticado." };
+  const { supabase, user } = auth;
+
+  const url = (formData.get("url") as string)?.trim();
+  if (!url) {
+    return { sucesso: false, erro: "O link da foto não pode estar vazio." };
+  }
+
+  // Validação simples de URL
+  try {
+    new URL(url);
+  } catch {
+    return { sucesso: false, erro: "Link inválido." };
+  }
+
+  // Verificar ownership e ler fotografias atuais
+  const { data: plantacao } = await supabase
+    .from("plantacoes")
+    .select("utilizador_id, fotografias")
+    .eq("id", plantacaoId)
+    .single();
+
+  if (!plantacao || plantacao.utilizador_id !== user.id) {
+    return { sucesso: false, erro: "Sem permissão." };
+  }
+
+  const novaFoto = {
+    id: crypto.randomUUID(),
+    url,
+    path: "", // vazio: por agora é link externo, não upload para Storage
+    criada_em: new Date().toISOString(),
+  };
+
+  const fotografiasAtuais = Array.isArray(plantacao.fotografias)
+    ? plantacao.fotografias
+    : [];
+  const fotografiasNovas = [...fotografiasAtuais, novaFoto];
+
+  const { error: erroUpdate } = await supabase
+    .from("plantacoes")
+    .update({ fotografias: fotografiasNovas })
+    .eq("id", plantacaoId);
+
+  if (erroUpdate) {
+    return { sucesso: false, erro: "Não foi possível guardar a foto." };
+  }
+
+  // Registar no histórico (não bloqueia se falhar)
+  await supabase.from("plantacao_historico").insert({
+    plantacao_id: plantacaoId,
+    evento: "observacao",
+    notas_utilizador: "Foto adicionada.",
+  });
+
+  revalidatePath(`/agenda-agricola/plantacao/${plantacaoId}`);
+  return { sucesso: true };
+}
