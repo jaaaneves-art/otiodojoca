@@ -26,10 +26,14 @@ const FORMATADOR_CURTO = new Intl.DateTimeFormat("pt-PT", {
 });
 
 const EVENTO_LABEL: Record<PlantacaoHistoricoItem["evento"], string> = {
-  estado_alterado: "Estado alterado",
-  nota_adicionada: "Nota",
-  foto_adicionada: "Foto adicionada",
-  colhida: "Colhida",
+  plantacao: "Plantação criada",
+  adubacao: "Adubação",
+  rega: "Rega",
+  poda: "Poda",
+  colheita: "Colheita",
+  problema: "Problema/Praga",
+  observacao: "Observação",
+  fenologia: "Mudança fenológica",
 };
 
 export default async function FichaPlantacaoPage({ params }: { params: { id: string } }) {
@@ -58,18 +62,18 @@ export default async function FichaPlantacaoPage({ params }: { params: { id: str
     .from("plantacao_historico")
     .select("*")
     .eq("plantacao_id", id)
-    .order("created_at", { ascending: false });
+    .order("criado_em", { ascending: false });
 
   const historico = (historicoRaw ?? []) as PlantacaoHistoricoItem[];
 
   const hojeInfo = infoLua(new Date());
   const sugestao =
-    plantacao.estado !== "colhida" && plantacao.estado !== "cancelada"
+    plantacao.estado !== "colhido" && plantacao.estado !== "interrompido"
       ? sugestaoLunar(plantacao.cultura, hojeInfo.fase)
       : null;
 
   const proximoEstado = PROXIMO_ESTADO[plantacao.estado];
-  const podeCancelar = plantacao.estado !== "colhida" && plantacao.estado !== "cancelada";
+  const podeCancelar = plantacao.estado !== "colhido" && plantacao.estado !== "interrompido";
 
   return (
     <div className="min-h-screen bg-terra-50">
@@ -153,7 +157,7 @@ export default async function FichaPlantacaoPage({ params }: { params: { id: str
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-terra-800">{EVENTO_LABEL[h.evento]}</span>
                     <span className="text-xs text-terra-400">
-                      {FORMATADOR_CURTO.format(new Date(h.created_at))}
+                      {FORMATADOR_CURTO.format(new Date(h.criado_em))}
                     </span>
                   </div>
                   {h.valor_antigo && h.valor_novo && (

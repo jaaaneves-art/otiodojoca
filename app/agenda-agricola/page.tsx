@@ -33,7 +33,7 @@ export default async function AgendaAgricolaPage() {
       if (!b.data_colheita_prevista) return -1;
       return a.data_colheita_prevista.localeCompare(b.data_colheita_prevista);
     });
-  const historico = todas.filter((p) => p.estado === "colhida" || p.estado === "cancelada");
+  const historico = todas.filter((p) => p.estado === "colhido" || p.estado === "interrompido");
 
   const hojeInfo = infoLua(new Date());
   const catalogo = (culturas ?? []) as CulturaGuia[];
@@ -85,7 +85,7 @@ export default async function AgendaAgricolaPage() {
         <section>
           <h2 className="text-lg font-bold text-terra-900 mb-4">Histórico</h2>
           {historico.length === 0 ? (
-            <p className="text-sm text-terra-500">Sem plantações colhidas ou canceladas ainda.</p>
+            <p className="text-sm text-terra-500">Sem plantações colhidas ou interrompidas ainda.</p>
           ) : (
             <div className="bg-white rounded-2xl border divide-y">
               {historico.map((p) => (
@@ -96,7 +96,7 @@ export default async function AgendaAgricolaPage() {
                 >
                   <span className="font-medium text-terra-800">{p.cultura.nome}</span>
                   <span className="text-terra-500">
-                    {p.data_plantacao} — {p.estado === "colhida" ? "colhida" : "cancelada"}
+                    {p.data_plantacao} — {p.estado === "colhido" ? "colhido" : "interrompido"}
                   </span>
                 </Link>
               ))}

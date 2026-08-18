@@ -9,12 +9,11 @@ import {
 const FORMATADOR = new Intl.DateTimeFormat("pt-PT", { day: "numeric", month: "short" });
 
 const ESTADO_COR: Record<EstadoPlantacao, string> = {
-  plantada: "bg-blue-100 text-blue-800",
-  germinada: "bg-green-100 text-green-800",
+  planejado: "bg-blue-100 text-blue-800",
   em_crescimento: "bg-emerald-100 text-emerald-800",
-  florada: "bg-pink-100 text-pink-800",
-  colhida: "bg-amber-100 text-amber-800",
-  cancelada: "bg-gray-100 text-gray-600",
+  em_producao: "bg-pink-100 text-pink-800",
+  colhido: "bg-amber-100 text-amber-800",
+  interrompido: "bg-gray-100 text-gray-600",
 };
 
 function diasEntre(a: Date, b: Date): number {
@@ -29,7 +28,7 @@ export default function PlantacaoCard({ plantacao }: { plantacao: PlantacaoComCu
   const hoje = new Date();
   const dataPlantacao = new Date(`${plantacao.data_plantacao}T12:00:00`);
   const diasPassados = Math.max(0, diasEntre(dataPlantacao, hoje));
-  const ativa = plantacao.estado !== "colhida" && plantacao.estado !== "cancelada";
+  const ativa = plantacao.estado !== "colhido" && plantacao.estado !== "interrompido";
 
   const dataColheita = plantacao.data_colheita_prevista
     ? new Date(`${plantacao.data_colheita_prevista}T12:00:00`)
