@@ -76,7 +76,7 @@ CREATE POLICY "Leitura publica de culturas_guia"
 
 CREATE TABLE IF NOT EXISTS plantacoes (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  utilizador_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   cultura_id BIGINT NOT NULL REFERENCES culturas_guia(id),
 
   local_nome TEXT,                   -- texto livre no MVP (ex: "Horta 2, Talhão A")
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS plantacoes (
   )
 );
 
-CREATE INDEX IF NOT EXISTS idx_plantacoes_user_id ON plantacoes (user_id);
+CREATE INDEX IF NOT EXISTS idx_plantacoes_utilizador_id ON plantacoes (utilizador_id);
 CREATE INDEX IF NOT EXISTS idx_plantacoes_cultura_id ON plantacoes (cultura_id);
 CREATE INDEX IF NOT EXISTS idx_plantacoes_data_plantacao ON plantacoes (data_plantacao);
 CREATE INDEX IF NOT EXISTS idx_plantacoes_estado ON plantacoes (estado);
@@ -115,19 +115,19 @@ ALTER TABLE plantacoes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Utilizador ve as suas plantacoes"
   ON plantacoes FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = utilizador_id);
 
 CREATE POLICY "Utilizador cria as suas plantacoes"
   ON plantacoes FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = utilizador_id);
 
 CREATE POLICY "Utilizador edita as suas plantacoes"
   ON plantacoes FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = utilizador_id);
 
 CREATE POLICY "Utilizador apaga as suas plantacoes"
   ON plantacoes FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = utilizador_id);
 
 -- ============================================================
 -- 3. plantacao_historico (log de alteracoes)
@@ -160,7 +160,7 @@ CREATE POLICY "Utilizador ve o historico das suas plantacoes"
     EXISTS (
       SELECT 1 FROM plantacoes
       WHERE plantacoes.id = plantacao_historico.plantacao_id
-        AND plantacoes.user_id = auth.uid()
+        AND plantacoes.utilizador_id = auth.uid()
     )
   );
 
@@ -170,6 +170,6 @@ CREATE POLICY "Utilizador regista historico das suas plantacoes"
     EXISTS (
       SELECT 1 FROM plantacoes
       WHERE plantacoes.id = plantacao_historico.plantacao_id
-        AND plantacoes.user_id = auth.uid()
+        AND plantacoes.utilizador_id = auth.uid()
     )
   );

@@ -62,7 +62,7 @@ export async function criarPlantacao(formData: FormData): Promise<ResultadoCriar
   const { data: plantacao, error } = await supabase
     .from("plantacoes")
     .insert({
-      user_id: user.id,
+      utilizador_id: user.id,
       cultura_id: culturaId,
       local_nome: localNome,
       data_plantacao: dataPlantacaoTexto,
@@ -91,11 +91,11 @@ export async function atualizarEstadoPlantacao(
 
   const { data: atual, error: erroAtual } = await supabase
     .from("plantacoes")
-    .select("estado, user_id")
+    .select("estado, utilizador_id")
     .eq("id", plantacaoId)
     .single();
 
-  if (erroAtual || !atual || atual.user_id !== user.id) {
+  if (erroAtual || !atual || atual.utilizador_id !== user.id) {
     return { sucesso: false, erro: "Plantação não encontrada." };
   }
 
@@ -136,11 +136,11 @@ export async function adicionarNota(plantacaoId: number, formData: FormData): Pr
 
   const { data: plantacao } = await supabase
     .from("plantacoes")
-    .select("user_id")
+    .select("utilizador_id")
     .eq("id", plantacaoId)
     .single();
 
-  if (!plantacao || plantacao.user_id !== user.id) {
+  if (!plantacao || plantacao.utilizador_id !== user.id) {
     return { sucesso: false, erro: "Plantação não encontrada." };
   }
 
@@ -166,11 +166,11 @@ export async function adicionarFoto(plantacaoId: number, formData: FormData): Pr
 
   const { data: plantacao } = await supabase
     .from("plantacoes")
-    .select("user_id, fotografias")
+    .select("utilizador_id, fotografias")
     .eq("id", plantacaoId)
     .single();
 
-  if (!plantacao || plantacao.user_id !== user.id) {
+  if (!plantacao || plantacao.utilizador_id !== user.id) {
     return { sucesso: false, erro: "Plantação não encontrada." };
   }
 

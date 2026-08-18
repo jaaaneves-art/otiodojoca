@@ -47,7 +47,7 @@ export default async function FichaPlantacaoPage({ params }: { params: { id: str
     .from("plantacoes")
     .select("*, cultura:culturas_guia(*)")
     .eq("id", id)
-    .eq("user_id", user.id)
+    .eq("utilizador_id", user.id)
     .single();
 
   if (!plantacaoRaw) notFound();

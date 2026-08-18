@@ -20,7 +20,7 @@ export default async function AgendaAgricolaPage() {
     supabase
       .from("plantacoes")
       .select("*, cultura:culturas_guia(*)")
-      .eq("user_id", user.id)
+      .eq("utilizador_id", user.id)
       .order("data_plantacao", { ascending: false }),
     supabase.from("culturas_guia").select("*").order("nome"),
   ]);

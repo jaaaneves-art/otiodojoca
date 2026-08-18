@@ -56,7 +56,7 @@ export const ESTADO_LABEL: Record<EstadoPlantacao, string> = {
 
 export interface Plantacao {
   id: number;
-  user_id: string;
+  utilizador_id: string;
   cultura_id: number;
   local_nome: string | null;
   data_plantacao: string;
