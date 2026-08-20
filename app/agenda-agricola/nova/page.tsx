@@ -5,7 +5,7 @@ import NovaPlantacaoForm from "@/components/agenda-agricola/nova-plantacao-form"
 import type { CulturaGuia } from "@/lib/agenda-agricola/tipos";
 
 export default async function NovaPlantacaoPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

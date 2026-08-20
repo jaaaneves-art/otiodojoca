@@ -38,7 +38,7 @@ export interface FilterOptions {
  * Obtém lista de anúncios com filtros e paginação
  */
 export async function getAds(filters: FilterOptions = {}) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from("marketplace_ads")
@@ -119,7 +119,7 @@ export async function getAds(filters: FilterOptions = {}) {
  * Obtém um anúncio específico
  */
 export async function getAdById(id: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Incrementar contador de visualizações
   try { await supabase.rpc("increment_views", { ad_id: id }); } catch (e) { console.error(e); }
@@ -149,7 +149,7 @@ export async function getAdById(id: number) {
 export async function createAd(
   data: Omit<Ad, "id" | "created_at" | "updated_at" | "views_count">
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: newAd, error } = await supabase
     .from("marketplace_ads")
@@ -174,7 +174,7 @@ export async function createAd(
  * Atualiza um anúncio existente
  */
 export async function updateAd(id: number, data: Partial<Ad>) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: updatedAd, error } = await supabase
     .from("marketplace_ads")
@@ -198,7 +198,7 @@ export async function updateAd(id: number, data: Partial<Ad>) {
  * Deleta um anúncio
  */
 export async function deleteAd(id: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase.from("marketplace_ads").delete().eq("id", id);
 
@@ -214,7 +214,7 @@ export async function deleteAd(id: number) {
  * Obtém anúncios de um utilizador específico
  */
 export async function getUserAds(userId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_ads")
@@ -234,7 +234,7 @@ export async function getUserAds(userId: string) {
  * Obtém anúncios similares (mesma categoria)
  */
 export async function getSimilarAds(category: string, excludeId: number, limit = 6) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_ads")
@@ -261,7 +261,7 @@ export async function getSimilarAds(category: string, excludeId: number, limit =
  * Obtém categorias disponíveis
  */
 export async function getCategories() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_categories")
@@ -280,7 +280,7 @@ export async function getCategories() {
  * Adiciona um anúncio aos favoritos
  */
 export async function addToFavorites(userId: string, adId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase.from("marketplace_favorites").insert([
     {
@@ -302,7 +302,7 @@ export async function addToFavorites(userId: string, adId: number) {
  * Remove um anúncio dos favoritos
  */
 export async function removeFromFavorites(userId: string, adId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("marketplace_favorites")
@@ -322,7 +322,7 @@ export async function removeFromFavorites(userId: string, adId: number) {
  * Obtém favoritos de um utilizador
  */
 export async function getUserFavorites(userId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_favorites")
@@ -346,7 +346,7 @@ export async function getUserFavorites(userId: string) {
  * Verifica se um anúncio é favorito do utilizador
  */
 export async function isFavorite(userId: string, adId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_favorites")
@@ -366,7 +366,7 @@ export async function createConversation(
   buyerId: string,
   sellerId: string
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_conversations")
@@ -397,7 +397,7 @@ export async function sendMessage(
   senderId: string,
   content: string
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_messages")
@@ -429,7 +429,7 @@ export async function createReview(
   rating: number,
   comment: string
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_reviews")
@@ -457,7 +457,7 @@ export async function createReview(
  * Obtém avaliações de um utilizador
  */
 export async function getUserReviews(userId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_reviews")
@@ -487,7 +487,7 @@ export async function reportAd(
   reason: string,
   description: string
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("marketplace_reports")

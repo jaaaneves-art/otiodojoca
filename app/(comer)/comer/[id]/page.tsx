@@ -16,7 +16,7 @@ export default async function RestauranteDetalhePage({ params }: Props) {
     notFound();
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: restaurante, error: restauranteError } = await supabase
     .from("restaurantes")

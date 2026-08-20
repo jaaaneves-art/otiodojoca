@@ -2,8 +2,6 @@ import { Suspense } from 'react';
 import { listarAlojamentos } from '@/lib/alojamento/actions';
 import AlojamentoCard from '@/components/alojamento/alojamento-card';
 
-export const dynamic = 'force-dynamic';
-
 export const metadata = {
   title: 'Alojamentos | O Tio do Joca',
   description: 'Descubra alojamentos rurais, casas de turismo e hospedagem em Portugal',

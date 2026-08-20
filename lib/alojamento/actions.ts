@@ -20,7 +20,7 @@ import type {
  * Listar todos os alojamentos (sem localização)
  */
 export async function listarAlojamentos() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: alojamentos, error } = await supabase
     .from('alojamentos')
@@ -38,7 +38,7 @@ export async function listarAlojamentos() {
  * Obter um alojamento com localização completa
  */
 export async function obterAlojamento(id: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Query 1: Alojamento
   const { data: alojamento, error: erroAlojamento } = await supabase
@@ -72,7 +72,7 @@ export async function obterAlojamento(id: number) {
  * Obter alojamento com refeições disponíveis
  */
 export async function obterAlojamentoComRefeicoes(id: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Query 1: Alojamento com localização
   const alojamento = await obterAlojamento(id);
@@ -98,7 +98,7 @@ export async function obterAlojamentoComRefeicoes(id: number) {
  * Filtrar alojamentos por tipo
  */
 export async function filtrarAlojamentosPorTipo(tipo: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: alojamentos, error } = await supabase
     .from('alojamentos')
@@ -117,7 +117,7 @@ export async function filtrarAlojamentosPorTipo(tipo: string) {
  * Filtrar alojamentos por preço
  */
 export async function filtrarAlojamentosPorPreco(precoMin: number, precoMax: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: alojamentos, error } = await supabase
     .from('alojamentos')
@@ -141,7 +141,7 @@ export async function filtrarAlojamentosPorPreco(precoMin: number, precoMax: num
  * Obter refeições disponíveis para um alojamento
  */
 export async function obterRefeicoesAlojamento(alojamentoId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: refeicoes, error } = await supabase
     .from('refeicoes_alojamento')
@@ -176,7 +176,7 @@ export async function criarReservaAlojamento(dados: {
   preco_total: number;
   observacoes?: string;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Validar datas
   const entrada = new Date(dados.data_entrada);
@@ -219,7 +219,7 @@ export async function criarReservaAlojamento(dados: {
  * Listar reservas de um alojamento
  */
 export async function listarReservasAlojamento(alojamentoId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: reservas, error } = await supabase
     .from('reservas_alojamento')
@@ -238,7 +238,7 @@ export async function listarReservasAlojamento(alojamentoId: number) {
  * Obter uma reserva específica
  */
 export async function obterReserva(id: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: reserva, error } = await supabase
     .from('reservas_alojamento')
@@ -260,7 +260,7 @@ export async function atualizarStatusReserva(
   id: number,
   novoStatus: 'confirmada' | 'concluido' | 'cancelada'
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: reserva, error } = await supabase
     .from('reservas_alojamento')
@@ -280,7 +280,7 @@ export async function atualizarStatusReserva(
  * Cancelar uma reserva
  */
 export async function cancelarReserva(id: number, motivo?: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: reserva, error } = await supabase
     .from('reservas_alojamento')
@@ -308,7 +308,7 @@ export async function verificarDisponibilidade(
   dataEntrada: string,
   dataSaida: string
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: reservas, error } = await supabase
     .from('reservas_alojamento')

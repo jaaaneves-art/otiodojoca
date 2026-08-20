@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Bell, MessageSquare, Heart, ShoppingBag } from "lucide-react";
 
 export default async function ProfilePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

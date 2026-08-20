@@ -11,7 +11,7 @@ export default async function CategoryPage({
 }: {
   params: { slug: string };
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: category } = await supabase
     .from("categories")

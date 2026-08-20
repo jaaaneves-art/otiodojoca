@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: cache } = await supabase
     .from("codigos_postais_geo")
     .select("latitude, longitude")

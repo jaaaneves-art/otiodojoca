@@ -13,7 +13,7 @@ interface SearchParams {
 }
 
 export default async function FeiraPage({ searchParams }: { searchParams: SearchParams }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let query = supabase
     .from("marketplace_ads")

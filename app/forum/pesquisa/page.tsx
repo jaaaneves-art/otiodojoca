@@ -9,7 +9,7 @@ export default async function SearchPage({
 }: {
   searchParams: { q?: string };
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const query = searchParams.q || "";
 
   let threads = null;

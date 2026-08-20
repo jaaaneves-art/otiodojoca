@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
  * Se já estiver nos favoritos, remove; senão, adiciona.
  */
 export async function toggleFavorite(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

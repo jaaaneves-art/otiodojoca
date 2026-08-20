@@ -13,7 +13,7 @@ import {
 } from "@/components/profile";
 
 export default async function ProfilePageV2() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

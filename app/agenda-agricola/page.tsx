@@ -7,7 +7,7 @@ import PlantacaoCard from "@/components/agenda-agricola/plantacao-card";
 import CatalogoCulturas from "@/components/agenda-agricola/catalogo-culturas";
 
 export default async function AgendaAgricolaPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

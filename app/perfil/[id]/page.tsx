@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function PerfilPublicoPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Buscar o perfil público (só campos públicos)
   const { data: profile, error } = await supabase

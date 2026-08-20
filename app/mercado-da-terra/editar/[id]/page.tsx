@@ -5,7 +5,7 @@ import { AdForm } from "@/components/mercado-da-terra/ad-form";
 import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar";
 
 export default async function EditarAnuncioPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -48,7 +48,7 @@ export default async function EditarAnuncioPage({ params }: { params: { id: stri
   async function updateAd(formData: FormData) {
     "use server";
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

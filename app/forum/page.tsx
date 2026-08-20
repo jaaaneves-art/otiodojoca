@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default async function ForumPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: mainCategories } = await supabase
     .from("categories")

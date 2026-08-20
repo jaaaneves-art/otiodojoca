@@ -7,7 +7,7 @@ import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar"
 async function createAd(formData: FormData) {
   "use server";
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -90,7 +90,7 @@ async function createAd(formData: FormData) {
 }
 
 export default async function NovoAnuncioPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

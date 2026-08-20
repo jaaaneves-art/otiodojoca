@@ -15,7 +15,7 @@ export interface ResultadoCriarPlantacao extends ResultadoAcao {
 }
 
 async function utilizadorAutenticado() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

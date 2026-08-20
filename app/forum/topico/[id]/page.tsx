@@ -10,7 +10,7 @@ export default async function ThreadPage({
 }: {
   params: { id: string };
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: thread } = await supabase
     .from("threads")

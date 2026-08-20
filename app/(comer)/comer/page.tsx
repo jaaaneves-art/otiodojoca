@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ComerPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: restaurantes, error } = await supabase
     .from("restaurantes")

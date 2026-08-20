@@ -20,7 +20,7 @@ export interface EntidadeComCategoria {
 }
 
 export async function getFreguesiaByCodigo(codigo: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: freguesia, error } = await supabase
     .from('freguesias')
@@ -38,7 +38,7 @@ export async function getFreguesiaByCodigo(codigo: string) {
 export async function getEntidadesByFreguesia(
   frequesiaId: number
 ): Promise<EntidadeComCategoria[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: entidades, error } = await supabase
     .from('entidades')
@@ -78,7 +78,7 @@ export async function getEntidadesByFreguesia(
 }
 
 export async function getEntidadeBySlug(slug: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: entidade, error } = await supabase
     .from('entidades')
@@ -101,7 +101,7 @@ export async function getEntidadeBySlug(slug: string) {
 }
 
 export async function getCategorias() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: categorias, error } = await supabase
     .from('categorias_entidade')

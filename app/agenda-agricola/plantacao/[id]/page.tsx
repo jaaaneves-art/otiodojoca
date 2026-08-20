@@ -40,7 +40,7 @@ export default async function FichaPlantacaoPage({ params }: { params: { id: str
   const id = Number(params.id);
   if (!Number.isFinite(id)) notFound();
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

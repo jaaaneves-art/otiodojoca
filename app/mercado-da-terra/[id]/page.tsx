@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import ContactSellerForm from "@/components/mercado-da-terra/contact-seller-form";
 
 export default async function AdPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: ad, error } = await supabase
     .from("marketplace_ads")

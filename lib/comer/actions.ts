@@ -46,7 +46,7 @@ function validarDataReserva(dataReservaStr: string): string | null {
 
 export async function criarReserva(params: CriarReservaParams) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const {
       data: { user },
