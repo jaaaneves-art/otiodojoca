@@ -53,6 +53,28 @@ npm install
 npm run dev
 ```
 
+## Database & Migrações (Supabase CLI)
+
+A partir de **agosto de 2026**, o projeto utiliza **Supabase CLI** para versionamento e migração de schema.
+
+### Quick Start
+
+```bash
+# Criar nova migração
+npx supabase migration new nome_descritivo
+
+# Testar localmente
+npx supabase start
+npx supabase db push
+
+# Aplicar em produção
+npx supabase db push
+```
+
+**⚠️ Importante:** Não edite o schema directamente no painel Supabase. Use sempre migrations.
+
+Para documentação completa, leia: [`docs/SUPABASE-CLI-SETUP.md`](docs/SUPABASE-CLI-SETUP.md)
+
 ## Licença
 
 A definir.
