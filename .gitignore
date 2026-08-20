@@ -49,3 +49,9 @@ TESTE-*.txt
 
 # dados de importacao unica para o Supabase (correr manualmente, nao versionar)
 /sql/*.csv
+
+# Backups e ambientes locais
+backups/
+venv/
+*.BAK-*
+*.backup
