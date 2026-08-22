@@ -10,7 +10,7 @@ interface ReservaFormProps {
   restauranteNome: string;
 }
 
-const LIMITE_ANTECEDENCIA_DIAS = 90;
+const LIMITE_ANTECEDENCIA_DIAS = 365;
 
 function paraDataString(data: Date) {
   const ano = data.getFullYear();

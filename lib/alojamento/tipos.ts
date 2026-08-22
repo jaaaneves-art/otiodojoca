@@ -9,11 +9,14 @@ export type TipoAlojamento =
   | 'chalé' 
   | 'quinta';
 
-export type TipoRefeicao = 
-  | 'sem_refeicoes' 
-  | 'pequeno_almoco' 
-  | 'meia_pensao' 
-  | 'pensao_completa';
+export type TipoRefeicao =
+  | 'sem_refeicoes'
+  | 'incluido'
+  | 'pequeno_almoco'
+  | 'meia_pensao'
+  | 'pensao_completa'
+  | 'almoço'
+  | 'jantar';
 
 export interface Localizacao {
   id: number;
@@ -22,6 +25,7 @@ export interface Localizacao {
   localidade: string;
   municipio?: string;
   distrito?: string;
+  morada?: string;
   latitude?: number;
   longitude?: number;
 }
@@ -38,6 +42,7 @@ export interface Alojamento {
   descricao?: string;
   tipo: TipoAlojamento;
   localizacao_id: number;
+  localizacao?: Localizacao | null;
   preco_noite: number;
   num_quartos: number;
   num_camas?: number;

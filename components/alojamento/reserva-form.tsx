@@ -1,20 +1,28 @@
-// components/alojamento/reserva-form.tsx
-
 'use client';
 
 import { useState } from 'react';
-import type { AlojamentoComRefeicoes, TipoRefeicao } from '@/lib/alojamento/tipos';
-import { criarReservaAlojamento, calcularPrecoReserva } from '@/lib/alojamento/actions';
+import { criarReservaAlojamento } from '@/lib/alojamento/actions';
+import type { TipoRefeicao } from '@/lib/alojamento/tipos';
 
-interface ReservaFormProps {
-  alojamento: AlojamentoComRefeicoes;
+interface Alojamento {
+  id: number;
+  nome: string;
+  preco_noite: number;
 }
 
-export default function ReservaForm({ alojamento }: ReservaFormProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+interface RefeicaoOpcao {
+  id: number;
+  tipo_refeicao: string;
+  preco_extra: number;
+}
 
+export default function ReservaForm({
+  alojamento,
+  refeicoes,
+}: {
+  alojamento: Alojamento;
+  refeicoes: RefeicaoOpcao[];
+}) {
   const [formData, setFormData] = useState({
     nome_hospede: '',
     email_hospede: '',
@@ -23,77 +31,80 @@ export default function ReservaForm({ alojamento }: ReservaFormProps) {
     data_saida: '',
     num_pessoas: 1,
     num_quartos: 1,
-    tipo_refeicao: 'sem_refeicoes' as TipoRefeicao,
+    tipo_refeicao: '',
     observacoes: '',
   });
 
-  const [precoCalculado, setPrecoCalculado] = useState<{
-    numNoites: number;
-    precoNoite: number;
-    precoRefeicoes: number;
-    precoTotal: number;
-  } | null>(null);
+  const [precoTotal, setPrecoTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  // Calcular preço quando datas ou refeições mudam
-  const calcularPreco = async () => {
-    if (!formData.data_entrada || !formData.data_saida) return;
+  // Nº de noites — calculado automaticamente a partir das datas,
+  // só para dar feedback visual imediato a quem faz a reserva.
+  const numNoites = (() => {
+    if (!formData.data_entrada || !formData.data_saida) return 0;
+    const dataEntrada = new Date(formData.data_entrada);
+    const dataSaida = new Date(formData.data_saida);
+    const noites = Math.ceil(
+      (dataSaida.getTime() - dataEntrada.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return noites > 0 ? noites : 0;
+  })();
 
-    try {
-      const resultado = await calcularPrecoReserva(
-        alojamento.id,
-        formData.data_entrada,
-        formData.data_saida,
-        formData.tipo_refeicao
+  const calcularPreco = (entrada: string, saida: string, refeicao: string) => {
+    if (!entrada || !saida) return;
+
+    const dataEntrada = new Date(entrada);
+    const dataSaida = new Date(saida);
+    const noites = Math.ceil(
+      (dataSaida.getTime() - dataEntrada.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (noites <= 0) {
+      setError('Data de saída deve ser posterior à de entrada');
+      setPrecoTotal(0);
+      return;
+    }
+
+    let precoRefeicao = 0;
+    if (refeicao) {
+      const refeicaoSelecionada = refeicoes.find(
+        (r) => r.tipo_refeicao === refeicao
       );
-      setPrecoCalculado(resultado);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao calcular preço');
+      if (refeicaoSelecionada) {
+        precoRefeicao = refeicaoSelecionada.preco_extra || 0;
+      }
+    }
+
+    const precoAlojamento = (alojamento.preco_noite * noites * formData.num_quartos);
+    const precoRefeicaTotal = precoRefeicao * noites * formData.num_pessoas;
+    const total = precoAlojamento + precoRefeicaTotal;
+
+    setPrecoTotal(total);
+    setError('');
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === 'data_entrada' || name === 'data_saida' || name === 'tipo_refeicao') {
+      const novoFormData = { ...formData, [name]: value };
+      calcularPreco(
+        novoFormData.data_entrada,
+        novoFormData.data_saida,
+        novoFormData.tipo_refeicao
+      );
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name.startsWith('num_') ? parseInt(value) : value,
-    }));
-  };
-
-  const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // Recalcular quando datas ou refeições mudam
-  const handleDataEntradaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleDataChange(e);
-    setTimeout(() => calcularPreco(), 100);
-  };
-
-  const handleDataSaidaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleDataChange(e);
-    setTimeout(() => calcularPreco(), 100);
-  };
-
-  const handleRefeicoesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    handleInputChange(e);
-    setTimeout(() => calcularPreco(), 100);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(false);
+    setError('');
 
     try {
-      if (!precoCalculado) {
-        throw new Error('Calcule o preço primeiro');
-      }
-
       await criarReservaAlojamento({
         alojamento_id: alojamento.id,
         nome_hospede: formData.nome_hospede,
@@ -101,14 +112,14 @@ export default function ReservaForm({ alojamento }: ReservaFormProps) {
         telefone_hospede: formData.telefone_hospede || undefined,
         data_entrada: formData.data_entrada,
         data_saida: formData.data_saida,
-        num_pessoas: formData.num_pessoas,
-        num_quartos: formData.num_quartos,
-        tipo_refeicao: formData.tipo_refeicao,
-        preco_total: precoCalculado.precoTotal,
+        num_pessoas: Number(formData.num_pessoas),
+        num_quartos: Number(formData.num_quartos),
+        tipo_refeicao: formData.tipo_refeicao as TipoRefeicao,
+        preco_total: precoTotal,
         observacoes: formData.observacoes || undefined,
       });
 
-      setSuccess(true);
+      setSuccess('Reserva criada com sucesso! Vai receber confirmação em breve.');
       setFormData({
         nome_hospede: '',
         email_hospede: '',
@@ -117,102 +128,103 @@ export default function ReservaForm({ alojamento }: ReservaFormProps) {
         data_saida: '',
         num_pessoas: 1,
         num_quartos: 1,
-        tipo_refeicao: 'sem_refeicoes',
+        tipo_refeicao: '',
         observacoes: '',
       });
-      setPrecoCalculado(null);
+      setPrecoTotal(0);
+
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao criar reserva');
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-lg border p-6 max-w-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">Fazer Reserva</h2>
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h1 className="text-3xl font-bold mb-6">Reservar: {alojamento.nome}</h1>
 
-      {success && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
-          ✅ Reserva criada com sucesso! Verifique seu email.
-        </div>
-      )}
+      {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}
+      {success && <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">{success}</div>}
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          ❌ {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Dados do Hóspede */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
-          <input
-            type="text"
-            name="nome_hospede"
-            value={formData.nome_hospede}
-            onChange={handleInputChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Seu nome"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-          <input
-            type="email"
-            name="email_hospede"
-            value={formData.email_hospede}
-            onChange={handleInputChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="seu@email.com"
-          />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-semibold mb-2">Nome *</label>
+            <input
+              type="text"
+              name="nome_hospede"
+              value={formData.nome_hospede}
+              onChange={handleInputChange}
+              required
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-2">Email *</label>
+            <input
+              type="email"
+              name="email_hospede"
+              value={formData.email_hospede}
+              onChange={handleInputChange}
+              required
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+          <label className="block font-semibold mb-2">Telefone</label>
           <input
             type="tel"
             name="telefone_hospede"
             value={formData.telefone_hospede}
             onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="+351 2XX XXX XXX"
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        {/* Datas */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data de Entrada *</label>
-          <input
-            type="date"
-            name="data_entrada"
-            value={formData.data_entrada}
-            onChange={handleDataEntradaChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data de Saída *</label>
-          <input
-            type="date"
-            name="data_saida"
-            value={formData.data_saida}
-            onChange={handleDataSaidaChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Capacidade */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Pessoas *</label>
+            <label className="block font-semibold mb-2">Data Entrada *</label>
+            <input
+              type="date"
+              name="data_entrada"
+              value={formData.data_entrada}
+              onChange={handleInputChange}
+              required
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-2">Data Saída *</label>
+            <input
+              type="date"
+              name="data_saida"
+              value={formData.data_saida}
+              onChange={handleInputChange}
+              required
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block font-semibold mb-2">Nº Noites *</label>
+            <input
+              type="text"
+              value={numNoites > 0 ? numNoites : ''}
+              readOnly
+              disabled
+              placeholder="Selecione as datas"
+              className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 font-semibold cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500 mt-1">Calculado automaticamente pelas datas</p>
+          </div>
+          <div>
+            <label className="block font-semibold mb-2">Nº Pessoas *</label>
             <input
               type="number"
               name="num_pessoas"
@@ -220,93 +232,69 @@ export default function ReservaForm({ alojamento }: ReservaFormProps) {
               onChange={handleInputChange}
               min="1"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-gray-300 rounded px-3 py-2"
             />
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Quartos *</label>
+            <label className="block font-semibold mb-2">Nº Quartos *</label>
             <input
               type="number"
               name="num_quartos"
               value={formData.num_quartos}
               onChange={handleInputChange}
               min="1"
-              max={alojamento.num_quartos}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-gray-300 rounded px-3 py-2"
             />
           </div>
         </div>
 
-        {/* Refeições */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Refeições</label>
+          <label className="block font-semibold mb-2">Tipo de Refeição *</label>
           <select
             name="tipo_refeicao"
             value={formData.tipo_refeicao}
-            onChange={handleRefeicoesChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={handleInputChange}
+            required
+            className="w-full border border-gray-300 rounded px-3 py-2"
           >
-            <option value="sem_refeicoes">Sem refeições</option>
-            {alojamento.refeicoes.some(r => r.tipo_refeicao === 'pequeno_almoco') && (
-              <option value="pequeno_almoco">Pequeno-almoço incluído</option>
-            )}
-            {alojamento.refeicoes.length >= 2 && (
-              <option value="meia_pensao">Meia-pensão (almoço + alojamento)</option>
-            )}
-            {alojamento.refeicoes.length === 3 && (
-              <option value="pensao_completa">Pensão completa (3 refeições)</option>
-            )}
+            <option value="">Selecione uma refeição</option>
+            <option value="sem_refeicoes">Não quero nenhuma refeição</option>
+            <option value="incluido">Refeição incluída (sem custo extra)</option>
+            {refeicoes.map((ref) => (
+              <option key={ref.id} value={ref.tipo_refeicao}>
+                {ref.tipo_refeicao} (+€{ref.preco_extra || 0}/pessoa/noite)
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Observações */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+          <label className="block font-semibold mb-2">Observações</label>
           <textarea
             name="observacoes"
             value={formData.observacoes}
             onChange={handleInputChange}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Informações adicionais..."
+            rows={4}
+            className="w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        {/* Preço */}
-        {precoCalculado && (
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <div className="space-y-1 mb-3">
-              <div className="flex justify-between text-sm">
-                <span>Noites:</span>
-                <span className="font-medium">{precoCalculado.numNoites}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>€{precoCalculado.precoNoite.toFixed(2)} × {precoCalculado.numNoites}</span>
-                <span className="font-medium">€{(precoCalculado.precoNoite * precoCalculado.numNoites).toFixed(2)}</span>
-              </div>
-              {precoCalculado.precoRefeicoes > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span>Refeições:</span>
-                  <span className="font-medium">€{precoCalculado.precoRefeicoes.toFixed(2)}</span>
-                </div>
-              )}
-            </div>
-            <div className="flex justify-between border-t pt-2 text-base font-bold text-blue-700">
-              <span>Total:</span>
-              <span>€{precoCalculado.precoTotal.toFixed(2)}</span>
-            </div>
+        <div className="bg-gray-50 p-4 rounded">
+          <div className="text-2xl font-bold">
+            Preço Total: €{precoTotal.toFixed(2)}
           </div>
-        )}
+          <div className="text-sm text-gray-600 mt-2">
+            Alojamento: €{alojamento.preco_noite}/noite
+          </div>
+        </div>
 
-        {/* Botão Submit */}
         <button
           type="submit"
-          disabled={loading || !precoCalculado}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 disabled:bg-gray-400"
         >
-          {loading ? 'Processando...' : 'Confirmar Reserva'}
+          {loading ? 'A guardar...' : 'Fazer Reserva'}
         </button>
       </form>
     </div>
