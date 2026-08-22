@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function ComerPage() {
   const supabase = await createClient();
 
-  const { data: restaurantes, error } = await supabase
+  const { data: restaurantesBrutos, error } = await supabase
     .from("restaurantes")
     .select(`
       id,
@@ -20,6 +20,7 @@ export default async function ComerPage() {
         localidade,
         municipio,
         distrito,
+        morada,
         latitude,
         longitude
       )
@@ -29,6 +30,15 @@ export default async function ComerPage() {
   if (error) {
     throw new Error("Erro ao carregar restaurantes: " + error.message);
   }
+
+  // O PostgREST às vezes devolve a relação embutida como array, às vezes
+  // como objeto único, consoante consiga inferir a cardinalidade da FK —
+  // normalizamos para não depender de um dos dois formatos.
+  const restaurantes = (restaurantesBrutos || []).map((r) => {
+    const bruto = r.localizacao as unknown;
+    const localizacao = Array.isArray(bruto) ? (bruto[0] ?? null) : (bruto ?? null);
+    return { ...r, localizacao };
+  });
 
   return (
     <div className="min-h-screen bg-orange-50">
@@ -77,7 +87,10 @@ export default async function ComerPage() {
 
                       <div className="flex items-center justify-between">
                         <p className="text-xs text-orange-500">
-                          📍 {restaurante.localizacao?.[0]?.municipio ?? "—"}
+                          📍{" "}
+                          {[restaurante.localizacao?.localidade, restaurante.localizacao?.municipio]
+                            .filter(Boolean)
+                            .join(", ") || "—"}
                         </p>
 
                         <p className="text-sm text-orange-600">

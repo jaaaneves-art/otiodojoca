@@ -16,22 +16,45 @@ import type {
 // ALOJAMENTOS
 // ========================================
 
+const CAMPOS_LOCALIZACAO_RESUMO = `
+  localizacao:localizacoes (
+    id, nome, localidade, municipio, distrito, codigo_postal, morada, latitude, longitude
+  )
+`;
+
 /**
- * Listar todos os alojamentos (sem localização)
+ * O PostgREST às vezes devolve a relação embutida como array, às vezes
+ * como objeto único, consoante consiga inferir a cardinalidade da FK.
+ * Normalizamos aqui para ficar sempre um objeto (ou null).
+ */
+function normalizarLocalizacao<T extends { localizacao?: unknown }>(
+  registo: T
+): T {
+  const bruto = registo.localizacao as unknown;
+  const localizacao = Array.isArray(bruto) ? (bruto[0] ?? null) : (bruto ?? null);
+  return { ...registo, localizacao };
+}
+
+/**
+ * Listar todos os alojamentos, com a localização (morada, código postal,
+ * localidade, município, distrito, GPS) já incluída para a listagem.
  */
 export async function listarAlojamentos() {
   const supabase = await createClient();
 
   const { data: alojamentos, error } = await supabase
     .from('alojamentos')
-    .select('id, nome, descricao, tipo, localizacao_id, preco_noite, num_quartos, rating, created_at, updated_at')
+    .select(`
+      id, nome, descricao, tipo, localizacao_id, preco_noite, num_quartos, rating, created_at, updated_at,
+      ${CAMPOS_LOCALIZACAO_RESUMO}
+    `)
     .order('nome');
 
   if (error) {
     throw new Error(`Erro ao listar alojamentos: ${error.message}`);
   }
 
-  return alojamentos;
+  return (alojamentos || []).map(normalizarLocalizacao) as Alojamento[];
 }
 
 /**
@@ -82,7 +105,6 @@ export async function obterAlojamentoComRefeicoes(id: number) {
     .from('refeicoes_alojamento')
     .select('*')
     .eq('alojamento_id', id)
-    .eq('disponivel', true);
 
   if (erroRefeicoes) {
     throw new Error('Erro ao buscar refeições');
@@ -102,7 +124,10 @@ export async function filtrarAlojamentosPorTipo(tipo: string) {
 
   const { data: alojamentos, error } = await supabase
     .from('alojamentos')
-    .select('id, nome, descricao, tipo, localizacao_id, preco_noite, num_quartos, rating, created_at, updated_at')
+    .select(`
+      id, nome, descricao, tipo, localizacao_id, preco_noite, num_quartos, rating, created_at, updated_at,
+      ${CAMPOS_LOCALIZACAO_RESUMO}
+    `)
     .eq('tipo', tipo)
     .order('nome');
 
@@ -110,7 +135,7 @@ export async function filtrarAlojamentosPorTipo(tipo: string) {
     throw new Error(`Erro ao filtrar alojamentos: ${error.message}`);
   }
 
-  return alojamentos;
+  return (alojamentos || []).map(normalizarLocalizacao) as Alojamento[];
 }
 
 /**
@@ -121,7 +146,10 @@ export async function filtrarAlojamentosPorPreco(precoMin: number, precoMax: num
 
   const { data: alojamentos, error } = await supabase
     .from('alojamentos')
-    .select('id, nome, descricao, tipo, localizacao_id, preco_noite, num_quartos, rating, created_at, updated_at')
+    .select(`
+      id, nome, descricao, tipo, localizacao_id, preco_noite, num_quartos, rating, created_at, updated_at,
+      ${CAMPOS_LOCALIZACAO_RESUMO}
+    `)
     .gte('preco_noite', precoMin)
     .lte('preco_noite', precoMax)
     .order('preco_noite');
@@ -130,7 +158,7 @@ export async function filtrarAlojamentosPorPreco(precoMin: number, precoMax: num
     throw new Error(`Erro ao filtrar por preço: ${error.message}`);
   }
 
-  return alojamentos;
+  return (alojamentos || []).map(normalizarLocalizacao) as Alojamento[];
 }
 
 // ========================================
@@ -147,7 +175,6 @@ export async function obterRefeicoesAlojamento(alojamentoId: number) {
     .from('refeicoes_alojamento')
     .select('*')
     .eq('alojamento_id', alojamentoId)
-    .eq('disponivel', true);
 
   if (error) {
     throw new Error('Erro ao buscar refeições');

@@ -41,6 +41,21 @@ export default function AlojamentoCard({ alojamento }: AlojamentoCardProps) {
         <div className="p-4">
           <h3 className="text-lg font-bold text-gray-900 mb-2">{alojamento.nome}</h3>
 
+          {alojamento.localizacao && (
+            <div className="flex items-center gap-1 text-sm text-gray-600 mb-2">
+              <span>📍</span>
+              <span>
+                {[
+                  alojamento.localizacao.localidade,
+                  alojamento.localizacao.municipio,
+                  alojamento.localizacao.codigo_postal,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || 'Localização não disponível'}
+              </span>
+            </div>
+          )}
+
           {alojamento.descricao && (
             <p className="text-sm text-gray-600 mb-3 line-clamp-2">{alojamento.descricao}</p>
           )}

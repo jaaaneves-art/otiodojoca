@@ -4,13 +4,14 @@ import ReservaForm from "@/components/comer/reserva-form";
 import { createClient } from "@/lib/supabase/server";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function RestauranteDetalhePage({ params }: Props) {
-  const id = Number(params.id);
+  const { id: idParam } = await params;
+  const id = Number(idParam);
 
   if (!Number.isInteger(id) || id <= 0) {
     notFound();
@@ -51,6 +52,7 @@ export default async function RestauranteDetalhePage({ params }: Props) {
         localidade,
         municipio,
         distrito,
+        morada,
         latitude,
         longitude
       `)
@@ -115,24 +117,26 @@ export default async function RestauranteDetalhePage({ params }: Props) {
               </h2>
 
               {localizacao ? (
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${localizacao.latitude},${localizacao.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-orange-700 hover:text-orange-900 hover:underline"
-                  title="Abrir localização no Google Maps"
-                >
-                  <strong>📍</strong>{" "}
-                  {[
-                    localizacao.nome,
-                    localizacao.localidade,
-                    localizacao.municipio,
-                    localizacao.distrito,
-                    localizacao.codigo_postal,
-                  ]
-                    .filter(Boolean)
-                    .join(" • ")}
-                </a>
+                <div className="text-orange-700">
+                  {localizacao.morada && <p>{localizacao.morada}</p>}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${localizacao.latitude},${localizacao.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-orange-900 hover:underline"
+                    title="Abrir localização no Google Maps"
+                  >
+                    <strong>📍</strong>{" "}
+                    {[
+                      localizacao.codigo_postal,
+                      localizacao.localidade,
+                      localizacao.municipio,
+                      localizacao.distrito,
+                    ]
+                      .filter(Boolean)
+                      .join(" • ")}
+                  </a>
+                </div>
               ) : (
                 <p className="text-orange-700">
                   <strong>📍</strong> Localização não disponível
