@@ -25,7 +25,7 @@ create table "public"."reservas_alojamento" (
   constraint "reservas_alojamento_tipo_refeicao_check"
     check
     (((tipo_refeicao)::text = ANY ((ARRAY['sem_refeicoes'::character varying, 'pequeno_almoco'::character varying, 'meia_pensao'::character varying, 'pensao_completa'::character
-    varying])::text[])))
+    varying, 'almoço'::character varying, 'jantar'::character varying])::text[])))
 );
 
 alter table "public"."reservas_alojamento"

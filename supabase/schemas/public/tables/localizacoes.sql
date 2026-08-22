@@ -9,6 +9,7 @@ create table "public"."localizacoes" (
   "longitude"     double precision,
   "created_at"    timestamp with time zone not null default now(),
   "updated_at"    timestamp with time zone not null default now(),
+  "morada"        text,
   constraint "localizacoes_codigo_postal_check" check (((codigo_postal)::text ~ '^[0-9]{4}-[0-9]{3}$'::text)),
   constraint "localizacoes_latitude_check" check (((latitude IS NULL) OR ((latitude >= ('-90'::integer)::double precision) AND (latitude <= (90)::double precision)))),
   constraint "localizacoes_longitude_check" check (((longitude IS NULL) OR ((longitude >= ('-180'::integer)::double precision) AND (longitude <= (180)::double precision)))),
