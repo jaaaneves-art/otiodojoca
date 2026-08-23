@@ -8,8 +8,10 @@ import { ArrowLeft } from "lucide-react";
 export default async function ThreadPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id: idParam } = await params;
+  const threadId = Number(idParam);
   const supabase = await createClient();
 
   const { data: thread } = await supabase
@@ -19,7 +21,7 @@ export default async function ThreadPage({
       category:categories(name, slug),
       author:profiles(username)
     `)
-    .eq("id", Number(params.id))
+    .eq("id", threadId)
     .single();
 
   if (!thread) {
@@ -32,8 +34,24 @@ export default async function ThreadPage({
       *,
       author:profiles(id, username, reputation)
     `)
-    .eq("thread_id", Number(params.id))
+    .eq("thread_id", threadId)
     .order("created_at");
+
+  // Buscar imagens de todos os posts deste tópico
+  const postIds = (posts || []).map((p: any) => p.id);
+  const imagesMap: Record<number, any[]> = {};
+  if (postIds.length > 0) {
+    const { data: images } = await supabase
+      .from("post_images")
+      .select("id, post_id, storage_path, sort_order")
+      .in("post_id", postIds)
+      .order("sort_order", { ascending: true });
+
+    images?.forEach((img: any) => {
+      if (!imagesMap[img.post_id]) imagesMap[img.post_id] = [];
+      imagesMap[img.post_id].push(img);
+    });
+  }
 
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -61,7 +79,7 @@ export default async function ThreadPage({
           {posts?.map((post) => (
             <PostItem
               key={post.id}
-              post={post as any}
+              post={{ ...post, images: imagesMap[post.id] || [] } as any}
               currentUserId={user?.id}
             />
           ))}
@@ -73,7 +91,7 @@ export default async function ThreadPage({
               Este topico esta fechado. Nao e possivel responder.
             </div>
           ) : (
-            <ReplyForm threadId={Number(params.id)} />
+            <ReplyForm threadId={threadId} />
           )
         ) : (
           <div className="p-4 bg-terra-100 rounded-lg text-center">

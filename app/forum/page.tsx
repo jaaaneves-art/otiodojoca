@@ -47,16 +47,20 @@ export default async function ForumPage() {
 
         {categoriesWithCount?.map((category: any) => (
           <div key={category.id} className="mb-8">
-            <h2 className="text-xl font-semibold text-terra-800 mb-4 flex items-center gap-2">
-              <span>{category.icon}</span>
-              {category.name}
-            </h2>
+            <Link href={`/forum/${category.slug}`}>
+              <h2 className="text-xl font-semibold text-terra-800 mb-4 flex items-center gap-2 hover:text-terra-600 w-fit">
+                <span>{category.icon}</span>
+                {category.name}
+              </h2>
+            </Link>
             {category.description && <p className="text-sm text-terra-500 mb-3">{category.description}</p>}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {category.children?.map((sub: any) => (
-                <CategoryCard key={sub.id} category={{ ...sub, thread_count: 0 }} />
-              ))}
-            </div>
+            {category.children && category.children.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {category.children?.map((sub: any) => (
+                  <CategoryCard key={sub.id} category={{ ...sub, thread_count: 0 }} />
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </main>

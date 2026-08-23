@@ -5,6 +5,12 @@ import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+interface PostImage {
+  id: number;
+  storage_path: string;
+  sort_order: number;
+}
+
 interface Post {
   id: number;
   content: string;
@@ -12,6 +18,7 @@ interface Post {
   created_at: string;
   updated_at: string;
   is_first_post: boolean;
+  images?: PostImage[];
 }
 
 export function PostItem({ post, currentUserId }: { post: Post; currentUserId?: string }) {
@@ -65,6 +72,19 @@ export function PostItem({ post, currentUserId }: { post: Post; currentUserId?: 
             ) : (
               <div className="prose prose-terra max-w-none">
                 <p className="whitespace-pre-wrap">{post.content}</p>
+              </div>
+            )}
+            {!isEditing && post.images && post.images.length > 0 && (
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2 max-w-md">
+                {post.images.map((img) => (
+                  <a key={img.id} href={img.storage_path} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={img.storage_path}
+                      alt=""
+                      className="w-full h-24 object-cover rounded-lg border border-terra-200 hover:opacity-90 transition"
+                    />
+                  </a>
+                ))}
               </div>
             )}
             {isAuthor && !isEditing && (

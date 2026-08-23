@@ -7,10 +7,11 @@ import { ArrowLeft } from "lucide-react";
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: Promise<{ q?: string }>;
 }) {
+  const { q } = await searchParams;
   const supabase = await createClient();
-  const query = searchParams.q || "";
+  const query = q || "";
 
   let threads = null;
 
