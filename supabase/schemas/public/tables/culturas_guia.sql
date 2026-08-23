@@ -1,8 +1,8 @@
 create table "public"."culturas_guia" (
-  "id"                    uuid                     not null default gen_random_uuid(),
-  "nome"                  text                     not null,
+  "id"                    uuid                        not null default gen_random_uuid(),
+  "nome"                  text                        not null,
   "nome_cientifico"       text,
-  "categoria"             text                     not null,
+  "categoria"             text                        not null,
   "ciclo_dias_min"        integer,
   "ciclo_dias_max"        integer,
   "semeadura_fase_lunar"  text,
@@ -16,8 +16,12 @@ create table "public"."culturas_guia" (
   "descricao"             text,
   "associacoes_beneficas" text,
   "dicas"                 text,
-  "criado_em"             timestamp with time zone default now(),
-  "atualizado_em"         timestamp with time zone default now(),
+  "criado_em"             timestamp with time zone    default now(),
+  "atualizado_em"         timestamp with time zone    default now(),
+  "tipo_cultura"          character varying,
+  "subcategoria"          character varying,
+  "descricao_estendida"   text,
+  "updated_at"            timestamp without time zone default now(),
   constraint "culturas_guia_nome_key" unique (nome),
   constraint "culturas_guia_pkey" primary key (id)
 );

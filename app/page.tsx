@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout } from "lucide-react";
+import { EntryChoiceModal } from "@/components/entidades/entry-choice-modal";
+import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark } from "lucide-react";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -19,6 +20,9 @@ export default async function HomePage() {
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/mercado-da-terra">Mercado da Terra</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/gran-bazar">Gran Bazar</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/perfil">Perfil</Link>
@@ -57,6 +61,12 @@ export default async function HomePage() {
           )}
         </div>
 
+        {!user && (
+          <div className="max-w-2xl mx-auto mb-4">
+            <EntryChoiceModal />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-12">
           <FeatureCard
             icon={<MessageSquare className="w-8 h-8" />}
@@ -69,6 +79,12 @@ export default async function HomePage() {
             title="Mercado da Terra"
             description="Compra, vende ou troca produtos locais."
             href="/mercado-da-terra"
+          />
+          <FeatureCard
+            icon={<Store className="w-8 h-8" />}
+            title="Gran Bazar"
+            description="Vende, troca, oferece ou procura o que precisas."
+            href="/gran-bazar"
           />
           <FeatureCard
             icon={<UtensilsCrossed className="w-8 h-8" />}
@@ -102,11 +118,16 @@ export default async function HomePage() {
             href="/agenda-agricola"
           />
           <FeatureCard
+            icon={<Landmark className="w-8 h-8" />}
+            title="Entidades Parceiras"
+            description="Juntas de Freguesia, Municipios, Associacoes e Cooperativas parceiras."
+            href="/parceiros"
+          />
+          <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
-            title="O Tio do Joca"
-            description="Artigos e guias sobre culturas e tradicoes."
-            href="#"
-            comingSoon
+            title="Almanaque"
+            description="Calendario diario, culturas e sabedoria rural."
+            href="/almanaque"
           />
         </div>
       </main>
