@@ -2,8 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ContactSellerForm from "@/components/mercado-da-terra/contact-seller-form";
+import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar";
 
-export default async function AdPage({ params }: { params: { id: string } }) {
+export default async function AdPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const { data: ad, error } = await supabase
@@ -12,7 +18,8 @@ export default async function AdPage({ params }: { params: { id: string } }) {
       *,
       author:profiles(id, username, avatar_url)
     `)
-    .eq("id", params.id)
+    .eq("id", id)
+    .eq("module", "mercado-da-terra")
     .single();
 
   if (error || !ad) {
@@ -28,7 +35,9 @@ export default async function AdPage({ params }: { params: { id: string } }) {
   const { data: { user } } = await supabase.auth.getUser();
 
   return (
-    <div className="min-h-screen bg-terra-50">
+    <>
+      <MarketplaceNavbar />
+      <div className="min-h-screen bg-terra-50">
       <main className="max-w-4xl mx-auto p-6">
         <div className="mb-4">
           <Link href="/mercado-da-terra" className="text-terra-600 hover:text-terra-800">
@@ -166,6 +175,7 @@ export default async function AdPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   );
 }

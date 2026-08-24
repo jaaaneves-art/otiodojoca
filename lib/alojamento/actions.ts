@@ -7,6 +7,7 @@ import type {
   Alojamento,
   AlojamentoComLocalizacao,
   AlojamentoComRefeicoes,
+  Localizacao,
   RefeicaoAlojamento,
   ReservaAlojamento,
   TipoRefeicao,
@@ -26,12 +27,19 @@ const CAMPOS_LOCALIZACAO_RESUMO = `
  * O PostgREST às vezes devolve a relação embutida como array, às vezes
  * como objeto único, consoante consiga inferir a cardinalidade da FK.
  * Normalizamos aqui para ficar sempre um objeto (ou null).
+ *
+ * O tipo de retorno reflete essa normalização explicitamente (em vez de
+ * devolver `T` inalterado) — sem isto, o TypeScript continua a ver
+ * `localizacao` como array depois do `.map()`, e o cast para
+ * `Alojamento[]` mais abaixo falha por sobreposição insuficiente.
  */
 function normalizarLocalizacao<T extends { localizacao?: unknown }>(
   registo: T
-): T {
+): Omit<T, 'localizacao'> & { localizacao: Localizacao | null } {
   const bruto = registo.localizacao as unknown;
-  const localizacao = Array.isArray(bruto) ? (bruto[0] ?? null) : (bruto ?? null);
+  const localizacao = (
+    Array.isArray(bruto) ? (bruto[0] ?? null) : (bruto ?? null)
+  ) as Localizacao | null;
   return { ...registo, localizacao };
 }
 

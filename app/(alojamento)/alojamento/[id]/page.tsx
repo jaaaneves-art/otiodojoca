@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { obterAlojamentoComRefeicoes } from "@/lib/alojamento/actions";
 import ReservaForm from "@/components/alojamento/reserva-form";
-import Image from "next/image";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -10,12 +9,18 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const dados = await obterAlojamentoComRefeicoes(id);
-  
+  const idNum = Number(id);
+
+  if (Number.isNaN(idNum)) {
+    return { title: "Alojamento não encontrado" };
+  }
+
+  const dados = await obterAlojamentoComRefeicoes(idNum);
+
   if (!dados) {
     return { title: "Alojamento não encontrado" };
   }
-  
+
   return {
     title: `${dados.nome} | Reservas`,
     description: dados.descricao || `Reserve o ${dados.nome}`,
@@ -24,7 +29,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AlojamentoDetalhePage({ params }: Props) {
   const { id } = await params;
-  const dados = await obterAlojamentoComRefeicoes(id);
+  const idNum = Number(id);
+
+  if (Number.isNaN(idNum)) {
+    notFound();
+  }
+
+  const dados = await obterAlojamentoComRefeicoes(idNum);
 
   if (!dados) {
     notFound();
@@ -66,33 +77,8 @@ export default async function AlojamentoDetalhePage({ params }: Props) {
             €{dados.preco_noite}/noite
           </p>
 
-          {dados.imagem && (
-            <div className="relative w-full h-64 mb-6 rounded-lg overflow-hidden">
-              <Image
-                src={dados.imagem}
-                alt={dados.nome}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
-          
           <div className="prose max-w-none">
             <p>{dados.descricao}</p>
-          </div>
-
-          <div className="mt-6">
-            <h3 className="font-semibold mb-2">Comodidades</h3>
-            <div className="flex flex-wrap gap-2">
-              {dados.comodidades?.map((c: string) => (
-                <span
-                  key={c}
-                  className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { criarReservaAlojamento } from '@/lib/alojamento/actions';
-import type { TipoRefeicao } from '@/lib/alojamento/tipos';
+import type { RefeicaoAlojamento, TipoRefeicao } from '@/lib/alojamento/tipos';
 
 interface Alojamento {
   id: number;
@@ -10,18 +10,12 @@ interface Alojamento {
   preco_noite: number;
 }
 
-interface RefeicaoOpcao {
-  id: number;
-  tipo_refeicao: string;
-  preco_extra: number;
-}
-
 export default function ReservaForm({
   alojamento,
   refeicoes,
 }: {
   alojamento: Alojamento;
-  refeicoes: RefeicaoOpcao[];
+  refeicoes: RefeicaoAlojamento[];
 }) {
   const [formData, setFormData] = useState({
     nome_hospede: '',

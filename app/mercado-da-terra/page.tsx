@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar";
 import MarketplaceFiltros from "@/components/mercado-da-terra/marketplace-filtros";
 import FavoriteButton from "@/components/mercado-da-terra/favorite-button";
 
@@ -12,31 +13,37 @@ interface SearchParams {
   type?: string;
 }
 
-export default async function FeiraPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function FeiraPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
   const supabase = await createClient();
 
   let query = supabase
     .from("marketplace_ads")
     .select("*")
+    .eq("module", "mercado-da-terra")
     .eq("status", "active");
 
-  if (searchParams.type) {
-    query = query.eq("type", searchParams.type);
+  if (params.type) {
+    query = query.eq("type", params.type);
   }
-  if (searchParams.category) {
-    query = query.eq("category_id", parseInt(searchParams.category));
+  if (params.category) {
+    query = query.eq("category_id", parseInt(params.category));
   }
-  if (searchParams.location) {
-    query = query.eq("location", searchParams.location);
+  if (params.location) {
+    query = query.eq("location", params.location);
   }
-  if (searchParams.min) {
-    query = query.gte("price", parseFloat(searchParams.min));
+  if (params.min) {
+    query = query.gte("price", parseFloat(params.min));
   }
-  if (searchParams.max) {
-    query = query.lte("price", parseFloat(searchParams.max));
+  if (params.max) {
+    query = query.lte("price", parseFloat(params.max));
   }
-  if (searchParams.q) {
-    query = query.or(`title.ilike.%${searchParams.q}%,description.ilike.%${searchParams.q}%`);
+  if (params.q) {
+    query = query.or(`title.ilike.%${params.q}%,description.ilike.%${params.q}%`);
   }
 
   const { data: ads } = await query.order("created_at", { ascending: false });
@@ -82,7 +89,7 @@ export default async function FeiraPage({ searchParams }: { searchParams: Search
   const procuraAds = ads?.filter(ad => ad.type === "troca") || [];
   const trocaAds = ads?.filter(ad => ad.type === "procura") || [];
 
-  const hasFilters = !!(searchParams.q || searchParams.category || searchParams.location || searchParams.min || searchParams.max || searchParams.type);
+  const hasFilters = !!(params.q || params.category || params.location || params.min || params.max || params.type);
   const totalResults = ads?.length || 0;
 
   const renderAdCard = (ad: any, showSecondary?: boolean) => {
@@ -147,8 +154,10 @@ export default async function FeiraPage({ searchParams }: { searchParams: Search
   );
 
   return (
-    <div className="min-h-screen bg-terra-50">
-      <main className="max-w-6xl mx-auto px-6 py-8">
+    <>
+      <MarketplaceNavbar />
+      <div className="min-h-screen bg-terra-50">
+        <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-6">
           <h2 className="text-3xl font-bold text-terra-900 mb-2">Bem-vindo ao Mercado da Terra</h2>
           <p className="text-terra-600 text-lg">Compra, vende ou troca produtos locais, agrícolas e artesanais</p>
@@ -262,7 +271,8 @@ export default async function FeiraPage({ searchParams }: { searchParams: Search
             </div>
           </>
         )}
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 }

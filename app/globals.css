@@ -7,3 +7,17 @@
     @apply bg-terra-50 text-terra-900 antialiased;
   }
 }
+
+/* Pisca-pisca do contador de leilão (Gran Bazar) no último minuto — ver
+   components/gran-bazar/auction-panel.tsx. A duração e a variável
+   --piscar-min são definidas inline pelo componente a cada segundo, para
+   piscar cada vez mais depressa e mais intensamente à medida que o tempo
+   se esgota; aqui fica só a forma da animação. */
+@keyframes otj-leilao-piscar {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--piscar-min, 0.4);
+  }
+}

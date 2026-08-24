@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { EntryChoiceModal } from "@/components/entidades/entry-choice-modal";
-import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark } from "lucide-react";
+import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark, Recycle, Car } from "lucide-react";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -23,6 +23,12 @@ export default async function HomePage() {
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/gran-bazar">Gran Bazar</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/lup">Lup</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/viaturas">StandGo</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/perfil">Perfil</Link>
@@ -85,6 +91,18 @@ export default async function HomePage() {
             title="Gran Bazar"
             description="Vende, troca, oferece ou procura o que precisas."
             href="/gran-bazar"
+          />
+          <FeatureCard
+            icon={<Recycle className="w-8 h-8" />}
+            title="Lup"
+            description="Doa ou recolhe excedentes — comida para pessoas, animais ou compostagem. Zero desperdício."
+            href="/lup"
+          />
+          <FeatureCard
+            icon={<Car className="w-8 h-8" />}
+            title="StandGo"
+            description="Compra e vende viaturas — venda direta ou em leilão."
+            href="/viaturas"
           />
           <FeatureCard
             icon={<UtensilsCrossed className="w-8 h-8" />}

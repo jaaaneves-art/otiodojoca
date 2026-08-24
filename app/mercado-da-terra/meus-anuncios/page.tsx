@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar";
 
 export default async function MeusAnunciosPage() {
   const supabase = await createClient();
@@ -14,26 +15,33 @@ export default async function MeusAnunciosPage() {
     .from("marketplace_ads")
     .select("*")
     .eq("author_id", user.id)
+    .eq("module", "mercado-da-terra")
     .order("created_at", { ascending: false });
 
   const activeAds = ads?.filter(ad => ad.status === "active") || [];
   const soldAds = ads?.filter(ad => ad.status === "sold") || [];
 
-  return (
-    <div className="min-h-screen bg-terra-50">
-      <nav className="bg-white border-b border-terra-200 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/mercado-da-terra" className="text-terra-600 hover:text-terra-800">
-            ← Voltar ao Mercado
-          </Link>
-          <Link href="/mercado-da-terra/novo">
-            <button className="bg-terra-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-terra-700">
-              + Novo Anúncio
-            </button>
-          </Link>
-        </div>
-      </nav>
+  // Primeira foto de cada anúncio (mesma lógica da página principal do Mercado)
+  const adIds = (ads || []).map((ad) => ad.id);
+  const photosMap: Record<number, string> = {};
+  if (adIds.length > 0) {
+    const { data: photos } = await supabase
+      .from("marketplace_photos")
+      .select("ad_id, storage_path, sort_order")
+      .in("ad_id", adIds)
+      .order("sort_order", { ascending: true });
 
+    photos?.forEach((photo: any) => {
+      if (!photosMap[photo.ad_id]) {
+        photosMap[photo.ad_id] = photo.storage_path;
+      }
+    });
+  }
+
+  return (
+    <>
+      <MarketplaceNavbar />
+      <div className="min-h-screen bg-terra-50">
       <main className="max-w-6xl mx-auto p-6">
         <h1 className="text-3xl font-bold text-terra-900 mb-2">Meus Anúncios</h1>
         <p className="text-terra-600 mb-8">Gerencia todos os teus anúncios</p>
@@ -47,16 +55,27 @@ export default async function MeusAnunciosPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeAds.map((ad) => (
                 <Link key={ad.id} href={`/mercado-da-terra/${ad.id}`}>
-                  <div className="bg-white p-4 rounded-lg border border-terra-200 hover:shadow-md transition cursor-pointer h-full">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-semibold text-terra-800">{ad.title}</h3>
-                      <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Ativo</span>
+                  <div className="bg-white rounded-lg border border-terra-200 hover:shadow-md transition cursor-pointer h-full overflow-hidden">
+                    {photosMap[ad.id] ? (
+                      <div className="w-full h-40 bg-terra-100">
+                        <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-40 bg-terra-100 flex items-center justify-center text-4xl">
+                        📦
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-semibold text-terra-800">{ad.title}</h3>
+                        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Ativo</span>
+                      </div>
+                      <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
+                      <p className="text-lg font-bold text-terra-700 mb-2">
+                        {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-terra-500">📍 {ad.location}</p>
                     </div>
-                    <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
-                    <p className="text-lg font-bold text-terra-700 mb-2">
-                      {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-terra-500">📍 {ad.location}</p>
                   </div>
                 </Link>
               ))}
@@ -72,16 +91,27 @@ export default async function MeusAnunciosPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {soldAds.map((ad) => (
-                <div key={ad.id} className="bg-white p-4 rounded-lg border border-terra-200 opacity-60">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-semibold text-terra-800">{ad.title}</h3>
-                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">Vendido</span>
+                <div key={ad.id} className="bg-white rounded-lg border border-terra-200 opacity-60 overflow-hidden">
+                  {photosMap[ad.id] ? (
+                    <div className="w-full h-40 bg-terra-100">
+                      <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-full h-40 bg-terra-100 flex items-center justify-center text-4xl">
+                      📦
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-semibold text-terra-800">{ad.title}</h3>
+                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">Vendido</span>
+                    </div>
+                    <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
+                    <p className="text-lg font-bold text-terra-700 mb-2">
+                      {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
+                    </p>
+                    <p className="text-sm text-terra-500">📍 {ad.location}</p>
                   </div>
-                  <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
-                  <p className="text-lg font-bold text-terra-700 mb-2">
-                    {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
-                  </p>
-                  <p className="text-sm text-terra-500">📍 {ad.location}</p>
                 </div>
               ))}
             </div>
@@ -100,6 +130,7 @@ export default async function MeusAnunciosPage() {
           </div>
         )}
       </main>
-    </div>
+      </div>
+    </>
   );
 }

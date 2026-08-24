@@ -17,6 +17,7 @@ export default async function EditarAnuncioPage({ params }: { params: { id: stri
     .from("marketplace_ads")
     .select("*")
     .eq("id", params.id)
+    .eq("module", "mercado-da-terra")
     .single();
 
   if (error || !ad) {
