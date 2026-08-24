@@ -96,7 +96,9 @@ export default async function ViaturaAdPage({
     ["Cor", d.cor ?? null],
     ["Potência", d.potencia ? `${d.potencia} cv` : null],
     ["Vendedor", d.tipo_vendedor ?? null],
-  ].filter(([, v]) => v);
+  ].filter(
+    (item): item is [string, string | null] => Boolean(item[1])
+  );
 
   return (
     <>
