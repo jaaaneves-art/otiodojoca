@@ -67,6 +67,24 @@ const config: Config = {
           800: "#1e40af",
           900: "#1e3a8a",
         },
+        // Identidade própria do módulo Imóveis — índigo, deliberadamente
+        // distinta de "terra" (castanho), "bazar" (laranja), "lup" (verde)
+        // e "viaturas" (azul mais claro/vivo). Ver docs/IMOVEIS.md. Nasceu
+        // da auditoria a um prompt+MVP externo "Lup Imóveis" que teria
+        // colidido de marca com o módulo "lup" já existente — por isso
+        // "Imóveis" sem prefixo, com paleta própria.
+        imoveis: {
+          50: "#eef2ff",
+          100: "#e0e7ff",
+          200: "#c7d2fe",
+          300: "#a5b4fc",
+          400: "#818cf8",
+          500: "#6366f1",
+          600: "#4f46e5",
+          700: "#4338ca",
+          800: "#3730a3",
+          900: "#312e81",
+        },
       },
     },
   },
