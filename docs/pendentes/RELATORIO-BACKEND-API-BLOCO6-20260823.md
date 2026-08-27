@@ -288,7 +288,7 @@ Validar RISCO-01 e RISCO-02 com o dono do projecto (decisões de produto, não s
 
 ## 17 — Atualização — 2026-08-26 — RISCO-01 e RISCO-02 RESOLVIDOS
 
-**RISCO-01 (`app/api/seed/route.ts` sem auth, service role key exposta).** ✅ Corrigido no código: a rota devolve 404 fora de `NODE_ENV=development`. Confirmado por leitura directa do ficheiro (sessão Cowork, via device bridge). **Por confirmar:** que esta correção está commitada, `git push`ada e já em produção (Vercel) — não verificado nesta sessão, só o ficheiro local.
+**RISCO-01 (`app/api/seed/route.ts` sem auth, service role key exposta).** ✅ Corrigido no código: a rota devolve 404 fora de `NODE_ENV=development`. Confirmado por leitura directa do ficheiro (sessão Cowork, via device bridge). **✅ Commitado e publicado em 2026-08-27** (commit `1732bfe`, `git push` para `origin/main` — ver secção 21). Antes deste commit, a correção só existia localmente: a rota esteve por corrigir em produção (se o Vercel estiver ligado a `origin/main`) até este push. Falta só confirmar visualmente no Vercel que o deploy automático correu.
 
 **RISCO-02 (RLS aberta em `reservas_alojamento`).** ✅ Resolvido de ponta a ponta:
 - Migration `supabase/migrations/20260826120000_fix_reservas_alojamento_rls.sql` escrita: acrescenta `user_id` (FK para `auth.users`), substitui as três policies `USING(true)`/`WITH CHECK(true)` por policies que exigem `auth.uid() = user_id` (ou `profiles.role in ('moderator','admin')` para staff), revoga grants de `anon`.
@@ -324,6 +324,8 @@ Validar RISCO-01 e RISCO-02 com o dono do projecto (decisões de produto, não s
 - Motor de leilões (Gran Bazar/Viaturas/Imóveis) — precisa de testes de integração, não unitários.
 - Testes end-to-end dos fluxos críticos (reserva, leilão, aprovação de Entidade Parceira) — nenhum escrito ainda.
 - LACUNA-05 fica **parcialmente** fechada, não resolvida — 1 função de 1 módulo tem cobertura, o resto do projecto continua sem rede de segurança automatizada.
+
+**Atualização — 2026-08-27:** acrescentados 6 testes para `calcularPrecoReserva` (noites × preço/noite, rejeição de datas inválidas, pequeno-almoço, meia-pensão vs pensão-completa, refeição pedida sem `preco_extra` configurado — não deve rebentar, arredondamento a 2 casas decimais). **Confirmado pelo Yos:** `npm test` → `11 passed (11)` (5 de `criarReservaAlojamento` + 6 novos). `lib/alojamento/actions.ts` fica agora com as suas duas funções de lógica de negócio mais arriscadas (segurança + dinheiro) cobertas por testes automatizados.
 
 ---
 
@@ -370,3 +372,20 @@ Isto não era só uma inconsistência cosmética: um operador que desse `role='a
 **Por confirmar (fora do alcance desta sessão):** `npx supabase db push` da nova migration, e o teste manual do fluxo completo de Entidades Parceiras que já estava pendente desde 26/08.
 
 **Continua em aberto:** esta correção resolveu só `entidade_pedidos`. Não foi feita uma pesquisa exaustiva por outros usos de `is_admin` no resto do código (sem `device_bash`) — se existirem, ficam com o mesmo tipo de inconsistência até serem encontrados e migrados para `role` também.
+
+---
+
+## 21 — Atualização — 2026-08-27 — Achado grave: dias de trabalho nunca commitados, agora corrigido
+
+Ao reconciliar pendentes antigos (Forum, Alojamento, Lup — 23-24/08) contra o estado real do repositório, `git status` revelou que **praticamente todo o trabalho desde 26/08 (e alguns ficheiros de antes) nunca tinha sido commitado**: RISCO-01, RISCO-02, a página `/admin/entidades`, **uma funcionalidade inteira de MFA/autenticação** (`app/(auth)/mfa/`, `forgot-password/`, `reset-password/`, `lib/auth/actions.ts` — não tinha aparecido em nenhum relatório desta sessão até agora), a fusão de mensagens/favoritos de hoje, os testes automatizados, a arrumação da raiz (os `rm` ficaram como "deleted" por commitar), e trabalho de migração de email para SendGrid/Cloudflare (`docs/EMAIL-SENDGRID-CLOUDFLARE.md`, `smtp-templates-*.json`, `test-sendgrid.js` — também nunca antes mencionado nesta sessão). Tudo isto existia só na OptiPlex, sem cópia em lado nenhum — exactamente o cenário que o risco do Nextcloud (secção 13, LACUNA-08) tornava perigoso.
+
+**✅ Resolvido:** `git add -A && git commit && git push`, commit `1732bfe` (94c1448..1732bfe), 99 ficheiros, publicado em `origin/main`. Todo esse trabalho tem agora uma cópia fora da máquina local.
+
+**Também confirmado nesta reconciliação (via `git log`/`supabase migration list`):**
+- Commit do Forum (`38466c0`, navegação de categorias + fotos) — já estava em `origin/main` desde 23/08, não precisava de acção.
+- Migrations `20260822180000` (forum_post_images) e `20260823030000` (lup) — Local = Remote, ambas já aplicadas.
+- `docs/devops/OTJ-DEVOPS-V07-DEPLOY.md`, que um relatório de 24/08 assinalava como possivelmente apagado sem intenção — já não aparece como alterado no `git status` actual; resolvido nalgum commit entretanto, sem sinal de problema.
+
+**Nota sem acção associada:** `git log` mostra `94c1448 Initial commit` como o commit mais recente antes deste, o que é invulgar (normalmente "Initial commit" é o mais antigo). Já era um hash conhecido da investigação ao Nextcloud em 26/08, não é uma novidade preocupante — só uma esquisitice do histórico ainda por perceber, sem urgência.
+
+**Lição para sessões futuras:** confirmar `git status` regularmente durante o trabalho, não só no fim — um projecto com múltiplos dispositivos a escrever directamente na pasta (via device bridge, sem passar por git) acumula divergência silenciosa entre "o que está no disco" e "o que está protegido no remoto" muito mais depressa do que um fluxo de trabalho normal.

@@ -15,7 +15,7 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 
 import { createClient } from '@/lib/supabase/server';
-import { criarReservaAlojamento } from './actions';
+import { criarReservaAlojamento, calcularPrecoReserva } from './actions';
 
 const DADOS_VALIDOS = {
   alojamento_id: 1,
@@ -111,5 +111,124 @@ describe('criarReservaAlojamento', () => {
     const resultado = await criarReservaAlojamento(DADOS_VALIDOS);
 
     expect(resultado).toEqual(reservaCriada);
+  });
+});
+
+/**
+ * Mock do cliente Supabase para calcularPrecoReserva() — que por baixo
+ * chama obterAlojamento() (tabelas "alojamentos" + "localizacoes") e,
+ * quando há refeições, obterRefeicoesAlojamento() ("refeicoes_alojamento").
+ * Dispatch por nome de tabela, porque calcularPrecoReserva() atravessa as
+ * três.
+ */
+function mockSupabaseParaPreco({
+  alojamento = { id: 1, localizacao_id: 1, preco_noite: 50 } as { localizacao_id: number; preco_noite: number },
+  localizacao = { id: 1 } as unknown,
+  refeicoes = [] as Array<{ tipo_refeicao: string; preco_extra: number }>,
+} = {}) {
+  const from = vi.fn((table: string) => {
+    if (table === 'alojamentos') {
+      return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: alojamento, error: null }) }) }) };
+    }
+    if (table === 'localizacoes') {
+      return { select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: localizacao, error: null }) }) }) };
+    }
+    if (table === 'refeicoes_alojamento') {
+      return { select: () => ({ eq: () => Promise.resolve({ data: refeicoes, error: null }) }) };
+    }
+    throw new Error(`mockSupabaseParaPreco: tabela "${table}" não configurada neste teste`);
+  });
+
+  return { from };
+}
+
+describe('calcularPrecoReserva', () => {
+  beforeEach(() => {
+    vi.mocked(createClient).mockReset();
+  });
+
+  it('calcula noites x preço/noite, sem refeições', async () => {
+    const supabase = mockSupabaseParaPreco({ alojamento: { localizacao_id: 1, preco_noite: 50 } });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    const resultado = await calcularPrecoReserva(1, '2026-09-10', '2026-09-13', 'sem_refeicoes');
+
+    expect(resultado).toEqual({
+      numNoites: 3,
+      precoNoite: 50,
+      precoRefeicoes: 0,
+      precoTotal: 150,
+    });
+  });
+
+  it('rejeita se a data de saída não for depois da entrada (0 ou menos noites)', async () => {
+    const supabase = mockSupabaseParaPreco();
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await expect(
+      calcularPrecoReserva(1, '2026-09-10', '2026-09-10', 'sem_refeicoes')
+    ).rejects.toThrow('Número de noites deve ser maior que zero');
+  });
+
+  it('soma o pequeno-almoço por noite quando pedido', async () => {
+    const supabase = mockSupabaseParaPreco({
+      alojamento: { localizacao_id: 1, preco_noite: 50 },
+      refeicoes: [{ tipo_refeicao: 'pequeno_almoco', preco_extra: 5 }],
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    const resultado = await calcularPrecoReserva(1, '2026-09-10', '2026-09-13', 'pequeno_almoco');
+
+    // 3 noites x (50 + 5)
+    expect(resultado.precoRefeicoes).toBe(15);
+    expect(resultado.precoTotal).toBe(165);
+  });
+
+  it('meia pensão soma só o almoço; pensão completa soma almoço + jantar', async () => {
+    const refeicoes = [
+      { tipo_refeicao: 'almoço', preco_extra: 10 },
+      { tipo_refeicao: 'jantar', preco_extra: 12 },
+    ];
+
+    const supabaseMeiaPensao = mockSupabaseParaPreco({
+      alojamento: { localizacao_id: 1, preco_noite: 50 },
+      refeicoes,
+    });
+    vi.mocked(createClient).mockResolvedValue(supabaseMeiaPensao as any);
+    const meiaPensao = await calcularPrecoReserva(1, '2026-09-10', '2026-09-12', 'meia_pensao');
+    // 2 noites x 10 (só almoço)
+    expect(meiaPensao.precoRefeicoes).toBe(20);
+
+    const supabasePensaoCompleta = mockSupabaseParaPreco({
+      alojamento: { localizacao_id: 1, preco_noite: 50 },
+      refeicoes,
+    });
+    vi.mocked(createClient).mockResolvedValue(supabasePensaoCompleta as any);
+    const pensaoCompleta = await calcularPrecoReserva(1, '2026-09-10', '2026-09-12', 'pensao_completa');
+    // 2 noites x (10 + 12)
+    expect(pensaoCompleta.precoRefeicoes).toBe(44);
+  });
+
+  it('não soma nada se a refeição pedida não tiver preco_extra configurado (sem rebentar)', async () => {
+    const supabase = mockSupabaseParaPreco({
+      alojamento: { localizacao_id: 1, preco_noite: 50 },
+      refeicoes: [], // nenhuma refeição configurada para este alojamento
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    const resultado = await calcularPrecoReserva(1, '2026-09-10', '2026-09-11', 'pensao_completa');
+
+    expect(resultado.precoRefeicoes).toBe(0);
+    expect(resultado.precoTotal).toBe(50);
+  });
+
+  it('arredonda o preço total a 2 casas decimais', async () => {
+    const supabase = mockSupabaseParaPreco({ alojamento: { localizacao_id: 1, preco_noite: 33.333 } });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    const resultado = await calcularPrecoReserva(1, '2026-09-10', '2026-09-11', 'sem_refeicoes');
+
+    // 1 noite x 33.333 = 33.333 -> arredondado a 33.33
+    expect(resultado.precoTotal).toBe(33.33);
   });
 });
