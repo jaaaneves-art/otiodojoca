@@ -1,11 +1,31 @@
 import { NextResponse } from 'next/server';
 import { criarReservaAlojamento } from '@/lib/alojamento/actions';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // RISCO-02 (docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md):
+    // esta rota não tinha nenhuma verificação de sessão -- era um
+    // segundo caminho, completamente anónimo, para criar reservas, a
+    // contornar o login/MFA já exigido para chegar à página. A RLS
+    // (auth.uid() = user_id) já bloqueia isto a nível da base de dados,
+    // mas verificamos aqui também para devolver um 401 claro em vez de
+    // um 500 genérico do erro lançado pela Server Action.
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'É preciso iniciar sessão para fazer uma reserva.' },
+        { status: 401 }
+      );
+    }
+
     const { id } = await params;
     const alojamentoId = Number(id);
 

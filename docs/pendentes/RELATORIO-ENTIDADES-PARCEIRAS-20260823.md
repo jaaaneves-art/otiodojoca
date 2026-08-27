@@ -83,6 +83,7 @@ qual fica como nome oficial.
   foi construído, roadmap de SSO, o que ficou por fazer).
 - `supabase/migrations/20260823010000_pedidos_entidade_parceira.sql`
 - `supabase/migrations/20260823020000_pedidos_entidade_tipo_e_municipio.sql`
+- `supabase/migrations/20260826130000_entidade_pedidos_freguesia_id.sql` (novo — ver secção 4)
 - `components/entidades/entry-choice-modal.tsx`
 - `components/entidades/partner-request-form.tsx`
 - `components/entidades/partner-request-form-municipio.tsx`
@@ -93,3 +94,56 @@ qual fica como nome oficial.
 - `app/parceiros/pedido/municipio/page.tsx`
 - `app/parceiros/pedido/freguesia/page.tsx`
 - `app/parceiros/pedido/organismo-publico/page.tsx`
+- `app/admin/entidades/page.tsx`, `app/admin/entidades/actions.ts` (novo — ver secção 4)
+
+---
+
+## 4. Atualização — 2026-08-26
+
+**"Correr `supabase db push`" (2.1) — ✅ já estava feito.** Confirmado por
+`npx supabase migration list`: `20260823010000` e `20260823020000` já
+apareciam em Local e Remote antes desta sessão mexer em nada. Não era
+pendente real.
+
+**🐛 Bug encontrado (não estava nesta lista): `entidade_pedidos.freguesia_id`
+nunca existiu na tabela.** `partner-request-form-freguesia.tsx` grava
+`freguesia_id` no insert desde a Ronda 2 (23/08) — e a documentação
+(`docs/PARCEIROS-ENTRADA.md` secção 2b) descreve isso como já feito — mas
+a migration `20260823020000` só acrescentou `municipio_id`, `cargo`,
+`nipc`, `tipo_entidade`; `freguesia_id` ficou de fora. **Resultado: todo
+pedido de Freguesia falhava ao submeter**, desde que o formulário foi
+publicado — coluna inexistente, rejeitado pelo PostgREST. Corrigido em
+`supabase/migrations/20260826130000_entidade_pedidos_freguesia_id.sql`
+(acrescenta a coluna + índice, mesmo padrão de `municipio_id`). ✅
+**Migration aplicada ao remoto** (26/08, `npx supabase db push` confirmado
+pelo Yos). **Por fazer, único ponto que falta:** teste manual ao vivo de
+`/parceiros/pedido/freguesia` — submeter um pedido a sério e confirmar
+que já não falha.
+
+**Página de admin para aprovar/rejeitar pedidos (2.2) — ✅ construída.**
+`app/admin/entidades/page.tsx` + `app/admin/entidades/actions.ts`:
+- Acesso restrito a `profiles.is_admin = true` (verificado na própria
+  página; a escrita fica de qualquer forma protegida pela RLS existente
+  de `entidade_pedidos`).
+- Lista pedidos por estado (tabs Pendentes/Aprovados/Rejeitados via
+  `?estado=`), com os dados específicos de cada `tipo_entidade`
+  (freguesia/município via join real, organismo/outro via categoria +
+  texto livre), dados do requerente (via `profiles`), NIPC, contactos,
+  mensagem.
+- Botões Aprovar/Rejeitar (server actions) atualizam `estado`,
+  `resolvido_por`, `resolvido_em`; guarda contra resolver duas vezes o
+  mesmo pedido (`.eq('estado', 'pendente')` no update).
+- **Deliberadamente fora do âmbito desta peça** (tal como o resto deste
+  relatório já previa): a ligação `entidade_pedidos.entidade_id` →
+  `entidades` continua manual — aprovar um pedido não cria nem associa
+  uma linha em `entidades`. Isso e o fluxo de "reivindicar" continuam
+  pendentes (ver tabela 2.2, ainda válidos).
+- **`npm run build` confirmado limpo pelo Yos** (26/08, depois desta
+  sessão escrever os ficheiros): `Compiled successfully`, `Finished
+  TypeScript` sem erros, `/admin/entidades` aparece na lista de rotas
+  (`ƒ /admin/entidades`, dinâmica). Compila contra os tipos reais do
+  Supabase gerado.
+- **Ainda por fazer:** aplicar a migration `20260826130000` (ver acima),
+  e teste manual ao vivo — submeter um pedido e aprovar/rejeitar a sério
+  com uma conta `is_admin=true`. Não há ainda nenhum link de navegação
+  para `/admin/entidades` — só acessível pelo URL directo.

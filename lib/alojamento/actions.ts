@@ -213,6 +213,19 @@ export async function criarReservaAlojamento(dados: {
 }) {
   const supabase = await createClient();
 
+  // RISCO-02 (docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md):
+  // a reserva fica ligada ao utilizador autenticado que a cria. A RLS de
+  // reservas_alojamento agora exige auth.uid() = user_id no INSERT, por
+  // isso esta verificação aqui é só para dar um erro claro em vez de
+  // deixar a RLS falhar com uma mensagem genérica do Postgres.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('É preciso iniciar sessão para fazer uma reserva.');
+  }
+
   // Validar datas
   const entrada = new Date(dados.data_entrada);
   const saida = new Date(dados.data_saida);
@@ -227,6 +240,7 @@ export async function criarReservaAlojamento(dados: {
     .insert([
       {
         alojamento_id: dados.alojamento_id,
+        user_id: user.id,
         nome_hospede: dados.nome_hospede,
         email_hospede: dados.email_hospede,
         telefone_hospede: dados.telefone_hospede || null,
@@ -336,7 +350,19 @@ export async function cancelarReserva(id: number, motivo?: string) {
 }
 
 /**
- * Verificar disponibilidade de um alojamento
+ * Verificar disponibilidade de um alojamento.
+ *
+ * ⚠️ Não usada em nenhuma página/componente atualmente (código morto do
+ * lado do frontend) -- ver docs/pendentes/RELATORIO-BACKEND-API-BLOCO6.
+ * Como criarReservaAlojamento() também não chama esta função, é possível
+ * criar reservas sobrepostas hoje (double-booking não prevenido).
+ *
+ * Se/quando esta função for ligada a uma página real: depois da correção
+ * de RLS de reservas_alojamento (auth.uid() = user_id), um utilizador
+ * comum só vê as SUAS próprias reservas -- esta query, tal como está,
+ * deixaria de "ver" reservas de outras pessoas e reportaria
+ * disponibilidade incorreta. Precisa de usar createAdminClient() (só
+ * lê datas, nunca expõe PII ao chamador) em vez do cliente de sessão.
  */
 export async function verificarDisponibilidade(
   alojamentoId: number,

@@ -203,7 +203,17 @@ A **camada de base de dados já está unificada** (`marketplace_ads.module` dist
 - **LACUNA-05** — Sem testes automatizados configurados (relevante para o Bloco 12).
 - **LACUNA-06** — `app/api/reservas/[id]/route.ts` existe em paralelo a `lib/alojamento/actions.ts` (já `'use server'`) sem se perceber porquê sem inspeccionar o formulário cliente.
 - **LACUNA-07** — RBAC: `profiles.role` vs `profiles.is_admin`, nenhum uso confirmado no código lido.
-- **LACUNA-08** — `/home/berze/Nextcloud/Projectos/otiodojoca` (fora de Nextcloud2) tem a mesma estrutura de pastas. **NÃO VERIFICADO** se é mirror sincronizado ou árvore divergente — confirmar antes de decisões de "fonte canónica" em fases futuras (ex. `Almanaque_Diario_Completo.md`, mencionado no prompt mestre V3 mas não localizado nesta auditoria — fica para o Bloco 11, Conteúdo/Migração).
+- **LACUNA-08 — ✅ VERIFICADO em 2026-08-26, e ⚠️ risco encontrado.** `/home/berze/Nextcloud/Projectos/otiodojoca` (fora de Nextcloud2) **é mirror sincronizado, não árvore divergente** — confirmado ao nível do git: mesmo commit (`94c1448e...`), mesmo remoto (`github.com/jaaaneves-art/otiodojoca.git`), `.git/index` e `.git/refs/heads/main` idênticos byte a byte entre as duas pastas. Não há "fonte canónica" a decidir — são a mesma árvore de trabalho, sincronizada em tempo real entre duas contas Nextcloud diferentes ligadas no mesmo computador.
+
+  **Risco real encontrado:** `.git/index (conflicted copy 2026-08-23 212348)` — um ficheiro de conflito do Nextcloud dentro do próprio `.git`, prova de que o cliente de sync já mexeu no índice do git em simultâneo a partir das duas contas. Mesmo mecanismo que já causou o bug do Turbopack documentado em `RELATORIO-LUP-20260823.md` (cache de build com "conflicted copy"), desta vez a afetar a base de dados interna do git — risco de corrupção do repositório, não só de ficheiros de build.
+
+  **Pendente — combinado com o Yos (26/08):** manter só a conta Nextcloud ligada a `~/Nextcloud2` (a que esta sessão já usa), remover a outra conta do cliente Nextcloud desktop (sem apagar os ficheiros locais logo — só depois de confirmar que tudo continua bem a partir de `Nextcloud2`), e excluir `.git/`, `node_modules/`, `.next/`, `.vercel/` da sincronização da conta que ficar. **Adiado pelo Yos para o dia seguinte** — ainda por fazer.
+
+  **Atualização — 2026-08-27, risco alargado:** confirmado pelo Yos um **terceiro dispositivo** a sincronizar a mesma árvore — um portátil Windows (Dell Latitude E6410 ATG, utilizador "filipe"), com o repositório em `C:\Users\filipe\Nextcloud3\Projectos\otiodojoca` (conta "Nextcloud3", nome próprio, diferente das duas contas Linux). Confirmado do Yos: **é dele próprio**, não outra pessoa. Isto não é mais duas contas na mesma máquina — é pelo menos três pontos de sincronização em tempo real (2 contas no OptiPlex Linux + 1 conta no portátil Windows) sobre o mesmo `.git`, o que **alarga o risco já documentado acima**, não o substitui.
+
+  Também nesta sessão: a ligação desta sessão Cowork à pasta `~/Nextcloud2/Projectos/otiodojoca` no OptiPlex ficou temporariamente inacessível ("Could not stat" na pasta inteira, não só num ficheiro) durante uns minutos, coincidindo com o Yos a mexer no portátil Windows. Recuperou sozinha pouco depois — sem confirmação de causa (pode ter sido só uma sincronização a decorrer, não necessariamente ligado ao risco do `.git`), mas o timing é sugestivo o suficiente para registar.
+
+  **Plano de remediação atualizado:** a exclusão de `.git/`, `node_modules/`, `.next/`, `.vercel/` da sincronização precisa de ser aplicada em **todos** os dispositivos que sincronizam este repositório (OptiPlex/Nextcloud2 e o portátil/Nextcloud3), não só remover a conta duplicada no OptiPlex. Continua por fazer — o Yos ainda não confirmou ter executado nenhuma parte deste plano.
 
 ---
 
@@ -273,3 +283,90 @@ Pela regra do prompt mestre ("NÃO IMPLEMENTES AINDA"), esta secção é **propo
 ## Próximo passo sugerido
 
 Validar RISCO-01 e RISCO-02 com o dono do projecto (decisões de produto, não só técnicas) antes de avançar para 6.2 (mapa definitivo de endpoints) — que, na prática, já está coberto pela secção 1, dado que só existem 3 route handlers no projecto inteiro. Recomenda-se avançar directamente para 6.5/6.6 (Integração Supabase / Segurança-RLS, já em grande parte cobertas aqui) e 6.3 (Server Actions, secção 2) — confirmando primeiro as Lacunas 01, 03, 06 e 07 antes de fechar o Gate do Bloco 6.
+
+---
+
+## 17 — Atualização — 2026-08-26 — RISCO-01 e RISCO-02 RESOLVIDOS
+
+**RISCO-01 (`app/api/seed/route.ts` sem auth, service role key exposta).** ✅ Corrigido no código: a rota devolve 404 fora de `NODE_ENV=development`. Confirmado por leitura directa do ficheiro (sessão Cowork, via device bridge). **Por confirmar:** que esta correção está commitada, `git push`ada e já em produção (Vercel) — não verificado nesta sessão, só o ficheiro local.
+
+**RISCO-02 (RLS aberta em `reservas_alojamento`).** ✅ Resolvido de ponta a ponta:
+- Migration `supabase/migrations/20260826120000_fix_reservas_alojamento_rls.sql` escrita: acrescenta `user_id` (FK para `auth.users`), substitui as três policies `USING(true)`/`WITH CHECK(true)` por policies que exigem `auth.uid() = user_id` (ou `profiles.role in ('moderator','admin')` para staff), revoga grants de `anon`.
+- `lib/alojamento/actions.ts` → `criarReservaAlojamento()` já actualizada em consonância: exige sessão (`supabase.auth.getUser()`), grava `user_id: user.id` no insert. Confirmado por leitura directa — consistente com a nova RLS, sem alterações necessárias.
+- Migration aplicada ao remoto com sucesso via `npx supabase db push` (confirmado: `20260826120000` aparece em Local e Remote em `supabase migration list`).
+- **Nota conhecida, aceite deliberadamente** (ver comentário na própria migration): sem excepção `OR user_id IS NULL`, pelo que reservas criadas antes desta migration ficam com `user_id` vazio e só staff (`moderator`/`admin`) consegue vê-las/geri-las — quem as fez perde o acesso a essas reservas antigas específicas. Novas reservas não são afectadas.
+- **Ainda por verificar** (fora do alcance desta sessão, sem terminal no projecto real): testar ao vivo o fluxo de criar uma reserva autenticado, e confirmar que `profiles.role` (não `profiles.is_admin` — ver LACUNA-07 acima) é de facto o campo usado para marcar staff nesta base de código.
+
+`atualizarStatusReserva`/`cancelarReserva` continuam sem verificação de ownership no código (ver classificação 🟡 ADAPTAR, secção 14) — mas ficam agora protegidas pela RLS nova como rede de segurança (um update fora do próprio user_id/staff simplesmente não afecta nenhuma linha). Adaptar o código para dar um erro explícito em vez de depender só da RLS continua a ser uma melhoria de UX pendente, não um risco de segurança.
+
+**LACUNA-01 / Duplicação-03 / RISCO-03 — praticamente fechada.** Sem `grep` de árvore completa (continua sem `device_bash` nesta sessão), mas confirmado por leitura directa de todos os `page.tsx`/`actions.ts` dos cinco módulos de anúncios (`gran-bazar`, `mercado-da-terra`, `lup`, `viaturas`, `imoveis`), da home (`app/page.tsx`) e dos componentes de imagem do Mercado da Terra (`image-upload.tsx`, `image-cropper.tsx`): **nenhum importa `lib/supabase/marketplace.ts`**. Todos os módulos usam o padrão real (`@/lib/supabase/server` + Server Actions próprias por módulo), nunca este ficheiro. RISCO-03 (funções sem verificação de sessão, dependem só da RLS) fica portanto **sem impacto conhecido** — o ficheiro parece ser código morto. Não confirmado 100% (não foram lidos todos os ficheiros de `components/mercado-da-terra/`, nem pesquisado fora dos cinco módulos de marketplace), mas a cobertura é ampla o suficiente para ser um forte candidato a remoção — um ficheiro sem auth que ninguém usa é um risco à espera de alguém o importar por engano no futuro.
+
+---
+
+## 18 — Atualização — 2026-08-27 — LACUNA-05: primeiros testes automatizados
+
+**LACUNA-05 (sem testes automatizados) — parcialmente fechada.** Configurado Vitest no projeto (`vitest.config.ts` na raiz, `vitest` acrescentado a `devDependencies`, scripts `npm test`/`npm run test:watch`) e escrito o primeiro ficheiro de testes: `lib/alojamento/actions.test.ts`, cobrindo `criarReservaAlojamento()` — escolhida por ser exactamente a função que a correção de RISCO-02 (secção 17 acima) alterou, para proteger essa correção contra regressão futura.
+
+5 testes, todos unitários (sem base de dados real — `@/lib/supabase/server` é mockado), todos a passar (confirmado pelo Yos: `npm install && npm test`, `5 passed (5)`):
+- rejeita se não houver sessão iniciada;
+- rejeita se a data de saída não for depois da data de entrada;
+- **liga a reserva sempre ao `user_id` da sessão autenticada, nunca a um valor vindo do cliente** — este é o teste que protege especificamente a correção de RISCO-02;
+- propaga o erro do Supabase (ex: RLS a bloquear o insert);
+- devolve a reserva criada com sucesso.
+
+**Por que só unitários e só este módulo, por agora:**
+- Testes unitários mockam o cliente Supabase e correm em milissegundos, sem precisar de `device_bash` nem de uma base de dados de teste — o único tipo de teste viável de configurar remotamente nesta sessão (sem terminal próprio, todos os comandos foram dados ao Yos para correr).
+- Testes end-to-end (Playwright, contra a UI real) ficariam para uma fase seguinte — precisam de mais configuração (browser, servidor a correr) e de iteração mais próxima do terminal.
+- O motor de leilões do Gran Bazar (`gran_bazar_place_bid`/`gran_bazar_advance_auctions`) — o código mais arriscado do projecto (dinheiro + concorrência, partilhado por 3 módulos) — **não é testável com testes unitários puros**: é lógica em PL/pgSQL, não TypeScript. Precisa de testes de integração contra uma base de dados de teste (pgTAP, ou Supabase local + chamadas RPC reais) — candidato natural para a próxima ronda, mas mais trabalho de configuração.
+
+**Continua em aberto:**
+- `calcularPrecoReserva` (mesmo módulo, lógica de preço com refeições) — bom próximo candidato a testes unitários, mesma abordagem.
+- Motor de leilões (Gran Bazar/Viaturas/Imóveis) — precisa de testes de integração, não unitários.
+- Testes end-to-end dos fluxos críticos (reserva, leilão, aprovação de Entidade Parceira) — nenhum escrito ainda.
+- LACUNA-05 fica **parcialmente** fechada, não resolvida — 1 função de 1 módulo tem cobertura, o resto do projecto continua sem rede de segurança automatizada.
+
+---
+
+## 19 — Atualização — 2026-08-27 — Duplicação-01: actions.ts de mensagens/favoritos fundidas
+
+**Duplicação-01 (secção 10) — parcialmente fechada.** A pedido do Yos, revisitada a decisão que tinha ficado em standby ("deixar para depois"). Antes de mexer em código, foi mostrado o diff real entre os pares de ficheiros para decidir o âmbito com informação completa.
+
+**O que o diff revelou:**
+- `favoritos/actions.ts` (Gran Bazar vs Mercado da Terra): **zero diferença de lógica** — só os caminhos hardcoded no `revalidatePath` mudavam. Fusão sem risco nenhum.
+- `mensagens/actions.ts` (Gran Bazar) vs `messages/actions.ts` (Mercado da Terra): sobretudo formatação e caminhos hardcoded, mas com **uma diferença real de comportamento**: a versão do Gran Bazar validava `ad.module !== "gran-bazar"` antes de abrir conversa; a do Mercado da Terra não validava o módulo do anúncio nenhum — dava para iniciar conversa a partir de um `adId` de qualquer outro módulo (Gran Bazar, Lup, Viaturas, Imóveis). Não é um risco de segurança grave (RLS de `marketplace_conversations` continua a aplicar-se, precisa de sessão), mas era uma lacuna real de isolamento entre módulos.
+
+**Ação tomada — só a camada de actions.ts (âmbito reduzido, por decisão explícita):**
+- `lib/marketplace/favoritos-actions.ts` (novo) — `toggleFavoritoAction(module, formData)`, parametrizada.
+- `lib/marketplace/mensagens-actions.ts` (novo) — `startConversationAction`/`sendMessageAction`/`markAsReadAction`, parametrizadas por `module` + `routeSegment` (routeSegment porque as rotas têm nomes diferentes: "mensagens" no Gran Bazar, "messages" no Mercado da Terra). A validação `ad.module !== module` foi generalizada — **corrige a lacuna do Mercado da Terra de graça**, como parte da fusão.
+- `app/gran-bazar/favoritos/actions.ts`, `app/mercado-da-terra/favoritos/actions.ts`, `app/gran-bazar/mensagens/actions.ts`, `app/mercado-da-terra/messages/actions.ts` — reduzidos a wrappers finos, só chamam a versão partilhada com o `module`/`routeSegment` certos. **Nenhum import existente em componentes/páginas muda** — os nomes exportados (`toggleFavorite`, `startConversation`, `sendMessage`, `markAsRead`) mantêm-se, só a implementação por trás passou a ser partilhada.
+- Ficheiros `lib/marketplace/*.ts` deliberadamente sem `"use server"` — nunca são chamados directamente de um componente cliente nem passados como `action` de um `<form>`, só pelos quatro wrappers acima (esses sim com `"use server"`).
+
+**Deliberadamente fora do âmbito desta ronda:** os componentes emparelhados (`ad-card`/`bazar-ad-card`, `ad-form`/`bazar-ad-form`, `contact-seller-form`, `favorite-button`, `message-form`) — o Yos escolheu fundir só as actions.ts por agora; os componentes ficam para uma sessão à parte, precisam de mais análise por serem mais ficheiros e maior risco de regressão visual.
+
+**`npm run build` confirmado limpo** (2026-08-27, corrido pelo Yos): `Compiled successfully`, `Finished TypeScript` sem erros, todas as rotas geradas — incluindo `/gran-bazar/mensagens`, `/gran-bazar/favoritos` e `/mercado-da-terra/messages` (as duas únicas usam agora os wrappers finos sobre `lib/marketplace/{mensagens,favoritos}-actions.ts`). Os tipos resolvem corretamente e nada quebrou nos outros módulos.
+
+**Nota de âmbito, para não confundir no futuro:** `/imoveis/mensagens`, `/imoveis/favoritos`, `/viaturas/mensagens`, `/viaturas/favoritos`, `/lup/mensagens`, `/lup/favoritos` também aparecem na lista de rotas, mas **não fazem parte desta fusão** — Lup, Viaturas e Imóveis continuam cada um com o seu próprio `actions.ts` independente (cópias próprias, não os wrappers). Só Gran Bazar e Mercado da Terra foram fundidos nesta ronda. Se a fusão for alargada no futuro, esses três módulos são candidatos óbvios ao mesmo tratamento — código ainda por confirmar se segue exatamente o mesmo padrão duplicado.
+
+**Ainda por fazer:** teste manual dos fluxos de mensagens/favoritos ao vivo (`npm run dev`) — o build confirma que compila e resolve os tipos, não que o comportamento em runtime está correto.
+
+---
+
+## 20 — Atualização — 2026-08-27 — LACUNA-07: entidade_pedidos passa a usar profiles.role
+
+**LACUNA-07 (secção 13) — fechada para `entidade_pedidos`, não para o projecto todo.** Ao investigar o RBAC inconsistente, foi confirmado exatamente o problema que a LACUNA apontava, e um caso concreto dele:
+
+- `entidade_pedidos` (migration `20260823010000`, e a página `/admin/entidades` construída em 26/08) usavam `profiles.is_admin` (boolean).
+- `reservas_alojamento` (RISCO-02, migration `20260826120000`) e `lib/supabase/middleware.ts` (obrigatoriedade de MFA) já usavam `profiles.role` (enum `user`/`moderator`/`admin`).
+
+Isto não era só uma inconsistência cosmética: um operador que desse `role='admin'` a alguém (o mecanismo que o middleware e as reservas já usam) **não lhe dava acesso a `/admin/entidades`**, porque essa página e a RLS por trás dela só olhavam para `is_admin`. Nomeadamente, é possível que isto explique por que o teste manual de `/admin/entidades` (pendente desde 26/08) ainda não foi feito — se ninguém tem `is_admin=true` na base de dados, a página está inacessível a toda a gente, admin incluído.
+
+**Ação tomada:**
+- `supabase/migrations/20260827100000_entidade_pedidos_rls_usar_role.sql` (novo) — substitui a policy `"Administradores gerem todos os pedidos"` de `entidade_pedidos` para usar `profiles.role = 'admin'` em vez de `profiles.is_admin = true`. Só `'admin'`, não `'moderator'` — aprovar entidades parceiras é uma ação de maior confiança do que gerir reservas de alojamento.
+- `app/admin/entidades/page.tsx` — atualizado em consonância: lê `profile.role` em vez de `profile.is_admin`.
+- `profiles.is_admin` **não foi removido da tabela** — pode ainda ter outros usos não confirmados sem grep de árvore completa (LACUNA-01 nunca teve cobertura 100%). Só deixou de ser a fonte de verdade para `entidade_pedidos`.
+
+**⚠️ Ação necessária do Yos antes de testar `/admin/entidades`:** confirmar que pelo menos uma conta tem `role = 'admin'` na tabela `profiles` (via SQL editor do Supabase: `update public.profiles set role = 'admin' where id = '<uuid da tua conta>';`). Ter `is_admin=true` deixou de ser suficiente.
+
+**Por confirmar (fora do alcance desta sessão):** `npx supabase db push` da nova migration, e o teste manual do fluxo completo de Entidades Parceiras que já estava pendente desde 26/08.
+
+**Continua em aberto:** esta correção resolveu só `entidade_pedidos`. Não foi feita uma pesquisa exaustiva por outros usos de `is_admin` no resto do código (sem `device_bash`) — se existirem, ficam com o mesmo tipo de inconsistência até serem encontrados e migrados para `role` também.

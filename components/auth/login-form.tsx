@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -25,16 +26,32 @@ export function LoginForm() {
       password,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       setError(error.message === "Invalid login credentials"
         ? "Email ou palavra-passe incorretos"
         : "Ocorreu um erro. Tenta novamente.");
-    } else {
-      router.push("/perfil");
-      router.refresh();
+      return;
     }
+
+    // Palavra-passe correta -> falta confirmar o segundo fator (MFA é
+    // obrigatório nesta plataforma). Decidimos o próximo ecrã com base no
+    // nível de segurança (AAL) que esta sessão já tem.
+    const next = searchParams.get("next") || "/perfil";
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+    setLoading(false);
+
+    if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== aal.nextLevel) {
+      // Já tem um fator TOTP verificado -- só falta o desafio desta sessão.
+      router.push(`/mfa/verify?next=${encodeURIComponent(next)}`);
+    } else if (!aal || aal.nextLevel !== "aal2") {
+      // Ainda não tem nenhum fator MFA configurado.
+      router.push(`/mfa/setup?next=${encodeURIComponent(next)}`);
+    } else {
+      router.push(next);
+    }
+    router.refresh();
   }
 
   return (
@@ -73,6 +90,11 @@ export function LoginForm() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "A entrar..." : "Entrar"}
           </Button>
+          <p className="text-center text-sm">
+            <a href="/forgot-password" className="text-terra-600 hover:underline">
+              Esqueceste-te da palavra-passe?
+            </a>
+          </p>
         </form>
       </CardContent>
     </Card>
