@@ -90,10 +90,7 @@ export default async function AdPage({
           {ad.type === 'troca' ? (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-blue-600 font-semibold mb-1">💱 Pretendo Receber</p>
-              <p className="text-lg text-blue-900">{ad.details?.seeking || 'Não especificado'}</p>
-              {ad.details?.seeking_description && (
-                <p className="text-sm text-blue-800 mt-2">{ad.details.seeking_description}</p>
-              )}
+              <p className="text-lg text-blue-900">{ad.details?.wants_to_receive || 'Não especificado'}</p>
             </div>
           ) : ad.type === 'procura' ? (
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">

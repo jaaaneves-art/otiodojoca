@@ -29,6 +29,13 @@ export function RegisterForm() {
       password,
       options: {
         data: { username },
+        // Bug encontrado em 2026-08-27: sem isto, o link do email de
+        // confirmação aponta sempre para o Site URL puro (ex:
+        // "localhost:3000/?code=xxx"), nunca para "/auth/callback" -- a
+        // única rota que troca esse código por uma sessão
+        // (exchangeCodeForSession). O código ficava pendurado na página
+        // errada, sem nunca ser trocado por sessão da forma esperada.
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 

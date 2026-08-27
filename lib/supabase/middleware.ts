@@ -11,12 +11,58 @@ const PUBLIC_PATH_PREFIXES = [
   "/auth",
 ];
 
+// Secções de conteúdo público -- qualquer visitante pode ver a página
+// inicial, navegar os módulos de marketplace, ler o fórum, o almanaque,
+// etc., sem sessão nenhuma.
+//
+// Bug corrigido em 2026-08-27: antes disto, NENHUMA destas secções estava
+// listada como pública -- incluindo a própria "/". Um visitante sem conta
+// era mandado para /login só por tentar ver a homepage, o que tornava
+// impossível navegar o site sem te registares primeiro. Errado para uma
+// plataforma comunitária pública (o objetivo do gate de MFA sempre foi
+// proteger ações/dados pessoais, não bloquear a leitura pública).
+const PUBLIC_CONTENT_PREFIXES = [
+  "/almanaque",
+  "/alojamento",
+  "/calendario",
+  "/comer",
+  "/forum",
+  "/freguesia",
+  "/gran-bazar",
+  "/imoveis",
+  "/lup",
+  "/mercado-da-terra",
+  "/parceiros",
+  "/viaturas",
+];
+
+// Dentro das secções públicas acima, estes segmentos continuam sempre a
+// exigir sessão -- são ações pessoais (publicar, editar, mensagens,
+// favoritos, "os meus anúncios", pedidos de parceria), nunca leitura
+// pública, mesmo que vivam debaixo de um prefixo público (ex:
+// "/gran-bazar/novo").
+const PRIVATE_ACTION_SEGMENTS = [
+  "/novo",
+  "/editar",
+  "/mensagens",
+  "/messages",
+  "/favoritos",
+  "/meus-anuncios",
+  "/pedido",
+];
+
 // Rotas do próprio fluxo de MFA: exigem sessão (AAL1) mas não AAL2 --
 // é precisamente aqui que se completa o AAL2.
 const MFA_PATH_PREFIXES = ["/mfa/setup", "/mfa/verify"];
 
 function matchesPrefix(pathname: string, prefixes: string[]) {
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+function isPublicContentRoute(pathname: string) {
+  if (pathname === "/") return true;
+  if (!matchesPrefix(pathname, PUBLIC_CONTENT_PREFIXES)) return false;
+  return !PRIVATE_ACTION_SEGMENTS.some((seg) => pathname.includes(seg));
 }
 
 export async function updateSession(request: NextRequest) {
@@ -63,8 +109,9 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Rotas totalmente públicas.
-  if (matchesPrefix(pathname, PUBLIC_PATH_PREFIXES)) {
+  // Rotas totalmente públicas (login/registo/etc.) e conteúdo público
+  // (homepage, módulos de marketplace, fórum, almanaque, ...).
+  if (matchesPrefix(pathname, PUBLIC_PATH_PREFIXES) || isPublicContentRoute(pathname)) {
     return supabaseResponse;
   }
 

@@ -66,7 +66,15 @@ export default async function EditarAnuncioPage({ params }: { params: { id: stri
     const price = formData.get("price") ? parseFloat(formData.get("price") as string) : null;
     const seeking = formData.get("seeking") as string | null;
     const seekingDescription = formData.get("seeking_description") as string | null;
+    // Campo próprio da Troca -- não confundir com "seeking" da Procura
+    // (ver lib/mercado-da-terra/ad-types.ts).
+    const wantsToReceive = formData.get("wantsToReceive") as string | null;
     const imageCount = parseInt(formData.get("image_count") as string) || 0;
+
+    const details: Record<string, string> = {};
+    if (seeking) details.seeking = seeking;
+    if (seekingDescription) details.seeking_description = seekingDescription;
+    if (wantsToReceive) details.wants_to_receive = wantsToReceive;
 
     // Atualizar anúncio
     const { error: updateError } = await supabase
@@ -80,7 +88,7 @@ export default async function EditarAnuncioPage({ params }: { params: { id: stri
         contact_method: contactMethod,
         price_type: priceType,
         price,
-        details: seeking || seekingDescription ? { seeking, seeking_description: seekingDescription } : null,
+        details: Object.keys(details).length > 0 ? details : null,
       })
       .eq("id", ad.id);
 
@@ -149,6 +157,7 @@ export default async function EditarAnuncioPage({ params }: { params: { id: stri
               price: ad.price,
               location: ad.location,
               contact_method: ad.contact_method,
+              wantsToReceive: ad.details?.wants_to_receive ?? null,
             }}
             submitLabel="Guardar Alterações"
           />

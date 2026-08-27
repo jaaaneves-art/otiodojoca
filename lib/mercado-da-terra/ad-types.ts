@@ -36,17 +36,24 @@ export const AD_TYPES: Record<string, AdTypeConfig> = {
   },
   troca: {
     // Bug encontrado em 2026-08-27 (LACUNA-03): o label estava trocado
-    // com "procura" (dizia "Procura" aqui). Já era um problema conhecido
-    // -- ver o comentário em lib/gran-bazar/ad-types.ts, que
-    // deliberadamente não repetiu esta inconsistência mas nunca chegou a
-    // corrigir a original. Só o label foi corrigido; id e fields
-    // mantidos tal como estavam (o id é o valor persistido em
-    // marketplace_ads.type para anúncios já existentes -- mudar isso
-    // precisaria de migração de dados, não só de código).
+    // com "procura" (dizia "Procura" aqui) -- corrigido nesse dia.
+    //
+    // Segundo bug, também 2026-08-27: os campos aqui pediam preço
+    // (priceType/price), como se "Troca" fosse uma segunda "Venda", sem
+    // nenhuma forma de dizer o que se quer receber em troca.
+    //
+    // Primeira tentativa de correção reaproveitou "seeking"/
+    // "seeking_description" (os campos da "Procura") -- rejeitada pelo
+    // Yos: tornava "Troca" e "Procura" indistinguíveis uma da outra
+    // (mesmo campo, mesmo texto "O que Procuro"). Corrigido usando
+    // "wantsToReceive" -- campo próprio, que já estava reservado no tipo
+    // FieldName acima mas nunca tinha sido usado em nenhuma entrada nem
+    // desenhado no formulário. "Procura" (seeking/seeking_description)
+    // fica completamente intocada.
     id: "troca",
     label: "Troca",
-    fields: ["title", "description", "categoryId", "priceType", "price", "location", "contactMethod"],
-    required: ["title", "description", "categoryId", "priceType", "price", "location", "contactMethod"],
+    fields: ["title", "description", "categoryId", "wantsToReceive", "location", "contactMethod"],
+    required: ["title", "description", "categoryId", "wantsToReceive", "location", "contactMethod"],
   },
   procura: {
     id: "procura",
