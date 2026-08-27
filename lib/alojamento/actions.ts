@@ -303,6 +303,60 @@ export async function obterReserva(id: number) {
 }
 
 /**
+ * Confirma que o utilizador autenticado pode gerir esta reserva — é o
+ * dono, ou é staff (profiles.role in moderator/admin). Lança um erro
+ * claro em vez de deixar `atualizarStatusReserva`/`cancelarReserva`
+ * dependerem só da RLS (que bloqueia o update na mesma, mas com uma
+ * mensagem genérica do Postgres tipo "no rows returned" — ver
+ * docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md, secção 14,
+ * classificação 🟡 ADAPTAR). Mesma abordagem defensiva de
+ * criarReservaAlojamento(): RLS continua a ser a rede de segurança real,
+ * isto é só para dar uma mensagem melhor.
+ */
+async function verificarPermissaoReserva(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  reservaId: number
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('É preciso iniciar sessão.');
+  }
+
+  // A própria RLS de SELECT já restringe isto ao dono ou a staff — se a
+  // reserva não aparecer, ou não existe ou não é permitido vê-la; não
+  // distinguimos os dois casos para não revelar a outrem se um dado id
+  // de reserva existe.
+  const { data: reserva } = await supabase
+    .from('reservas_alojamento')
+    .select('user_id')
+    .eq('id', reservaId)
+    .maybeSingle();
+
+  if (!reserva) {
+    throw new Error('Reserva não encontrada.');
+  }
+
+  if (reserva.user_id === user.id) {
+    return;
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile?.role === 'moderator' || profile?.role === 'admin') {
+    return;
+  }
+
+  throw new Error('Não tens permissão para gerir esta reserva.');
+}
+
+/**
  * Atualizar status de uma reserva
  */
 export async function atualizarStatusReserva(
@@ -310,6 +364,8 @@ export async function atualizarStatusReserva(
   novoStatus: 'confirmada' | 'concluido' | 'cancelada'
 ) {
   const supabase = await createClient();
+
+  await verificarPermissaoReserva(supabase, id);
 
   const { data: reserva, error } = await supabase
     .from('reservas_alojamento')
@@ -330,6 +386,8 @@ export async function atualizarStatusReserva(
  */
 export async function cancelarReserva(id: number, motivo?: string) {
   const supabase = await createClient();
+
+  await verificarPermissaoReserva(supabase, id);
 
   const { data: reserva, error } = await supabase
     .from('reservas_alojamento')

@@ -15,7 +15,12 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 
 import { createClient } from '@/lib/supabase/server';
-import { criarReservaAlojamento, calcularPrecoReserva } from './actions';
+import {
+  criarReservaAlojamento,
+  calcularPrecoReserva,
+  atualizarStatusReserva,
+  cancelarReserva,
+} from './actions';
 
 const DADOS_VALIDOS = {
   alojamento_id: 1,
@@ -230,5 +235,153 @@ describe('calcularPrecoReserva', () => {
 
     // 1 noite x 33.333 = 33.333 -> arredondado a 33.33
     expect(resultado.precoTotal).toBe(33.33);
+  });
+});
+
+/**
+ * Mock do cliente Supabase para atualizarStatusReserva()/cancelarReserva()
+ * — cobrem o guard verificarPermissaoReserva() acrescentado em 2026-08-27
+ * (dono ou staff, com mensagem clara em vez de depender só da RLS — ver
+ * docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md, secção 14).
+ * "reservas_alojamento" precisa de suportar select() (a verificação de
+ * permissão) e update() (a alteração em si) a partir do mesmo from().
+ */
+function mockSupabaseParaGestaoReserva({
+  user = { id: 'user-dono' } as { id: string } | null,
+  reservaExiste = true,
+  reservaUserId = 'user-dono',
+  profileRole = 'user' as string | undefined,
+  updateData = { id: 1, status: 'confirmada' } as unknown,
+  updateError = null as { message: string } | null,
+} = {}) {
+  const update = vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ data: updateData, error: updateError }),
+      }),
+    }),
+  });
+
+  const selectReserva = vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: reservaExiste ? { user_id: reservaUserId } : null,
+      }),
+    }),
+  });
+
+  const selectProfile = vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      maybeSingle: vi.fn().mockResolvedValue({ data: profileRole ? { role: profileRole } : null }),
+    }),
+  });
+
+  const from = vi.fn((table: string) => {
+    if (table === 'reservas_alojamento') return { select: selectReserva, update };
+    if (table === 'profiles') return { select: selectProfile };
+    throw new Error(`mockSupabaseParaGestaoReserva: tabela "${table}" não configurada neste teste`);
+  });
+
+  return {
+    auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) },
+    from,
+    _update: update,
+  };
+}
+
+describe('atualizarStatusReserva / cancelarReserva — verificarPermissaoReserva', () => {
+  beforeEach(() => {
+    vi.mocked(createClient).mockReset();
+  });
+
+  it('rejeita sem sessão iniciada', async () => {
+    const supabase = mockSupabaseParaGestaoReserva({ user: null });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await expect(atualizarStatusReserva(1, 'confirmada')).rejects.toThrow(
+      'É preciso iniciar sessão.'
+    );
+    expect(supabase._update).not.toHaveBeenCalled();
+  });
+
+  it('rejeita se a reserva não existir (ou a RLS de SELECT já a esconder)', async () => {
+    const supabase = mockSupabaseParaGestaoReserva({ reservaExiste: false });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await expect(atualizarStatusReserva(1, 'confirmada')).rejects.toThrow(
+      'Reserva não encontrada.'
+    );
+    expect(supabase._update).not.toHaveBeenCalled();
+  });
+
+  it('rejeita quem não é dono nem staff', async () => {
+    const supabase = mockSupabaseParaGestaoReserva({
+      user: { id: 'user-intruso' },
+      reservaUserId: 'user-dono',
+      profileRole: 'user',
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await expect(atualizarStatusReserva(1, 'confirmada')).rejects.toThrow(
+      'Não tens permissão para gerir esta reserva.'
+    );
+    expect(supabase._update).not.toHaveBeenCalled();
+  });
+
+  it('permite ao dono atualizar a própria reserva', async () => {
+    const supabase = mockSupabaseParaGestaoReserva({
+      user: { id: 'user-dono' },
+      reservaUserId: 'user-dono',
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await atualizarStatusReserva(1, 'confirmada');
+
+    expect(supabase._update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'confirmada' })
+    );
+  });
+
+  it('permite a staff (moderator/admin) gerir uma reserva que não é sua', async () => {
+    const supabase = mockSupabaseParaGestaoReserva({
+      user: { id: 'user-staff' },
+      reservaUserId: 'outro-utilizador',
+      profileRole: 'moderator',
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await atualizarStatusReserva(1, 'concluido');
+
+    expect(supabase._update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'concluido' })
+    );
+  });
+
+  it('cancelarReserva aplica o mesmo guard e grava o motivo', async () => {
+    const supabase = mockSupabaseParaGestaoReserva({
+      user: { id: 'user-dono' },
+      reservaUserId: 'user-dono',
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await cancelarReserva(1, 'Mudança de planos');
+
+    expect(supabase._update).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'cancelada', observacoes: 'Mudança de planos' })
+    );
+  });
+
+  it('cancelarReserva também rejeita quem não é dono nem staff', async () => {
+    const supabase = mockSupabaseParaGestaoReserva({
+      user: { id: 'user-intruso' },
+      reservaUserId: 'user-dono',
+      profileRole: 'user',
+    });
+    vi.mocked(createClient).mockResolvedValue(supabase as any);
+
+    await expect(cancelarReserva(1)).rejects.toThrow(
+      'Não tens permissão para gerir esta reserva.'
+    );
+    expect(supabase._update).not.toHaveBeenCalled();
   });
 });

@@ -369,7 +369,9 @@ Isto não era só uma inconsistência cosmética: um operador que desse `role='a
 
 **⚠️ Ação necessária do Yos antes de testar `/admin/entidades`:** confirmar que pelo menos uma conta tem `role = 'admin'` na tabela `profiles` (via SQL editor do Supabase: `update public.profiles set role = 'admin' where id = '<uuid da tua conta>';`). Ter `is_admin=true` deixou de ser suficiente.
 
-**Por confirmar (fora do alcance desta sessão):** `npx supabase db push` da nova migration, e o teste manual do fluxo completo de Entidades Parceiras que já estava pendente desde 26/08.
+**✅ Migração aplicada** (2026-08-27, `npx supabase db push` confirmado pelo Yos). Código já estava commitado/publicado (secção 21). LACUNA-07 fechada para `entidade_pedidos` de ponta a ponta: código, RLS e base de dados remota todos alinhados em `profiles.role`.
+
+**Único ponto ainda por fazer para testar:** confirmar que a conta do Yos tem `role = 'admin'` (nota acima), e depois o teste manual do fluxo completo de Entidades Parceiras que já estava pendente desde 26/08.
 
 **Continua em aberto:** esta correção resolveu só `entidade_pedidos`. Não foi feita uma pesquisa exaustiva por outros usos de `is_admin` no resto do código (sem `device_bash`) — se existirem, ficam com o mesmo tipo de inconsistência até serem encontrados e migrados para `role` também.
 
@@ -389,3 +391,31 @@ Ao reconciliar pendentes antigos (Forum, Alojamento, Lup — 23-24/08) contra o 
 **Nota sem acção associada:** `git log` mostra `94c1448 Initial commit` como o commit mais recente antes deste, o que é invulgar (normalmente "Initial commit" é o mais antigo). Já era um hash conhecido da investigação ao Nextcloud em 26/08, não é uma novidade preocupante — só uma esquisitice do histórico ainda por perceber, sem urgência.
 
 **Lição para sessões futuras:** confirmar `git status` regularmente durante o trabalho, não só no fim — um projecto com múltiplos dispositivos a escrever directamente na pasta (via device bridge, sem passar por git) acumula divergência silenciosa entre "o que está no disco" e "o que está protegido no remoto" muito mais depressa do que um fluxo de trabalho normal.
+
+---
+
+## 22 — Atualização — 2026-08-27 — ✅ Confirmado: segredos de `.env.local.save*` nunca estiveram no git
+
+Seguimento directo da arrumação da raiz (secção 2 do relatório de sessão 26/08): os ficheiros `.env.local.save`/`.env.local.save.1` apagados continham a service role key do Supabase e um token OIDC da Vercel em texto simples. Ficou por confirmar, na altura, se alguma vez tinham sido commitados — apagar o ficheiro do disco não bastaria nesse caso, porque o git guarda a história.
+
+**Confirmado pelo Yos:** `.gitignore` já tinha `.env*` (regra ampla, cobre `.save` também, não só `.env.local`), e `git log --all --oneline -- ".env.local.save*" ".env.local"` devolveu **vazio** — nunca estiveram trackeados, em nenhum branch, em toda a história do repositório. **Não há fuga de segredos via git.** Não é necessário rodar a service role key nem o token da Vercel por esta via.
+
+**Continua como precaução, não urgência:** os ficheiros estiveram numa pasta sincronizada por Nextcloud em pelo menos 3 dispositivos/contas (secção 13, LACUNA-08 alargada) antes de serem apagados — mais superfície de exposição do que um `.env.local` só local, ainda que sem confirmação de fuga real. Rodar as chaves fica ao critério do Yos como precaução extra, não como correcção obrigatória.
+
+---
+
+## 23 — Atualização — 2026-08-27 — LACUNA-07 fechada para o projecto todo, e dois reforços menores
+
+**LACUNA-07 — ✅ fechada de vez.** O Yos correu o grep exaustivo que a secção 13 pedia (sem `device_bash` esta sessão nunca teria cobertura 100%):
+
+```
+grep -rn "is_admin" --include="*.ts" --include="*.tsx" --include="*.sql" --exclude-dir=node_modules --exclude-dir=.next .
+```
+
+Resultado: **nenhum uso vivo de `profiles.is_admin` em código de aplicação** — só comentários explicativos nas migrations antigas (histórico, correcto deixar como está), a definição da coluna em `profiles.sql` (mantida de propósito, secção 20), e um comentário desatualizado em `app/admin/entidades/actions.ts` (linha 18) que ainda referia `is_admin` como o mecanismo de decisão da RLS — corrigido para referir `profiles.role = 'admin'` e a migration `20260827100000`. Não havia nenhum código executável a depender de `is_admin` fora do que já tinha sido corrigido na secção 20. `profiles.is_admin` está confirmado como campo morto/legado em toda a aplicação.
+
+**Reforço menor — `atualizarStatusReserva`/`cancelarReserva` (secção 14, classificação 🟡 ADAPTAR):** acrescentada verificação explícita de dono-ou-staff (`verificarPermissaoReserva()`, mesma abordagem defensiva de `criarReservaAlojamento()`) antes do update — mensagem clara ("Não tens permissão para gerir esta reserva.") em vez do erro genérico do Postgres que a RLS sozinha devolvia. A RLS continua a ser a proteção real; isto é só UX/clareza. 7 testes novos (`npm test` → a confirmar pelo Yos), cobrindo sem sessão, reserva inexistente, intruso rejeitado, dono permitido, staff (moderator) permitido, e o mesmo em `cancelarReserva`.
+
+**Deixado para depois, por decisão do Yos:** biblioteca de validação partilhada (zod ou equivalente, LACUNA-04) — âmbito maior que uma sessão, registado como pendente de robustez sem urgência.
+
+**Por confirmar:** `npm test` (18 testes agora no total) e `npm run build`, depois `git add -A && git commit && git push` do costume.

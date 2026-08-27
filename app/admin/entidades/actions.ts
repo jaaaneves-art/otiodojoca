@@ -15,8 +15,11 @@ async function resolverPedido(id: number, novoEstado: 'aprovado' | 'rejeitado') 
   }
 
   // A RLS de entidade_pedidos ("Administradores gerem todos os pedidos",
-  // profiles.is_admin = true) é quem decide, de facto, se esta escrita
-  // passa. .select().single() aqui não é só para devolver o registo — é
+  // profiles.role = 'admin' desde a migration
+  // 20260827100000_entidade_pedidos_rls_usar_role.sql — antes disso era
+  // profiles.is_admin = true, ver LACUNA-07) é quem decide, de facto, se
+  // esta escrita passa. .select().single() aqui não é só para devolver
+  // o registo — é
   // o que transforma um bloqueio silencioso da RLS (0 linhas afetadas,
   // sem erro) num erro explícito, em vez de a UI achar que resolveu o
   // pedido sem nada ter mudado na base de dados.
