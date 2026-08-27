@@ -35,14 +35,22 @@ export const AD_TYPES: Record<string, AdTypeConfig> = {
     required: ["title", "description", "categoryId", "location", "contactMethod"],
   },
   troca: {
+    // Bug encontrado em 2026-08-27 (LACUNA-03): o label estava trocado
+    // com "procura" (dizia "Procura" aqui). Já era um problema conhecido
+    // -- ver o comentário em lib/gran-bazar/ad-types.ts, que
+    // deliberadamente não repetiu esta inconsistência mas nunca chegou a
+    // corrigir a original. Só o label foi corrigido; id e fields
+    // mantidos tal como estavam (o id é o valor persistido em
+    // marketplace_ads.type para anúncios já existentes -- mudar isso
+    // precisaria de migração de dados, não só de código).
     id: "troca",
-    label: "Procura",
+    label: "Troca",
     fields: ["title", "description", "categoryId", "priceType", "price", "location", "contactMethod"],
     required: ["title", "description", "categoryId", "priceType", "price", "location", "contactMethod"],
   },
   procura: {
     id: "procura",
-    label: "Troca",
+    label: "Procura",
     fields: ["title", "description", "categoryId", "seeking", "seeking_description", "location", "contactMethod"],
     required: ["title", "description", "categoryId", "seeking", "seeking_description", "location", "contactMethod"],
   },

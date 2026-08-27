@@ -418,4 +418,57 @@ Resultado: **nenhum uso vivo de `profiles.is_admin` em código de aplicação** 
 
 **Deixado para depois, por decisão do Yos:** biblioteca de validação partilhada (zod ou equivalente, LACUNA-04) — âmbito maior que uma sessão, registado como pendente de robustez sem urgência.
 
-**Por confirmar:** `npm test` (18 testes agora no total) e `npm run build`, depois `git add -A && git commit && git push` do costume.
+**✅ Tudo confirmado pelo Yos:** `npm test` → `18 passed (18)`; `npm run build` → limpo, 57/57 páginas; commit `005bde3` (`177b611..005bde3`) publicado em `origin/main`. Secção 23 fica completamente fechada.
+
+---
+
+## 24 — Atualização — 2026-08-27 — LACUNA-03 (bug real encontrado e corrigido), LACUNA-06 (explicada), LACUNA-02 (confirmada em aberto, precisa de decisão)
+
+**LACUNA-06 — ✅ explicada, não é problema.** `app/api/reservas/[id]/route.ts` existe a par de `lib/alojamento/actions.ts` porque é um wrapper JSON/REST à volta de `criarReservaAlojamento()` — não duplica lógica nenhuma, só adiciona validação de request HTTP (parsing do body, códigos de status) e já tinha sido corrigido para RISCO-02 antes desta sessão (o próprio comentário no ficheiro já refere isso). Continua por confirmar apenas se algum componente cliente ainda o chama via `fetch` (não verificado sem grep completo), mas não é uma lacuna de segurança ou arquitetura.
+
+**LACUNA-03 — comparação campo a campo feita, e revelou um bug real, agora corrigido.** `lib/gran-bazar/ad-types.ts` já tinha um comentário a avisar: "o Mercado da Terra... tem os labels de 'troca'/'procura' trocados entre si — aqui optámos por não repetir essa inconsistência". Confirmado ao ler `lib/mercado-da-terra/ad-types.ts`: a entrada com `id: "troca"` tinha `label: "Procura"`, e a entrada com `id: "procura"` tinha `label: "Troca"` — trocadas entre si. Na prática, quem publicasse um anúncio de troca via Mercado da Terra via o botão/label "Procura", e vice-versa — confuso para qualquer utilizador. **Corrigido:** só os `label` foram trocados de volta (para "Troca"/"Procura" corresponderem aos seus próprios `id`); `id` e `fields` de cada tipo mantidos exactamente iguais, porque `id` é o valor persistido em `marketplace_ads.type` para anúncios já existentes — mudar isso exigiria migração de dados, não só de código.
+
+**Achado à parte, não corrigido (decisão de produto, não bug):** os `fields` da entrada `id="troca"` no Mercado da Terra usam `priceType`/`price` (like Venda), não `seeking` (como a Troca do Gran Bazar) — e a entrada `id="procura"` é que tem `seeking`/`seeking_description`. Ou seja, para além do label trocado, os próprios *campos* de cada tipo no Mercado da Terra podem não corresponder ao que "Troca"/"Procura" significam no Gran Bazar. Não mexi nisto — precisa de confirmação do Yos sobre qual o comportamento correto antes de qualquer alteração de `fields`, para não partir anúncios já publicados.
+
+**LACUNA-02 — ⚠️ confirmada em aberto, precisa de uma decisão tua para avançar.** `gran_bazar_advance_auctions()` (migration `20260823000000_gran_bazar_leiloes_ativos.sql`) transita leilões `scheduled → live → ended` e define o vencedor — mas a própria migration já avisava "não corre sozinha, precisa de ser chamada periodicamente (pg_cron ou uma API/edge function chamada por um cron externo a cada 1-2 minutos)". Confirmado nesta sessão: **não existe nenhum `vercel.json` no repositório, nem nenhuma rota `app/api/cron/*`** — não há absolutamente nenhum mecanismo a chamar esta função. Isto afecta os **três módulos** que reutilizam o motor de leilões (Gran Bazar, Viaturas, Imóveis): um leilão que chegue à sua `ends_at` **nunca fecha sozinho** — fica "live" para sempre, sem vencedor definido, até alguém correr a função manualmente via SQL.
+
+Duas formas de resolver, com trade-offs diferentes:
+1. **`pg_cron`** (extensão do Postgres, dentro do Supabase) — mais simples de configurar (uma migration), mas precisa da extensão estar disponível/activada no plano do projecto Supabase.
+2. **Vercel Cron + rota `/api/cron/leiloes`** (já existe `lib/supabase/admin.ts` pronto a usar, com a service role key) — mais controlo, mas **o plano gratuito (Hobby) da Vercel só permite crons diários**, não a cada 1-2 minutos que os leilões precisam; só funciona bem em Pro ou superior.
+
+**Por decidir antes de implementar:** que plano tens no Supabase e na Vercel, para escolher a opção viável. Sem essa informação não avanço, para não construir algo que não vai funcionar no teu ambiente real.
+
+---
+
+## 25 — Atualização — 2026-08-27 — LACUNA-02 implementada (pg_cron)
+
+**Planos confirmados pelo Yos (via print do dashboard Vercel + resposta directa):** Vercel = **Hobby**, Supabase = **Free**.
+
+Isso decidiu a opção: Vercel Hobby só permite cron 1x/dia (inútil para fechar leilões perto da hora certa), por isso ficou excluída. `pg_cron` funciona em qualquer plano Supabase, incluindo Free — é limitado pelos recursos (CPU/memória/disco) que consome, não pelo tier em si — e permite granularidade de minutos, ao contrário do Vercel Hobby. Risco aceite e documentado: projetos Free do Supabase pausam ao fim de 1 semana sem atividade, o que pararia também o `pg_cron` até o projeto ser reativado manualmente no dashboard — não bloqueante (o site deve ter atividade regular), mas é o primeiro sítio a verificar se, no futuro, leilões ficarem "presos" sem fechar.
+
+**Implementado:** `supabase/migrations/20260827200000_gran_bazar_agendar_avanco_leiloes.sql` — activa a extensão `pg_cron`, e agenda `gran_bazar_advance_auctions()` para correr **de 5 em 5 minutos** (`*/5 * * * *`). Idempotente: se a migration for reaplicada, remove o agendamento anterior antes de recriar (não duplica nem falha com "job already exists"). Sem necessidade de grants extra — o job corre com o role que aplicou a migration (tipicamente `postgres`/`supabase_admin`, superuser, ignora os grants restritos de `gran_bazar_advance_auctions()` que já limitavam o execute a `service_role`).
+
+**Por confirmar pelo Yos:**
+1. Aplicar a migration: `npx supabase db push`.
+2. Confirmar que o job ficou agendado, correndo no SQL Editor do Supabase:
+   ```sql
+   select jobname, schedule, active from cron.job where jobname = 'gran-bazar-advance-auctions';
+   ```
+   Deve devolver uma linha com `schedule = '*/5 * * * *'` e `active = true`.
+3. (Opcional, passados uns minutos) confirmar execuções reais:
+   ```sql
+   select * from cron.job_run_details
+   where jobid = (select jobid from cron.job where jobname = 'gran-bazar-advance-auctions')
+   order by start_time desc limit 5;
+   ```
+
+Afecta os três módulos que partilham o motor de leilões: **Gran Bazar, Viaturas, Imóveis**.
+
+**✅ Confirmado pelo Yos** (`npx supabase db push` + query ao `cron.job`):
+
+```
+jobname                     | schedule    | active
+gran-bazar-advance-auctions | */5 * * * * | true
+```
+
+**LACUNA-02 fechada.** Falta só: fazer commit da migration (`git add -A && git commit -m "feat: agendar fecho automático de leilões via pg_cron (LACUNA-02)" && git push`) — sem isso fica só aplicada na base de dados, não no histórico do repositório.
