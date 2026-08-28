@@ -213,6 +213,19 @@ export async function criarReservaAlojamento(dados: {
 }) {
   const supabase = await createClient();
 
+  // RISCO-02 (docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md):
+  // a reserva fica ligada ao utilizador autenticado que a cria. A RLS de
+  // reservas_alojamento agora exige auth.uid() = user_id no INSERT, por
+  // isso esta verificação aqui é só para dar um erro claro em vez de
+  // deixar a RLS falhar com uma mensagem genérica do Postgres.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('É preciso iniciar sessão para fazer uma reserva.');
+  }
+
   // Validar datas
   const entrada = new Date(dados.data_entrada);
   const saida = new Date(dados.data_saida);
@@ -227,6 +240,7 @@ export async function criarReservaAlojamento(dados: {
     .insert([
       {
         alojamento_id: dados.alojamento_id,
+        user_id: user.id,
         nome_hospede: dados.nome_hospede,
         email_hospede: dados.email_hospede,
         telefone_hospede: dados.telefone_hospede || null,
@@ -289,6 +303,60 @@ export async function obterReserva(id: number) {
 }
 
 /**
+ * Confirma que o utilizador autenticado pode gerir esta reserva — é o
+ * dono, ou é staff (profiles.role in moderator/admin). Lança um erro
+ * claro em vez de deixar `atualizarStatusReserva`/`cancelarReserva`
+ * dependerem só da RLS (que bloqueia o update na mesma, mas com uma
+ * mensagem genérica do Postgres tipo "no rows returned" — ver
+ * docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md, secção 14,
+ * classificação 🟡 ADAPTAR). Mesma abordagem defensiva de
+ * criarReservaAlojamento(): RLS continua a ser a rede de segurança real,
+ * isto é só para dar uma mensagem melhor.
+ */
+async function verificarPermissaoReserva(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  reservaId: number
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('É preciso iniciar sessão.');
+  }
+
+  // A própria RLS de SELECT já restringe isto ao dono ou a staff — se a
+  // reserva não aparecer, ou não existe ou não é permitido vê-la; não
+  // distinguimos os dois casos para não revelar a outrem se um dado id
+  // de reserva existe.
+  const { data: reserva } = await supabase
+    .from('reservas_alojamento')
+    .select('user_id')
+    .eq('id', reservaId)
+    .maybeSingle();
+
+  if (!reserva) {
+    throw new Error('Reserva não encontrada.');
+  }
+
+  if (reserva.user_id === user.id) {
+    return;
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile?.role === 'moderator' || profile?.role === 'admin') {
+    return;
+  }
+
+  throw new Error('Não tens permissão para gerir esta reserva.');
+}
+
+/**
  * Atualizar status de uma reserva
  */
 export async function atualizarStatusReserva(
@@ -296,6 +364,8 @@ export async function atualizarStatusReserva(
   novoStatus: 'confirmada' | 'concluido' | 'cancelada'
 ) {
   const supabase = await createClient();
+
+  await verificarPermissaoReserva(supabase, id);
 
   const { data: reserva, error } = await supabase
     .from('reservas_alojamento')
@@ -317,6 +387,8 @@ export async function atualizarStatusReserva(
 export async function cancelarReserva(id: number, motivo?: string) {
   const supabase = await createClient();
 
+  await verificarPermissaoReserva(supabase, id);
+
   const { data: reserva, error } = await supabase
     .from('reservas_alojamento')
     .update({
@@ -336,7 +408,19 @@ export async function cancelarReserva(id: number, motivo?: string) {
 }
 
 /**
- * Verificar disponibilidade de um alojamento
+ * Verificar disponibilidade de um alojamento.
+ *
+ * ⚠️ Não usada em nenhuma página/componente atualmente (código morto do
+ * lado do frontend) -- ver docs/pendentes/RELATORIO-BACKEND-API-BLOCO6.
+ * Como criarReservaAlojamento() também não chama esta função, é possível
+ * criar reservas sobrepostas hoje (double-booking não prevenido).
+ *
+ * Se/quando esta função for ligada a uma página real: depois da correção
+ * de RLS de reservas_alojamento (auth.uid() = user_id), um utilizador
+ * comum só vê as SUAS próprias reservas -- esta query, tal como está,
+ * deixaria de "ver" reservas de outras pessoas e reportaria
+ * disponibilidade incorreta. Precisa de usar createAdminClient() (só
+ * lê datas, nunca expõe PII ao chamador) em vez do cliente de sessão.
  */
 export async function verificarDisponibilidade(
   alojamentoId: number,

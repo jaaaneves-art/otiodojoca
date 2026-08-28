@@ -69,6 +69,7 @@ export interface RefeicaoAlojamento {
 export interface ReservaAlojamento {
   id: number;
   alojamento_id: number;
+  user_id: string | null;
   nome_hospede: string;
   email_hospede: string;
   telefone_hospede: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,35 +12,59 @@ export function RegisterForm() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { username },
+        // Bug encontrado em 2026-08-27: sem isto, o link do email de
+        // confirmação aponta sempre para o Site URL puro (ex:
+        // "localhost:3000/?code=xxx"), nunca para "/auth/callback" -- a
+        // única rota que troca esse código por uma sessão
+        // (exchangeCodeForSession). O código ficava pendurado na página
+        // errada, sem nunca ser trocado por sessão da forma esperada.
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       setError(
         error.message.includes("already registered")
           ? "Este email ja esta registado"
           : "Ocorreu um erro. Tenta novamente."
       );
-    } else {
-      router.push("/perfil");
-      router.refresh();
+      return;
     }
+
+    setLoading(false);
+
+    if (!data.session) {
+      // A confirmação de email está ativa neste projeto -- ainda não há
+      // sessão para configurar o MFA.
+      setInfo(
+        "Verifica o teu email para confirmares a conta. Depois de confirmares, o próximo passo é ativar a verificação em duas etapas."
+      );
+      return;
+    }
+
+    // MFA é obrigatório para todas as contas -- toda a gente nova
+    // passa sempre por aqui a seguir ao registo.
+    const next = searchParams.get("next") || "/perfil";
+    router.push(`/mfa/setup?next=${encodeURIComponent(next)}`);
+    router.refresh();
   }
 
   return (
@@ -86,6 +110,9 @@ export function RegisterForm() {
           </div>
           {error && (
             <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>
+          )}
+          {info && (
+            <p className="text-sm text-terra-700 bg-terra-50 p-3 rounded-lg">{info}</p>
           )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "A criar conta..." : "Criar conta"}

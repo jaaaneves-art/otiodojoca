@@ -17,6 +17,7 @@ interface AdInicial {
   price?: number | null;
   location?: string | null;
   contact_method?: string;
+  wantsToReceive?: string | null;
 }
 
 export function AdForm({
@@ -142,6 +143,22 @@ export function AdForm({
             step="0.01"
             defaultValue={inicial?.price ?? ""}
             placeholder="0.00"
+            required
+            className="w-full border rounded-lg p-2 mt-1"
+          />
+        </div>
+      )}
+
+      {/* Campo próprio da Troca -- NÃO é o mesmo campo/texto da Procura
+          (ver comentário em lib/mercado-da-terra/ad-types.ts sobre a
+          tentativa anterior, rejeitada, de reaproveitar "seeking"). */}
+      {mostra("wantsToReceive") && (
+        <div>
+          <label className="text-sm font-medium">O que Queres Receber em Troca *</label>
+          <input
+            name="wantsToReceive"
+            defaultValue={inicial?.wantsToReceive ?? ""}
+            placeholder="Ex: Sacos de ração para galinhas"
             required
             className="w-full border rounded-lg p-2 mt-1"
           />

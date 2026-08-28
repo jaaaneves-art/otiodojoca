@@ -1,17 +1,18 @@
 create table "public"."profiles" (
-  "id"                 uuid                     not null,
-  "username"           text                     not null,
-  "display_name"       text,
-  "bio"                text,
-  "location"           text,
-  "avatar_url"         text,
-  "reputation"         integer                  default 0,
-  "is_admin"           boolean                  default false,
-  "created_at"         timestamp with time zone default now(),
-  "updated_at"         timestamp with time zone default now(),
-  "email"              text,
-  "two_factor_enabled" boolean                  not null default false,
-  "deleted_at"         timestamp with time zone,
+  "id"                     uuid                     not null,
+  "username"               text                     not null,
+  "display_name"           text,
+  "bio"                    text,
+  "location"               text,
+  "avatar_url"             text,
+  "reputation"             integer                  default 0,
+  "is_admin"               boolean                  default false,
+  "created_at"             timestamp with time zone default now(),
+  "updated_at"             timestamp with time zone default now(),
+  "email"                  text,
+  "two_factor_enabled"     boolean                  not null default false,
+  "mfa_setup_dismissed_at" timestamp with time zone,
+  "deleted_at"             timestamp with time zone,
   constraint "profiles_id_fkey" foreign key (id) references auth.users(id) on delete cascade,
   constraint "profiles_pkey" primary key (id),
   constraint "profiles_username_key" unique (username)
@@ -71,6 +72,10 @@ grant update ("location") on table "public"."profiles" to "authenticated";
 revoke all ("username") on table "public"."profiles" from "authenticated";
 
 grant update ("username") on table "public"."profiles" to "authenticated";
+
+revoke all ("mfa_setup_dismissed_at") on table "public"."profiles" from "authenticated";
+
+grant update ("mfa_setup_dismissed_at") on table "public"."profiles" to "authenticated";
 
 revoke all on table "public"."profiles" from "authenticated";
 

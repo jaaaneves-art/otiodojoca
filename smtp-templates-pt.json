@@ -1,0 +1,40 @@
+{
+  "mailer_subjects_confirmation": "Confirma o teu email",
+  "mailer_templates_confirmation_content": "<h2>Confirma o teu endereço de email</h2>\n\n<p>Segue o link abaixo para confirmares este email e terminares o registo.</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Confirmar email</a></p>",
+
+  "mailer_subjects_recovery": "Repõe a tua palavra-passe",
+  "mailer_templates_recovery_content": "<h2>Repõe a tua palavra-passe</h2>\n\n<p>Recebemos um pedido para repores a palavra-passe da tua conta. Segue o link abaixo para escolheres uma nova.</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Repor palavra-passe</a></p>\n\n<p>Se não pediste isto, podes ignorar este email em segurança.</p>",
+
+  "mailer_subjects_email_change": "Confirma o teu novo email",
+  "mailer_templates_email_change_content": "<h2>Confirma o teu novo endereço de email</h2>\n\n<p>Segue o link abaixo para confirmares {{ .NewEmail }} como o teu novo email.</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Confirmar novo email</a></p>\n\n<p>Se não pediste esta alteração, podes ignorar este email em segurança.</p>",
+
+  "mailer_subjects_invite": "Foste convidado",
+  "mailer_templates_invite_content": "<h2>Foste convidado</h2>\n\n<p>Foste convidado a criar uma conta. Segue o link abaixo para aceitares o convite.</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Aceitar convite</a></p>",
+
+  "mailer_subjects_magic_link": "O teu link de acesso",
+  "mailer_templates_magic_link_content": "<h2>O teu link de acesso</h2>\n\n<p>Segue o link abaixo para entrares. Este link expira em breve e só pode ser usado uma vez.</p>\n<p><a href=\"{{ .ConfirmationURL }}\">Entrar</a></p>",
+
+  "mailer_subjects_reauthentication": "{{ .Token }} é o teu código de verificação",
+  "mailer_templates_reauthentication_content": "<h2>O teu código de verificação</h2>\n\n<p>Usa o código abaixo para verificares a tua identidade. Expira em breve.</p>\n\n<p>{{ .Token }}</p>",
+
+  "mailer_subjects_password_changed_notification": "A tua palavra-passe foi alterada",
+  "mailer_templates_password_changed_notification_content": "<h2>A tua palavra-passe foi alterada</h2>\n\n<p>A palavra-passe da tua conta foi alterada recentemente.</p>\n\n<p>Se não foste tu a fazer esta alteração, repõe a palavra-passe e contacta o suporte imediatamente.</p>",
+
+  "mailer_subjects_email_changed_notification": "O teu endereço de email foi alterado",
+  "mailer_templates_email_changed_notification_content": "<h2>O teu endereço de email foi alterado</h2>\n\n<p>O email da tua conta foi alterado de {{ .OldEmail }} para {{ .Email }}.</p>\n\n<p>Se não foste tu a fazer esta alteração, contacta o suporte imediatamente.</p>",
+
+  "mailer_subjects_phone_changed_notification": "O teu número de telefone foi alterado",
+  "mailer_templates_phone_changed_notification_content": "<h2>O teu número de telefone foi alterado</h2>\n\n<p>O número de telefone da tua conta foi alterado de {{ .OldPhone }} para {{ .Phone }}.</p>\n\n<p>Se não foste tu a fazer esta alteração, contacta o suporte imediatamente.</p>",
+
+  "mailer_subjects_mfa_factor_enrolled_notification": "Foi adicionado um novo método de verificação à tua conta",
+  "mailer_templates_mfa_factor_enrolled_notification_content": "<h2>Foi adicionado um novo método de verificação</h2>\n\n<p>O método de verificação em duas etapas {{ .FactorType }} foi adicionado à tua conta.</p>\n\n<p>Se não foste tu a fazer esta alteração, contacta o suporte imediatamente.</p>",
+
+  "mailer_subjects_mfa_factor_unenrolled_notification": "Foi removido um método de verificação da tua conta",
+  "mailer_templates_mfa_factor_unenrolled_notification_content": "<h2>Foi removido um método de verificação</h2>\n\n<p>O método de verificação em duas etapas {{ .FactorType }} foi removido da tua conta.</p>\n\n<p>Se não foste tu a fazer esta alteração, contacta o suporte imediatamente.</p>",
+
+  "mailer_subjects_identity_linked_notification": "Foi associado um novo método de entrada à tua conta",
+  "mailer_templates_identity_linked_notification_content": "<h2>Foi associado um novo método de entrada</h2>\n\n<p>A tua conta {{ .Provider }} foi associada como um novo método de entrada para {{ .Email }}.</p>\n\n<p>Se não foste tu a fazer esta alteração, contacta o suporte imediatamente.</p>",
+
+  "mailer_subjects_identity_unlinked_notification": "Foi removido um método de entrada da tua conta",
+  "mailer_templates_identity_unlinked_notification_content": "<h2>Foi removido um método de entrada</h2>\n\n<p>A tua conta {{ .Provider }} foi removida como método de entrada para {{ .Email }}.</p>\n\n<p>Se não foste tu a fazer esta alteração, contacta o suporte imediatamente.</p>"
+}

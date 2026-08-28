@@ -86,8 +86,14 @@ export default async function FeiraPage({
 
   const vendaAds = ads?.filter(ad => ad.type === "sale") || [];
   const ofertaAds = ads?.filter(ad => ad.type === "offer") || [];
-  const procuraAds = ads?.filter(ad => ad.type === "troca") || [];
-  const trocaAds = ads?.filter(ad => ad.type === "procura") || [];
+  // Bug encontrado em 2026-08-27: os dois filtros abaixo estavam trocados
+  // entre si (procuraAds filtrava por "troca" e vice-versa) -- exatamente
+  // o mesmo tipo de troca acidental já corrigido em lib/mercado-da-terra/
+  // ad-types.ts (LACUNA-03), mas noutro sítio do código. Era por isto que
+  // um anúncio "Troca" novo não aparecia na secção "Troca" da listagem
+  // (ia parar à secção "Procura", filtrada com a condição errada).
+  const procuraAds = ads?.filter(ad => ad.type === "procura") || [];
+  const trocaAds = ads?.filter(ad => ad.type === "troca") || [];
 
   const hasFilters = !!(params.q || params.category || params.location || params.min || params.max || params.type);
   const totalResults = ads?.length || 0;
@@ -130,10 +136,14 @@ export default async function FeiraPage({
               </div>
 
               <div>
-                {(ad.type === "sale" || ad.type === "troca") ? (
+                {ad.type === "sale" ? (
                   <p className="text-lg font-bold text-terra-700 mb-2">
                     {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
                     {ad.price_type === "negotiable" && ad.price != null && " (neg.)"}
+                  </p>
+                ) : ad.type === "troca" ? (
+                  <p className="text-sm font-semibold text-blue-700 mb-2 line-clamp-1">
+                    💱 Quer: {ad.details?.wants_to_receive || "não especificado"}
                   </p>
                 ) : (
                   <p className="text-lg font-bold text-terra-700 mb-2">Grátis</p>
@@ -250,21 +260,17 @@ export default async function FeiraPage({
 
             <div className="mb-12">
               <h3 className="text-xl font-semibold text-terra-800 mb-4">🔄 Troca ({trocaAds.length})</h3>
+              {/* Cada anúncio de Troca aparecia duas vezes aqui (uma em
+                  "Há", outra em "Que se busca", ambas a mapear o mesmo
+                  array) -- desenhado para a versão antiga em que Troca
+                  reaproveitava os campos "seeking" da Procura. Agora que
+                  Troca tem o seu próprio campo (wantsToReceive, mostrado
+                  no cartão via renderAdCard), uma grelha única chega,
+                  igual às secções Venda/Oferta. */}
               {trocaAds.length > 0 ? (
-                <>
-                  <div className="mb-8">
-                    <h4 className="text-lg font-medium text-terra-700 mb-3">Há</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {trocaAds.map(ad => renderAdCard(ad, false))}
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-medium text-terra-700 mb-3">Que se busca</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {trocaAds.map(ad => renderAdCard(ad, true))}
-                    </div>
-                  </div>
-                </>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {trocaAds.map(ad => renderAdCard(ad))}
+                </div>
               ) : (
                 <EmptySection />
               )}

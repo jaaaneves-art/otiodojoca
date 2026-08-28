@@ -1,0 +1,312 @@
+
+============================================================
+FICHEIRO: AUDITORIA-LUP-IMOVEIS-20260824.md
+============================================================
+# Auditoria — Lup Imóveis (prompt + MVP React)
+
+**Data**: 24/08/2026 às 12:38
+
+---
+
+## Contexto
+
+Foram enviados três ficheiros: `LupImoveisPROMPT.md` (spec para uma IA construir a versão de produção em Next.js + Supabase) e dois zips, `LupImoveisMVP1.zip` e `LupImoveisMVP.zip`. Confirmado por `diff -rq`: **os dois zips são byte-a-byte idênticos** — é o mesmo projeto React + Vite + TypeScript + Tailwind ("lupimoveis"), duplicado.
+
+> ⚠️ **Colisão de nome encontrada ao guardar este relatório.** `docs/LUP.md` e `docs/pendentes/RELATORIO-LUP-20260823.md` já existem no projeto — mas descrevem um módulo **completamente diferente**: "Lup" (de "loop") é o módulo de economia circular/excedentes alimentares (doação, venda simbólica e procura de comida/bens perecíveis — três ciclos: humano, animal, compostagem), construído em 23/08/2026 a partir do MVP standalone **SobraCiclo**, reaproveitando `marketplace_ads.module = 'lup'`. Não tem nada a ver com imóveis. "Lup Imóveis" (este relatório) usaria o mesmo prefixo de marca para um domínio totalmente diferente — se este módulo avançar, precisa de um nome que não colida com o "Lup" já em produção (o `module` já tem `'lup'` reservado para o outro). Ficheiro deste relatório nomeado `AUDITORIA-LUP-IMOVEIS-20260824.md` para já ficar distinto de `RELATORIO-LUP-20260823.md`.
+
+Seguindo o princípio já estabelecido neste projeto ("auditar primeiro, construir depois"), esta sessão só analisou — nada foi integrado na plataforma Almanaque/OTJ.
+
+## O que foi executado a sério (não só lido)
+
+- `npm install` — falhou uma vez por instabilidade transitória do mirror interno (`405` num tarball do vite), sucesso à segunda tentativa. Não é um problema do código.
+- `npx tsc -b` — **passa sem erros**.
+- `npm run build` (`tsc -b && vite build`) — **build limpo**, 2647 módulos, `dist/` gerado em 1.46s.
+- `npx oxlint` — **1 aviso** (não bloqueante): em `Listings.tsx`, `setFilters` dentro de um `useEffect` a sincronizar `useSearchParams` — padrão comum em React mas o linter sugere derivar o valor no render em vez de um efeito. Cosmético.
+
+Conclusão sobre o MVP React em si: **código limpo e funcional como protótipo de UI**. Sem bugs de tipos, sem erros de build.
+
+## O que o MVP React realmente é (e não é)
+
+Cobre só as 5 rotas públicas do prompt (`/`, `/imoveis`, `/imovel/:id`, `/leiloes`, `/publicar`) — **não** existe `/dashboard`, autenticação, upload real de fotos, nem persistência. Confirmado ao ler o código:
+
+- `Publish.tsx`: o submit só faz `setSubmitted(true)`. Não grava nada — nem em `localStorage`. Recarregar a página perde tudo.
+- `PropertyDetail.tsx`: os lances (`handleBid`) só atualizam `useState` local. Sem backend, dois utilizadores nunca veriam o mesmo leilão a mudar.
+- Imagens são gradientes CSS a partir de códigos de cor no mock (`property.images: string[]`), não fotografias reais.
+- `districts` no mock só tem 10 dos 18 distritos de Portugal (faltam Beja, Bragança, Castelo Branco, Évora, Guarda, Portalegre, Viana do Castelo, Vila Real, e regiões autónomas). Cosmético, mas relevante porque o projeto já tem `Freguesias_Portugal_2026.xlsx` / `Concelhos_Portugal_2026.xlsx` como dados de referência reais.
+
+Isto é normal e esperado para o que é — um mockup de front-end. **É útil como referência visual** (layout dos cards, painel de leilão, filtros, formulário de publicação), não como base de código a copiar para produção.
+
+## O prompt para a versão de produção (Next.js + Supabase): conflitos com a arquitetura real da plataforma
+
+============================================================
+FICHEIRO: RELATORIO-ALMANAQUE-FORUM-20260823.md
+============================================================
+# Relatório — Almanaque (rota `/almanaque`) e Forum (fotos + navegação)
+
+**Data:** 2026-08-23
+**Âmbito:** duas frentes de trabalho independentes, tratadas como domínios
+separados por instrução explícita — (1) ligar os componentes de Culturas
+já existentes a uma rota real `/almanaque`; (2) corrigir navegação do
+Forum e concluir o suporte a fotos em tópicos/respostas. Sem qualquer
+ligação entre os dois módulos.
+
+## 1. Ponto de partida
+
+O prompt inicial desta sessão pedia continuação de um plano extenso
+("OTJ × Almanaque", 14 blocos) a partir de checkpoints já produzidos em
+`~/Transferências/`. Verificação desses ficheiros (`OTJ-ALMANAQUE-FASE2`
+a `FASE6`, ~20 ficheiros, alguns com 500KB+) mostrou que eram, na
+prática, *dumps* em bruto de `find`/`grep` — nenhuma decisão de modelo de
+dados ou implementação real tinha sido tomada nessa via; o próprio
+ficheiro de gate da Fase 5 confirmava "esta fase não faz push para
+produção" com todos os itens por marcar.
+
+A investigação directa ao código encontrou uma peça de trabalho real e
+não commitada: a migration "Fase 7" de `culturas_guia` (20 de agosto),
+que já estava aplicada à base de dados (72 culturas, 12 aptidões, 12
+produtos, confirmado por query directa à REST API do Supabase) mas cujo
+frontend (`components/almanaque/*`) nunca tinha sido ligado a nenhuma
+rota — ficheiros `??` no git, sem nenhum `import` a partir de `app/`.
+
+## 2. O que foi feito
+
+### 2.1 Almanaque — rota `/almanaque` (commit `52feaad`)
+
+- `app/almanaque/page.tsx` — página inicial do Almanaque, com três
+  cartões: Almanaque Diário (liga a `/calendario`, já existente e
+  funcional — reutilizado, não duplicado), Guia de Culturas, Dashboard.
+- `app/almanaque/culturas/page.tsx` e `app/almanaque/culturas/[id]/page.tsx`
+
+============================================================
+FICHEIRO: RELATORIO-ALOJAMENTO-20260824.md
+============================================================
+# Relatório — Módulo Alojamento: correção de build + limpeza (24 de agosto de 2026)
+
+**Data:** 2026-08-24
+**Âmbito:** módulo de Alojamento (`/alojamento`, reservas de casas rurais,
+pousadas, hotéis) e estado geral do repositório.
+
+## 1. O que foi pedido
+
+Seguimento dos pendentes registados nas sessões de 22-23/08 (Gran Bazar,
+Entidades Parceiras). O `npm run build` estava a falhar com 8 erros de
+TypeScript, todos no módulo de Alojamento — módulo à parte, sem relação
+com leilões/parceiros.
+
+## 2. O que foi feito
+
+### 2.1 Correção dos erros de build
+
+| Ficheiro | Problema | Correção |
+|---|---|---|
+| `app/(alojamento)/alojamento/[id]/page.tsx` | `params.id` é `string`, mas `obterAlojamentoComRefeicoes()` espera `number` | `Number(id)` + guarda para `NaN` → `notFound()`/"não encontrado" |
+| Mesmo ficheiro | `dados.imagem` e `dados.comodidades` não existem no tipo nem na tabela `alojamentos` (confirmado nas migrations de 21/08) — código morto | Removido o bloco de imagem e a secção "Comodidades", + import não usado de `next/image` |
+| `lib/alojamento/actions.ts` | `normalizarLocalizacao()` devolvia o mesmo tipo genérico `T` recebido, sem refletir a normalização feita em runtime → cast `as Alojamento[]` falhava (TS2352) em 3 sítios | Tipo de retorno corrigido para `Omit<T, 'localizacao'> & { localizacao: Localizacao \| null }` |
+| `components/alojamento/reserva-form.tsx` | Interface local `RefeicaoOpcao` exigia `preco_extra: number` obrigatório, divergindo do tipo real `RefeicaoAlojamento` (`preco_extra?: number`) | Substituída pela importação direta de `RefeicaoAlojamento` |
+
+Confirmado: `npx tsc --noEmit` e `npm run build` correm limpos (39/39
+páginas), testado visualmente em `npm run dev` pelo utilizador.
+
+Detalhe completo em `claude/FIX-BUILD-ALOJAMENTO-20260824.md` (projeto
+Claude "otj").
+
+### 2.2 Limpeza do ficheiro órfão
+
+Encontrado no relatório de 23/08 (Gran Bazar): um ficheiro na raiz do
+projeto chamado literalmente `upabase db push --dry-run` (14 KB).
+Inspecionado o conteúdo — era só a saída colorida de um `git diff`
+
+============================================================
+FICHEIRO: RELATORIO-BACKEND-API-BLOCO6-20260823.md
+============================================================
+# OTJ — Fase 6.1 — Auditoria Backend / API
+
+**Data:** 2026-08-23 22:08 (Europe/Lisbon)
+**Repositório:** `/home/berze/Nextcloud2/Projectos/otiodojoca`
+**Executado por:** Claude (Cowork), sessão cloud — via device bridge (sem `device_bash` disponível neste dispositivo; auditoria feita por leitura directa de ficheiros staged a partir do repositório real).
+**Cópia irmã:** `~/Transferências/OTJ-FASE-6-01-AUDITORIA-BACKEND-API-20260823-220827.txt`
+
+---
+
+## Protocolo EVOLUI/REPETIR
+
+**EVOLUI.** Não existia, no repositório, um mapa consolidado de endpoints/server actions/RLS para o backend actual — apenas auditorias pontuais antigas (`AUDITORIA-RESERVAS*.txt`, `AUDITORIA-COMER*.txt`, `AUDITORIA-RLS-RESERVAS.txt`, datadas de antes de 2026-08-12) que já não reflectem o código actual (o problema que descreviam em `lib/comer/actions.ts` — sem autenticação, sem validação de data — já está corrigido no ficheiro actual). Este documento consolida o estado real a partir do código lido agora, não do inventário antigo.
+
+**Nota sobre o prompt original:** o prompt mestre fornecido referia caminhos Windows (`C:\Users\sev7\...`). A máquina ligada a esta sessão é Linux Mint (`berze-optiplex-5050`). O utilizador confirmou usar esta máquina; o repositório real foi localizado em `/home/berze/Nextcloud2/Projectos/otiodojoca` (existe um duplicado idêntico em `/home/berze/Nextcloud/Projectos/`, não auditado nesta fase; e um backup em `otiodojoca.backup-atual`, também não auditado — ambos **NÃO VERIFICADOS**).
+
+**Limitação técnica desta execução:** este dispositivo não expõe um shell remoto (`device_bash`) a esta sessão — só listagem de directórios e transferência de ficheiros individuais. Não foi possível correr grep/ripgrep sobre a árvore completa. A auditoria cobre os ficheiros de backend identificados por inspecção estrutural (`app/api`, `app/**/actions.ts`, `lib/**/actions.ts`, `lib/supabase/*`, `supabase/schemas`, `supabase/migrations` recentes) — não uma pesquisa textual exaustiva. Onde a cobertura é parcial, está assinalado **NÃO VERIFICADO**.
+
+---
+
+## 1 — Mapa de endpoints (Route Handlers, `app/api/`)
+
+Só existem **três** route handlers no projecto inteiro — a esmagadora maioria da lógica de escrita passa por Server Actions (ver secção 2):
+
+### `GET /api/geocode`
+- Ficheiro: `app/api/geocode/route.ts`
+- Geocodifica um código postal PT: tenta cache local (`codigos_postais_geo`), depois Nominatim (OSM) com User-Agent identificável e cache de 30 dias.
+- Auth: nenhuma (leitura pública, adequado).
+- Validação: regex do código postal (`0000-000`). OK.
+
+### `POST /api/seed`
+- Ficheiro: `app/api/seed/route.ts`
+- Insere dados de teste (localização, alojamento "Hotel Tio do Joca", refeições) usando `createAdminClient()` — cliente com **service role key**, que ignora RLS.
+- Auth: **nenhuma**. Ver RISCO-01 (secção 16).
+- Idempotente, mas isso não resolve o problema: qualquer pessoa na internet pode invocar `POST /api/seed` e escrever na base de dados com privilégios de admin.
+
+
+============================================================
+FICHEIRO: RELATORIO-ENTIDADES-PARCEIRAS-20260823.md
+============================================================
+# Relatório — Entrada de Entidades Parceiras
+
+**Data:** 2026-08-23
+**Âmbito:** módulo de entrada/registo de entidades parceiras (Municípios,
+Freguesias, outros organismos públicos, e outras entidades — Associações,
+Cooperativas, Produtores, Empresas), a par do registo individual já
+existente.
+
+Este relatório resume o que foi construído em três rondas de trabalho e,
+sobretudo, regista tudo o que ficou **pendente** — para não se perder de
+vista antes de se avançar para a fase seguinte (revisão/aprovação de
+pedidos, ligação a `entidades`, SSO institucional).
+
+## 1. O que já está feito
+
+### Ronda 1 — janela de entrada e pedido genérico
+
+- Janela de boas-vindas na home (`components/entidades/entry-choice-
+  modal.tsx`): "Sou cidadão" / "Sou entidade parceira", só para
+  visitantes sem sessão.
+- Cartão "Entidades Parceiras" na grelha da home, sempre visível.
+- Nota na página `/login` a explicar que entidades parceiras entram com
+  email + password.
+- Tabela nova `public.entidade_pedidos` (migration
+  `20260823010000_pedidos_entidade_parceira.sql`) — pedido de associação
+  ligado a `profile_id`, com RLS (só o próprio + admins). Não escreve
+  directamente em `entidades` (tabela curada).
+- `/parceiros` (explicação + CTA) e formulário genérico de pedido.
+
+### Ronda 2 — formulários individualizados por tipo
+
+- Migration additiva `20260823020000_pedidos_entidade_tipo_e_
+  municipio.sql`: acrescenta `tipo_entidade` (discriminador), `municipio_id`,
+  `cargo`, `nipc` a `entidade_pedidos`.
+- Quatro formulários especializados, cada um na sua rota:
+
+============================================================
+FICHEIRO: RELATORIO-IMOVEIS-20260824.md
+============================================================
+# Relatório — Módulo Imóveis (venda + leilão)
+
+**Data:** 24 de agosto de 2026 às 13:04
+**Sessão:** Criação do módulo Imóveis a partir da auditoria ao prompt+MVP "Lup Imóveis"
+
+---
+
+## 1. O que foi pedido
+
+"Implementar seguindo a recomendação" — a recomendação sendo a de
+`claude/AUDITORIA-LUP-IMOVEIS-20260824.md` (auditoria feita antes desta
+sessão a um prompt externo + MVP React "Lup Imóveis", que propunha tabelas
+`properties`/`property_auctions`/`property_auction_bids` novas e um motor
+de leilão próprio no cliente): reaproveitar `marketplace_ads`,
+`marketplace_auctions`/`marketplace_auction_bids`, `marketplace_photos` e
+`localizacoes`/localização já existentes, em vez de duplicar.
+
+Decisões tomadas contigo antes de começar (via perguntas diretas):
+- Módulo próprio (como o Gran Bazar/Lup), não uma categoria dentro do Gran
+  Bazar.
+- Nome: **Imóveis**, sem o prefixo "Lup" — porque `'lup'` já é o módulo de
+  economia circular/excedentes (SobraCiclo), e usar o mesmo prefixo de
+  marca para um domínio diferente só criaria confusão.
+
+## 2. O que foi feito
+
+Auditoria ao código real do Gran Bazar e do Lup (migrations, `lib/`,
+`components/`, `app/`, `docs/`) para replicar o mesmo padrão — reaproveitar
+tudo o que já existe, duplicar só o que tem de ser visualmente próprio
+(paleta, componentes) — e criação de 24 ficheiros novos + 2 editados,
+acedidos e escritos diretamente na tua pasta local via a ligação ao
+computador (não passaram por git/GitHub):
+
+- **`supabase/migrations/20260824010000_imoveis.sql`** (novo) — acrescenta
+  `'imoveis'` ao CHECK de `marketplace_ads.module` e ao CHECK de
+
+============================================================
+FICHEIRO: RELATORIO-IMOVEIS-CONTINUACAO-20260824.md
+============================================================
+# Relatório — Continuação módulo Imóveis (24 agosto 2026, sessão em pausa)
+
+Continuação de `docs/pendentes/RELATORIO-IMOVEIS-20260824.md` e
+`claude/IMPLEMENTACAO-IMOVEIS-20260824.md` (projeto Claude "otj"). Este
+relatório cobre o que aconteceu **depois** desses dois, e serve para
+retomar a sessão sem perder contexto.
+
+---
+
+## 1. O que foi feito nesta sessão (depois do relatório anterior)
+
+1. **`app/viaturas/[id]/page.tsx` resolvido.** Este ficheiro aparecia como
+   modificado (sem commit) em todos os `git status` da sessão, sem
+   contexto documentado sobre o motivo. Investigado a fundo: lido o
+   ficheiro inteiro e todos os componentes que importa
+   (`auction-panel.tsx`, `contact-seller-form.tsx`, `favorite-button.tsx`,
+   `viaturas-navbar.tsx`, `lib/viaturas/ad-types.ts`) — está correto,
+   estruturalmente igual ao `app/gran-bazar/[id]/page.tsx` (que sei que
+   funciona), sem imports nem props desalinhados. Perguntado ao Yos, que
+   confirmou: não havia bug nenhum, era só um commit por fazer (3
+   inserções, 1 remoção). Commitado (`61dab65`) e publicado com `git push`
+   (`1fc6f7f..61dab65 -> origin/main`), junto com o commit anterior do
+   módulo Imóveis.
+2. **Supabase CLI confirmado.** Versão `2.11.5`, instalada via
+   `npm install supabase --save-dev` (não havia instalação global). O
+   projeto já estava ligado (`supabase/.temp/project-ref` já existia),
+   por isso não foi preciso `supabase link`.
+3. **Migração `20260824010000_imoveis.sql` confirmada aplicada no
+   remoto.** `npx supabase db push` reportou "Remote database is up to
+   date" (nada pendente); `npx supabase migration list` confirmou a
+   versão `20260824010000` presente nas colunas **Local** e **Remote**.
+4. **`npm run build` confirmado limpo no projeto real.** `next build`
+   (Next.js 16.3.1, Turbopack) — "Compiled successfully", "Finished
+   TypeScript" sem nenhum erro. Todas as 8 rotas `/imoveis/*` aparecem na
+   listagem final de rotas, lado a lado com Gran Bazar/Lup/Viaturas. Os
+
+============================================================
+FICHEIRO: RELATORIO-LUP-20260823.md
+============================================================
+# Relatório — Módulo Lup (economia circular de excedentes)
+
+**Data:** 23 de agosto de 2026
+**Sessão:** Criação do módulo Lup a partir do MVP SobraCiclo
+
+---
+
+## 1. O que foi pedido
+
+Trazer o MVP standalone **SobraCiclo** (React + Vite, dados mock —
+plataforma de excedentes alimentares inspirada no TooGoodToGo, com três
+categorias: consumo humano, alimentação animal, compostagem) para dentro
+d'O Tio do Joca, "ao nível do Gran Bazar". Nome escolhido para a caixa:
+**Lup** (de "loop"), a rever mais tarde.
+
+Decisões tomadas com o Yos antes de começar:
+- Aceder ao código através da pasta local ligada no desktop app (não via
+  GitHub).
+- Reaproveitar `marketplace_ads` (mesma arquitetura do Gran Bazar), em
+  vez de tabelas próprias.
+- Identidade visual adaptada ao design system do OTJ (paleta própria,
+  como o Gran Bazar tem a sua).
+
+## 2. O que foi feito
+
+Auditoria à arquitetura do Gran Bazar (`docs/GRAN-BAZAR.md` e o código em
+`app/gran-bazar/`, `components/gran-bazar/`, `lib/gran-bazar/`) para
+replicar o mesmo padrão, e criação de 22 ficheiros novos/editados:
+
+- **`supabase/migrations/20260823030000_lup.sql`** — acrescenta `'lup'`
+  ao CHECK de `marketplace_ads.module` e `'lup'` ao CHECK de
+  `categories.type`; insere as 3 categorias fixas (`lup-humano`,
+  `lup-animal`, `lup-compostagem`). Sem tabelas novas — mesma decisão que
+  o Gran Bazar tomou.
+- **`lib/lup/ad-types.ts`** — 3 tipos de anúncio (`oferta` = doação

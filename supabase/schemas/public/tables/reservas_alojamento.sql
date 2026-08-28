@@ -12,10 +12,12 @@ create table "public"."reservas_alojamento" (
   "preco_total"      numeric(10,2)            not null,
   "status"           character varying        not null default 'pendente'::character varying,
   "observacoes"      text,
+  "user_id"          uuid,
   "created_at"       timestamp with time zone not null default now(),
   "updated_at"       timestamp with time zone not null default now(),
   constraint "check_datas" check ((data_saida > data_entrada)),
   constraint "reservas_alojamento_alojamento_id_fkey" foreign key (alojamento_id) references public.alojamentos(id) on delete restrict,
+  constraint "reservas_alojamento_user_id_fkey" foreign key (user_id) references auth.users(id) on delete cascade,
   constraint "reservas_alojamento_num_pessoas_check" check ((num_pessoas > 0)),
   constraint "reservas_alojamento_num_quartos_check" check ((num_quartos > 0)),
   constraint "reservas_alojamento_pkey" primary key (id),
@@ -39,20 +41,49 @@ create index idx_reservas_email on public.reservas_alojamento using btree (email
 
 create index idx_reservas_status on public.reservas_alojamento using btree (status);
 
-create policy "Reservas - INSERT para todos" on "public"."reservas_alojamento"
+create index idx_reservas_alojamento_user_id on public.reservas_alojamento using btree (user_id);
+
+-- Reserva fica ligada ao utilizador autenticado que a criou (user_id).
+-- Sem exceção anónima -- ao contrário de restaurante_reservas, este
+-- módulo não tem hoje um caminho de reserva sem sessão (a página já
+-- exige login via middleware). "Staff" (moderator/admin) vê e gere
+-- todas as reservas, seguindo o precedente de audit_log.sql.
+
+create policy "Reservas alojamento - criar a propria" on "public"."reservas_alojamento"
   for insert
-  to PUBLIC
-  with check (true);
+  to authenticated
+  with check (auth.uid() = user_id);
 
-create policy "Reservas - SELECT públicas" on "public"."reservas_alojamento"
+create policy "Reservas alojamento - ver propria ou staff" on "public"."reservas_alojamento"
   for select
-  to PUBLIC
-  using (true);
+  to authenticated
+  using (
+    auth.uid() = user_id
+    or exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid()
+        and profiles.role in ('moderator', 'admin')
+    )
+  );
 
-create policy "Reservas - UPDATE próprias" on "public"."reservas_alojamento"
+create policy "Reservas alojamento - editar propria ou staff" on "public"."reservas_alojamento"
   for update
-  to PUBLIC
-  using (true)
-  with check (true);
+  to authenticated
+  using (
+    auth.uid() = user_id
+    or exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid()
+        and profiles.role in ('moderator', 'admin')
+    )
+  )
+  with check (
+    auth.uid() = user_id
+    or exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid()
+        and profiles.role in ('moderator', 'admin')
+    )
+  );
 
-grant delete, insert, maintain, references, select, trigger, truncate, update on table "public"."reservas_alojamento" to "anon", "authenticated", "postgres", "service_role";
+grant select, insert, update on table "public"."reservas_alojamento" to "authenticated";

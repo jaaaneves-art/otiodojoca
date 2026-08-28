@@ -6,6 +6,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 // vez de criar duplicados a cada chamada.
 //
 // Uso: POST http://localhost:3000/api/seed
+//
+// RISCO-01 (docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md):
+// esta rota escreve com a service role key (ignora RLS) e não tinha
+// nenhuma verificação -- qualquer pessoa na internet, com a URL de
+// produção, conseguia invocá-la e escrever dados. É só uma ferramenta de
+// desenvolvimento, por isso fica bloqueada fora de "development" em vez
+// de exigir autenticação (não há utilizador "certo" para a chamar em
+// produção -- não devia correr lá de todo).
 
 const LOCALIZACAO_TESTE = {
   codigo_postal: "1100-201",
@@ -32,6 +40,13 @@ const REFEICOES_TESTE = [
 ];
 
 export async function POST() {
+  if (process.env.NODE_ENV !== "development") {
+    return NextResponse.json(
+      { success: false, error: "Não disponível em produção." },
+      { status: 404 }
+    );
+  }
+
   try {
     const supabase = createAdminClient();
     // 1. Localização — reaproveita se já existir

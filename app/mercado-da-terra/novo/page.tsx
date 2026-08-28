@@ -24,11 +24,15 @@ async function createAd(formData: FormData) {
   const price = formData.get("price") ? parseFloat(formData.get("price") as string) : null;
   const seeking = formData.get("seeking") as string | null;
   const seekingDescription = formData.get("seeking_description") as string | null;
+  // Campo próprio da Troca -- não confundir com "seeking" da Procura
+  // (ver lib/mercado-da-terra/ad-types.ts).
+  const wantsToReceive = formData.get("wantsToReceive") as string | null;
   const imageCount = parseInt(formData.get("image_count") as string) || 0;
 
-  const details = (seeking || seekingDescription) 
-    ? { seeking: seeking || "", seeking_description: seekingDescription || "" }
-    : {};
+  const details: Record<string, string> = {};
+  if (seeking) details.seeking = seeking;
+  if (seekingDescription) details.seeking_description = seekingDescription;
+  if (wantsToReceive) details.wants_to_receive = wantsToReceive;
 
   const { data: ad, error: adError } = await supabase
     .from("marketplace_ads")

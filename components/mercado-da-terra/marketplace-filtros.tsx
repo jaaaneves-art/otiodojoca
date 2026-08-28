@@ -89,11 +89,17 @@ export default function MarketplaceFiltros({ categories, municipios }: FiltrosPr
                 onChange={(e) => setType(e.target.value)}
                 className="w-full border border-terra-200 rounded-lg p-2 mt-1"
               >
+                {/* Bug encontrado em 2026-08-27: os values de troca/procura
+                    estavam invertidos face aos labels -- terceira
+                    ocorrência do mesmo erro copy-paste nesta funcionalidade
+                    (ver também lib/mercado-da-terra/ad-types.ts e
+                    app/mercado-da-terra/page.tsx). Ao escolher "Troca"
+                    aqui, a pesquisa filtrava por type=procura. */}
                 <option value="">Todos</option>
                 <option value="sale">💰 Venda</option>
                 <option value="offer">🎁 Oferta</option>
-                <option value="troca">🔍 Procura</option>
-                <option value="procura">🔄 Troca</option>
+                <option value="troca">🔄 Troca</option>
+                <option value="procura">🔍 Procura</option>
               </select>
             </div>
 

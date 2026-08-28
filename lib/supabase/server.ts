@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function createClient() {
@@ -6,21 +6,22 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set({ name, value, ...options });
-          } catch {}
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: "", ...options });
-          } catch {}
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          } catch {
+            // O `setAll` foi chamado a partir de um Server Component.
+            // Pode ser ignorado se houver middleware a atualizar as
+            // sessões de utilizador (é o nosso caso: proxy.ts).
+          }
         },
       },
     }
