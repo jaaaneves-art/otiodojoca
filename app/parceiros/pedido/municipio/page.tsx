@@ -1,54 +1,11 @@
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { PartnerRequestFormMunicipio } from "@/components/entidades/partner-request-form-municipio";
+import { redirect } from "next/navigation";
 
-export default async function PedidoMunicipioPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-terra-50">
-        <div className="mx-auto max-w-md p-6 py-16 text-center">
-          <h1 className="text-xl font-semibold text-terra-900">
-            Precisas de entrar primeiro
-          </h1>
-          <p className="mt-2 text-sm text-terra-600">
-            Entra ou cria conta e depois volta a esta pagina para pedires a
-            associacao do teu municipio.
-          </p>
-          <div className="mt-6 flex justify-center gap-3">
-            <Link href="/login" className="font-medium text-terra-700 underline">
-              Entrar
-            </Link>
-            <Link href="/registo" className="font-medium text-terra-700 underline">
-              Criar conta
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const { data: municipios } = await supabase
-    .from("municipios")
-    .select("id, nome, distrito_regiao")
-    .order("nome", { ascending: true });
-
-  return (
-    <div className="min-h-screen bg-terra-50">
-      <div className="mx-auto max-w-xl p-6 py-16">
-        <h1 className="mb-2 text-2xl font-bold text-terra-900">
-          Pedido de associacao — Municipio
-        </h1>
-        <p className="mb-6 text-sm text-terra-600">
-          Representas uma Camara Municipal? Conta-nos qual e a nossa equipa
-          analisa o pedido e entra em contacto.
-        </p>
-        <PartnerRequestFormMunicipio municipios={municipios ?? []} userEmail={user.email} />
-      </div>
-    </div>
-  );
+// Esta rota passou a ser servida por /participar/municipio — um formulário
+// público dedicado (sem exigir login prévio), com o wizard de 4 passos
+// próprio de Município. Mantemos o URL antigo vivo como redirect em vez de
+// o apagar, para não partir marcadores/links já partilhados. O formulário
+// anterior (autenticado, campo "cargo") continua disponível para os
+// restantes tipos em /parceiros/pedido/*.
+export default function PedidoMunicipioPage() {
+  redirect("/participar/municipio");
 }
