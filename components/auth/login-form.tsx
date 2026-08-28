@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -34,23 +35,18 @@ export function LoginForm() {
       return;
     }
 
-    // Palavra-passe correta -> falta confirmar o segundo fator (MFA é
-    // obrigatório nesta plataforma). Decidimos o próximo ecrã com base no
-    // nível de segurança (AAL) que esta sessão já tem.
-    const next = searchParams.get("next") || "/perfil";
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-
     setLoading(false);
 
-    if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== aal.nextLevel) {
-      // Já tem um fator TOTP verificado -- só falta o desafio desta sessão.
-      router.push(`/mfa/verify?next=${encodeURIComponent(next)}`);
-    } else if (!aal || aal.nextLevel !== "aal2") {
-      // Ainda não tem nenhum fator MFA configurado.
-      router.push(`/mfa/setup?next=${encodeURIComponent(next)}`);
-    } else {
-      router.push(next);
-    }
+    // Não decidir aqui se é preciso passar por /mfa/setup ou /mfa/verify --
+    // essa decisão já é feita pelo middleware (lib/supabase/middleware.ts),
+    // que também sabe se o utilizador já dispensou a sugestão de MFA
+    // ("Agora não"). Duplicar a lógica aqui (como acontecia antes, só a
+    // olhar para o AAL) ignorava essa dispensa e voltava a mostrar o QR em
+    // todos os logins seguintes, mesmo depois de o utilizador já ter dito
+    // que não queria configurar. Navegar sempre para o destino e deixar o
+    // middleware redirecionar se for mesmo preciso.
+    const next = searchParams.get("next") || "/perfil";
+    router.push(next);
     router.refresh();
   }
 
@@ -60,7 +56,8 @@ export function LoginForm() {
         <CardTitle>Entrar</CardTitle>
         <CardDescription>Entra na comunidade do Almanaque</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <OAuthButtons />
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">Email</label>

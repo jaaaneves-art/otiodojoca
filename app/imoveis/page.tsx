@@ -11,6 +11,7 @@ interface SearchParams {
   max?: string;
   quartos?: string;
   sort?: string;
+  estudantes?: string;
 }
 
 export default async function ImoveisPage({
@@ -56,12 +57,17 @@ export default async function ImoveisPage({
 
   const { data: adsRaw } = await query;
 
-  // Quartos mínimo: filtrado em memória porque vive em details (jsonb), não
-  // numa coluna própria — mesma razão por que o Gran Bazar filtra "seeking"
-  // (troca) do lado do cliente em vez de no query builder.
-  const ads = params.quartos
-    ? (adsRaw || []).filter((a) => (a.details?.bedrooms ?? 0) >= parseInt(params.quartos!))
-    : adsRaw || [];
+  // Quartos mínimo e "para estudantes": filtrados em memória porque vivem
+  // em details (jsonb), não em colunas próprias — mesma razão por que o
+  // Gran Bazar filtra "seeking" (troca) do lado do cliente em vez de no
+  // query builder.
+  let ads = adsRaw || [];
+  if (params.quartos) {
+    ads = ads.filter((a) => (a.details?.bedrooms ?? 0) >= parseInt(params.quartos!));
+  }
+  if (params.estudantes === "1") {
+    ads = ads.filter((a) => !!a.details?.para_estudantes);
+  }
 
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -111,7 +117,7 @@ export default async function ImoveisPage({
     });
   }
 
-  const hasFilters = !!(params.q || params.category || params.type || params.min || params.max || params.quartos || (params.sort && params.sort !== "recentes"));
+  const hasFilters = !!(params.q || params.category || params.type || params.min || params.max || params.quartos || params.estudantes === "1" || (params.sort && params.sort !== "recentes"));
 
   return (
     <>

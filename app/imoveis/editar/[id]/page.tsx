@@ -82,7 +82,7 @@ export default async function EditarImovelPage({
     let price: number | null = null;
     let priceType: string | null = null;
 
-    if (type === "venda") {
+    if (type === "venda" || type === "arrendamento" || type === "quarto") {
       priceType = (formData.get("priceType") as string) || "fixed";
       price = formData.get("price") ? parseFloat(formData.get("price") as string) : null;
     }
@@ -91,10 +91,32 @@ export default async function EditarImovelPage({
     // ainda não existir linha em marketplace_auctions para este anúncio —
     // é isso que o trigger vai ler de NEW.details nesta UPDATE. Se já
     // existir leilão, os parâmetros são atualizados em separado mais
-    // abaixo, e o details fica só com as características do imóvel.
-    const details = type === "leilao" && !auction
-      ? buildImovelDetails(type, formData)
-      : buildImovelDetails("venda", formData); // reaproveita só a parte de características (ignora campos de leilão)
+    // abaixo, e o details fica só com as características do imóvel (por
+    // isso "venda" aqui, e não "leilao" — buildImovelDetails só monta os
+    // campos start_price/ends_at/etc quando o tipo passado é "leilao", e
+    // esses campos vêm desativados do formulário depois de o leilão já ter
+    // começado, logo nem chegam a estar em formData).
+    // Para os restantes tipos (venda/arrendamento/permuta/companhia) passa
+    // sempre o tipo real, para não perder os campos próprios de cada um.
+    const details = type === "leilao"
+      ? (auction ? buildImovelDetails("venda", formData) : buildImovelDetails(type, formData))
+      : buildImovelDetails(type, formData);
+
+    // "quarto" não mostra o seletor de "Tipo de imóvel" — a categoria é
+    // sempre atribuída à categoria "Quarto" já existente (ver o mesmo
+    // comentário em app/imoveis/novo/page.tsx).
+    let categoryIdValue: number | null = null;
+    if (type === "quarto") {
+      const { data: quartoCategoria } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("type", "imoveis")
+        .eq("slug", "imoveis-quarto")
+        .maybeSingle();
+      categoryIdValue = quartoCategoria?.id ?? null;
+    } else {
+      categoryIdValue = categoryId ? parseInt(categoryId) : null;
+    }
 
     const { error: updateError } = await supabase
       .from("marketplace_ads")
@@ -102,7 +124,7 @@ export default async function EditarImovelPage({
         title,
         description,
         type,
-        category_id: parseInt(categoryId),
+        category_id: categoryIdValue,
         location,
         contact_method: contactMethod,
         price_type: priceType,
@@ -219,6 +241,22 @@ export default async function EditarImovelPage({
               auction_starts_at: auction?.starts_at,
               auction_ends_at: auction?.ends_at,
               auction_status: auction?.status,
+              mobilado: details.mobilado,
+              despesas_incluidas: details.despesas_incluidas,
+              caucao: details.caucao,
+              disponivel_desde: details.disponivel_desde,
+              duracao_minima: details.duracao_minima,
+              para_estudantes: details.para_estudantes,
+              vagas_disponiveis: details.vagas_disponiveis,
+              procura_em_troca: details.procura_em_troca,
+              aceita_com_diferenca: details.aceita_com_diferenca,
+              apoio_esperado: details.apoio_esperado,
+              regras_da_casa: details.regras_da_casa,
+              tipo_quarto: details.tipo_quarto,
+              casa_banho: details.casa_banho,
+              pessoas_na_casa: details.pessoas_na_casa,
+              comodidades: details.comodidades,
+              aceita_casais: details.aceita_casais,
             }}
             submitLabel="Guardar Alterações"
           />

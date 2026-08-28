@@ -165,5 +165,13 @@ export async function markAsReadAction(
     .neq('sender_id', user.id)
     .is('read_at', null);
 
-  revalidatePath(`/${module}/${routeSegment}`);
+  // Sem revalidatePath aqui de propósito: esta função é chamada durante o
+  // render da página da conversa (app/<modulo>/<rota>/[id]/page.tsx), e o
+  // Next.js 16 não permite revalidatePath durante o render -- dá "used
+  // revalidatePath ... during render which is unsupported" (mesmo bug
+  // encontrado e corrigido em Gran Bazar, Imóveis, Lup, Mercado da Terra e
+  // Viaturas em 28/08/2026 -- ver claude/STANDGO-STANDS-VERIFICADOS-
+  // CONTACTO-DIRETO-20260828.md, projeto Claude "otj"). O próprio pedido
+  // já traz os dados frescos; a lista de conversas de cada módulo já corre
+  // sempre dinâmica (usa auth/cookies), não fica em cache.
 }

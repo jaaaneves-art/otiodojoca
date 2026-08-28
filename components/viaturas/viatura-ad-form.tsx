@@ -10,6 +10,7 @@ import {
   CAIXA_OPCOES,
   CONDICAO_OPCOES,
   TIPO_VENDEDOR_OPCOES,
+  SEGURO_OPCOES,
 } from "@/lib/viaturas/ad-types";
 
 interface Categoria { id: number; name: string; }
@@ -41,6 +42,14 @@ interface AdInicial {
   /** ISO (UTC) — idem */
   auction_ends_at?: string | null;
   auction_status?: string | null;
+  budget?: string | number | null;
+  preco_dia?: string | number | null;
+  preco_3_dias?: string | number | null;
+  preco_semana?: string | number | null;
+  preco_2_semanas?: string | number | null;
+  preco_mes?: string | number | null;
+  caucao?: string | number | null;
+  seguro?: string | null;
 }
 
 // <input type="datetime-local"> não sabe nada de fusos-horários — a mesma
@@ -79,6 +88,7 @@ export function ViaturaAdForm({
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const config = getViaturaAdType(tipo);
   const mostra = (campo: string) => config.fields.includes(campo as any);
+  const obrigatorio = (campo: string) => config.required.includes(campo as any);
 
   // Mesma regra do Gran Bazar: um leilão já agendado só pode ter os seus
   // parâmetros alterados enquanto ainda não começou.
@@ -112,7 +122,7 @@ export function ViaturaAdForm({
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl border border-viaturas-200 space-y-4">
       <div>
         <label className="text-sm font-medium">O que queres fazer? *</label>
-        <div className="grid grid-cols-2 gap-2 mt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
           {Object.values(VIATURAS_AD_TYPES).map((type) => (
             <button
               key={type.id}
@@ -145,26 +155,28 @@ export function ViaturaAdForm({
       </div>
 
       <div className="bg-viaturas-50 border border-viaturas-200 rounded-lg p-4 space-y-4">
-        <p className="text-sm font-semibold text-viaturas-900">🚗 Dados da viatura</p>
+        <p className="text-sm font-semibold text-viaturas-900">
+          {tipo === "comprar" ? "🔍 O que procuras" : "🚗 Dados da viatura"}
+        </p>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Marca *</label>
+            <label className="text-sm font-medium">Marca{obrigatorio("marca") && " *"}</label>
             <input
               name="marca"
               defaultValue={inicial?.marca ?? ""}
               placeholder="Ex: BMW"
-              required
+              required={obrigatorio("marca")}
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Modelo *</label>
+            <label className="text-sm font-medium">Modelo{obrigatorio("modelo") && " *"}</label>
             <input
               name="modelo"
               defaultValue={inicial?.modelo ?? ""}
               placeholder="Ex: Série 3"
-              required
+              required={obrigatorio("modelo")}
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
@@ -172,7 +184,7 @@ export function ViaturaAdForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Ano *</label>
+            <label className="text-sm font-medium">Ano{obrigatorio("ano") && " *"}</label>
             <input
               name="ano"
               type="number"
@@ -180,19 +192,19 @@ export function ViaturaAdForm({
               max="2100"
               defaultValue={inicial?.ano ?? ""}
               placeholder="2020"
-              required
+              required={obrigatorio("ano")}
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Quilómetros *</label>
+            <label className="text-sm font-medium">Quilómetros{obrigatorio("quilometros") && " *"}</label>
             <input
               name="quilometros"
               type="number"
               min="0"
               defaultValue={inicial?.quilometros ?? ""}
               placeholder="45000"
-              required
+              required={obrigatorio("quilometros")}
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
@@ -200,11 +212,11 @@ export function ViaturaAdForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium">Combustível *</label>
+            <label className="text-sm font-medium">Combustível{obrigatorio("combustivel") && " *"}</label>
             <select
               name="combustivel"
               defaultValue={inicial?.combustivel ?? ""}
-              required
+              required={obrigatorio("combustivel")}
               className="w-full border rounded-lg p-2 mt-1"
             >
               <option value="">Seleciona</option>
@@ -214,11 +226,11 @@ export function ViaturaAdForm({
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium">Caixa *</label>
+            <label className="text-sm font-medium">Caixa{obrigatorio("caixa") && " *"}</label>
             <select
               name="caixa"
               defaultValue={inicial?.caixa ?? ""}
-              required
+              required={obrigatorio("caixa")}
               className="w-full border rounded-lg p-2 mt-1"
             >
               <option value="">Seleciona</option>
@@ -231,11 +243,11 @@ export function ViaturaAdForm({
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="text-sm font-medium">Condição *</label>
+            <label className="text-sm font-medium">Condição{obrigatorio("condicao") && " *"}</label>
             <select
               name="condicao"
               defaultValue={inicial?.condicao ?? ""}
-              required
+              required={obrigatorio("condicao")}
               className="w-full border rounded-lg p-2 mt-1"
             >
               <option value="">Seleciona</option>
@@ -266,18 +278,20 @@ export function ViaturaAdForm({
           </div>
         </div>
 
-        <div>
-          <label className="text-sm font-medium">Tipo de vendedor</label>
-          <select
-            name="tipoVendedor"
-            defaultValue={inicial?.tipo_vendedor ?? "Particular"}
-            className="w-full border rounded-lg p-2 mt-1"
-          >
-            {TIPO_VENDEDOR_OPCOES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
+        {mostra("tipoVendedor") && (
+          <div>
+            <label className="text-sm font-medium">Tipo de vendedor</label>
+            <select
+              name="tipoVendedor"
+              defaultValue={inicial?.tipo_vendedor ?? "Particular"}
+              className="w-full border rounded-lg p-2 mt-1"
+            >
+              {TIPO_VENDEDOR_OPCOES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div>
@@ -399,6 +413,126 @@ export function ViaturaAdForm({
                 className="w-full border rounded-lg p-2 mt-1 disabled:bg-viaturas-100 disabled:text-viaturas-500"
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {mostra("budget") && (
+        <div>
+          <label className="text-sm font-medium">Orçamento (EUR)</label>
+          <input
+            name="budget"
+            type="number"
+            step="0.01"
+            min="0"
+            defaultValue={inicial?.budget ?? ""}
+            placeholder="Deixa em branco se não tiveres um valor definido"
+            className="w-full border rounded-lg p-2 mt-1"
+          />
+        </div>
+      )}
+
+      {mostra("precoDia") && (
+        <div className="bg-viaturas-50 border border-viaturas-200 rounded-lg p-4 space-y-4">
+          <p className="text-sm font-semibold text-viaturas-900">🔑 Preços do aluguer</p>
+          <p className="text-xs text-viaturas-600">
+            Só o preço por dia é obrigatório — os restantes escalões são opcionais, mas
+            ajudam quem quer alugar por mais tempo (tal como nos sites de rent-a-car).
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Preço por dia (EUR) *</label>
+              <input
+                name="precoDia"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_dia ?? ""}
+                placeholder="35.00"
+                required
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Preço 3 dias (EUR)</label>
+              <input
+                name="preco3Dias"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_3_dias ?? ""}
+                placeholder="90.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Preço 1 semana (EUR)</label>
+              <input
+                name="precoSemana"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_semana ?? ""}
+                placeholder="170.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Preço 2 semanas (EUR)</label>
+              <input
+                name="preco2Semanas"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_2_semanas ?? ""}
+                placeholder="300.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Preço 1 mês (EUR)</label>
+              <input
+                name="precoMes"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_mes ?? ""}
+                placeholder="500.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Caução (EUR)</label>
+              <input
+                name="caucao"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.caucao ?? ""}
+                placeholder="250.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Seguro</label>
+            <select
+              name="seguroIncluido"
+              defaultValue={inicial?.seguro ?? "Incluído"}
+              className="w-full border rounded-lg p-2 mt-1"
+            >
+              {SEGURO_OPCOES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
           </div>
         </div>
       )}

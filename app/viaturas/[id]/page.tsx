@@ -162,6 +162,51 @@ export default async function ViaturaAdPage({
                   Este leilão ainda não tem dados associados — tenta novamente dentro de instantes.
                 </div>
               )
+            ) : ad.type === "comprar" ? (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-purple-600 font-semibold mb-1">🔍 Anúncio de procura</p>
+                <p className="text-2xl font-bold text-purple-900">
+                  {ad.price == null ? "Orçamento a combinar" : `Orçamento até €${ad.price.toFixed(2)}`}
+                </p>
+              </div>
+            ) : ad.type === "ceder" ? (
+              <div className="text-2xl font-bold text-green-700 mb-6">🤝 CEDÊNCIA GRÁTIS</div>
+            ) : ad.type === "alugar" ? (
+              <div className="mb-6">
+                <div className="text-2xl font-bold text-viaturas-700 mb-3">
+                  €{ad.price != null ? ad.price.toFixed(2) : "—"}<span className="text-base font-medium text-viaturas-600">/dia</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+                  {d.preco_3_dias && (
+                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-viaturas-600">3 dias</p>
+                      <p className="font-bold text-viaturas-900">€{Number(d.preco_3_dias).toFixed(2)}</p>
+                    </div>
+                  )}
+                  {d.preco_semana && (
+                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-viaturas-600">1 semana</p>
+                      <p className="font-bold text-viaturas-900">€{Number(d.preco_semana).toFixed(2)}</p>
+                    </div>
+                  )}
+                  {d.preco_2_semanas && (
+                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-viaturas-600">2 semanas</p>
+                      <p className="font-bold text-viaturas-900">€{Number(d.preco_2_semanas).toFixed(2)}</p>
+                    </div>
+                  )}
+                  {d.preco_mes && (
+                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
+                      <p className="text-xs text-viaturas-600">1 mês</p>
+                      <p className="font-bold text-viaturas-900">€{Number(d.preco_mes).toFixed(2)}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-4 text-sm text-viaturas-700">
+                  {d.seguro && <p>🛡️ Seguro: <strong>{d.seguro}</strong></p>}
+                  {d.caucao && <p>💶 Caução: <strong>€{Number(d.caucao).toFixed(2)}</strong></p>}
+                </div>
+              </div>
             ) : (
               <div className="text-2xl font-bold text-viaturas-700 mb-6">
                 {ad.price == null ? "Consultar preço" : "€" + ad.price.toFixed(2)}

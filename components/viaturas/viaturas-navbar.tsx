@@ -5,10 +5,20 @@ export default async function ViaturasNavbar() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Mensagens não lidas, só das conversas ligadas a anúncios de Viaturas.
+  // Mensagens não lidas -- conversas ligadas a anúncios de Viaturas MAIS
+  // as conversas diretas entre stands (ad_id null, module = "viaturas" --
+  // ver migration 20260828140000_stand_automovel_contacto_direto.sql).
   let unreadTotal = 0;
+  let isStandVerificado = false;
 
   if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_stand_automovel")
+      .eq("id", user.id)
+      .maybeSingle();
+    isStandVerificado = profile?.is_stand_automovel ?? false;
+
     const { data: viaturaAdIds } = await supabase
       .from("marketplace_ads")
       .select("id")
@@ -16,25 +26,28 @@ export default async function ViaturasNavbar() {
 
     const adIdSet = (viaturaAdIds || []).map((a: any) => a.id);
 
-    if (adIdSet.length > 0) {
-      const { data: convs } = await supabase
-        .from("marketplace_conversations")
-        .select("id")
-        .in("ad_id", adIdSet)
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
+    const orCondicao =
+      adIdSet.length > 0
+        ? `ad_id.in.(${adIdSet.join(",")}),and(ad_id.is.null,module.eq.viaturas)`
+        : `and(ad_id.is.null,module.eq.viaturas)`;
 
-      const convIds = (convs || []).map((c: any) => c.id);
+    const { data: convs } = await supabase
+      .from("marketplace_conversations")
+      .select("id")
+      .or(orCondicao)
+      .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
 
-      if (convIds.length > 0) {
-        const { count } = await supabase
-          .from("marketplace_messages")
-          .select("id", { count: "exact", head: true })
-          .in("conversation_id", convIds)
-          .neq("sender_id", user.id)
-          .is("read_at", null);
+    const convIds = (convs || []).map((c: any) => c.id);
 
-        unreadTotal = count || 0;
-      }
+    if (convIds.length > 0) {
+      const { count } = await supabase
+        .from("marketplace_messages")
+        .select("id", { count: "exact", head: true })
+        .in("conversation_id", convIds)
+        .neq("sender_id", user.id)
+        .is("read_at", null);
+
+      unreadTotal = count || 0;
     }
   }
 
@@ -48,6 +61,14 @@ export default async function ViaturasNavbar() {
         <div className="flex gap-3 items-center">
           {user ? (
             <>
+              {isStandVerificado && (
+                <Link href="/viaturas/stands">
+                  <button className="border border-viaturas-600 text-viaturas-50 font-medium py-2 px-4 rounded-lg hover:bg-viaturas-800">
+                    🤝 Stands
+                  </button>
+                </Link>
+              )}
+
               <Link href="/viaturas/mensagens" className="relative">
                 <button className="border border-viaturas-600 text-viaturas-50 font-medium py-2 px-4 rounded-lg hover:bg-viaturas-800 flex items-center gap-2">
                   💬 Mensagens

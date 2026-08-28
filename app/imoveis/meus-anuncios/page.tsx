@@ -62,6 +62,11 @@ export default async function MeusAnunciosImoveisPage() {
               {ad.price == null ? "Sob consulta" : "€" + ad.price.toLocaleString("pt-PT")}
             </p>
           )}
+          {(ad.type === "arrendamento" || ad.type === "quarto") && (
+            <p className="text-lg font-bold text-imoveis-700 mb-2">
+              {ad.price == null ? "Sob consulta" : "€" + ad.price.toLocaleString("pt-PT") + "/mês"}
+            </p>
+          )}
           <p className="text-sm text-imoveis-500">📍 {ad.location}</p>
         </div>
       </div>

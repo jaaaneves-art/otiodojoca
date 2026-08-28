@@ -28,6 +28,9 @@ interface ViaturaAd {
 const TYPE_BADGE_STYLE: Record<string, string> = {
   venda: "bg-viaturas-600 text-white",
   leilao: "bg-amber-800 text-white",
+  comprar: "bg-purple-600 text-white",
+  ceder: "bg-green-600 text-white",
+  alugar: "bg-viaturas-800 text-white",
 };
 
 const formatKm = (km: string | number | undefined) =>
@@ -86,6 +89,19 @@ export function ViaturaAdCard({
                 <p className="text-lg font-bold text-viaturas-700 mb-1">
                   {ad.price == null ? "Consultar" : `${ad.price.toFixed(2)} €`}
                   {ad.price_type === "negotiable" && ad.price != null && " (negociável)"}
+                </p>
+              )}
+              {ad.type === "comprar" && (
+                <p className="text-lg font-bold text-purple-700 mb-1">
+                  {ad.price == null ? "Orçamento a combinar" : `Até ${ad.price.toFixed(2)} €`}
+                </p>
+              )}
+              {ad.type === "ceder" && (
+                <p className="text-lg font-bold text-green-700 mb-1">Grátis</p>
+              )}
+              {ad.type === "alugar" && (
+                <p className="text-lg font-bold text-viaturas-700 mb-1">
+                  {ad.price == null ? "Consultar" : `${ad.price.toFixed(2)} €/dia`}
                 </p>
               )}
               {ad.type === "leilao" && ad.auction && (

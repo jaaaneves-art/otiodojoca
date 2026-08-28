@@ -13,6 +13,7 @@ create table "public"."profiles" (
   "two_factor_enabled"     boolean                  not null default false,
   "mfa_setup_dismissed_at" timestamp with time zone,
   "deleted_at"             timestamp with time zone,
+  "is_stand_automovel"     boolean                  not null default false,
   constraint "profiles_id_fkey" foreign key (id) references auth.users(id) on delete cascade,
   constraint "profiles_pkey" primary key (id),
   constraint "profiles_username_key" unique (username)
@@ -25,6 +26,13 @@ alter table "public"."profiles"
   add column "role" public.user_role not null default 'user'::public.user_role;
 
 create index idx_profiles_username on public.profiles using btree (username);
+
+-- Sem grant de UPDATE para "authenticated" -- mesmo padrão da coluna
+-- "role" (só postgres/service_role podem ativar isto; ver
+-- app/admin/entidades/actions.ts, que usa lib/supabase/admin.ts).
+create index idx_profiles_stand_automovel
+  on public.profiles using btree (is_stand_automovel)
+  where is_stand_automovel = true;
 
 create trigger profiles_updated_at
   before update on public.profiles

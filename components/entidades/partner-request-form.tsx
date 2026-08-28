@@ -10,16 +10,21 @@ type Categoria = { id: number; nome: string; icone?: string | null };
 export function PartnerRequestForm({
   categorias,
   userEmail,
+  tipoEntidade = "outro",
 }: {
   categorias: Categoria[];
   userEmail?: string | null;
+  /** "outro" (omissão, Associação/Cooperativa/Produtor/Empresa) ou "stand_automovel". */
+  tipoEntidade?: "outro" | "stand_automovel";
 }) {
+  const isStandAutomovel = tipoEntidade === "stand_automovel";
   const supabase = createClient();
   const [nomeEntidade, setNomeEntidade] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
   const [localizacao, setLocalizacao] = useState("");
   const [email, setEmail] = useState(userEmail ?? "");
   const [telefone, setTelefone] = useState("");
+  const [codigoAtividade, setCodigoAtividade] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,12 +44,13 @@ export function PartnerRequestForm({
 
     const { error: insertError } = await supabase.from("entidade_pedidos").insert({
       profile_id: auth.user.id,
-      tipo_entidade: "outro",
+      tipo_entidade: tipoEntidade,
       nome_entidade: nomeEntidade.trim(),
       categoria_id: categoriaId ? Number(categoriaId) : null,
       localizacao_texto: localizacao.trim() || null,
       contacto_email: email.trim() || null,
       contacto_telefone: telefone.trim() || null,
+      codigo_atividade: codigoAtividade.trim() || null,
       mensagem: mensagem.trim() || null,
     });
 
@@ -85,29 +91,31 @@ export function PartnerRequestForm({
           required
           value={nomeEntidade}
           onChange={(e) => setNomeEntidade(e.target.value)}
-          placeholder="ex.: Junta de Freguesia de..."
+          placeholder={isStandAutomovel ? "ex.: Stand Auto Silva" : "ex.: Junta de Freguesia de..."}
         />
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="categoria" className="text-sm font-medium">
-          Tipo de entidade
-        </label>
-        <select
-          id="categoria"
-          value={categoriaId}
-          onChange={(e) => setCategoriaId(e.target.value)}
-          className="flex h-10 w-full rounded-lg border border-terra-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-terra-400 focus:border-transparent"
-        >
-          <option value="">Selecionar…</option>
-          {categorias.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.icone ? `${c.icone} ` : ""}
-              {c.nome}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!isStandAutomovel && (
+        <div className="space-y-2">
+          <label htmlFor="categoria" className="text-sm font-medium">
+            Tipo de entidade
+          </label>
+          <select
+            id="categoria"
+            value={categoriaId}
+            onChange={(e) => setCategoriaId(e.target.value)}
+            className="flex h-10 w-full rounded-lg border border-terra-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-terra-400 focus:border-transparent"
+          >
+            <option value="">Selecionar…</option>
+            {categorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.icone ? `${c.icone} ` : ""}
+                {c.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="space-y-2">
         <label htmlFor="localizacao" className="text-sm font-medium">
@@ -143,6 +151,34 @@ export function PartnerRequestForm({
             onChange={(e) => setTelefone(e.target.value)}
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="codigo_atividade" className="text-sm font-medium">
+          Código de Atividade Económica (CAE){isStandAutomovel ? " *" : " — opcional"}
+        </label>
+        <Input
+          id="codigo_atividade"
+          required={isStandAutomovel}
+          value={codigoAtividade}
+          onChange={(e) => setCodigoAtividade(e.target.value)}
+          placeholder="ex.: 45110"
+        />
+        <p className="text-xs text-terra-500">
+          Consulta o CAE da tua empresa no Portal das Finanças ou no cartão de empresa (IRN).
+        </p>
+        {isStandAutomovel && !codigoAtividade.trim().startsWith("45") && codigoAtividade.trim().length > 0 && (
+          <p className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
+            ⚠️ Este CAE não parece ser do setor automóvel (Secção G, Divisão 45). Podes enviar
+            na mesma — a nossa equipa confirma manualmente.
+          </p>
+        )}
+        {codigoAtividade.trim().startsWith("45") && (
+          <p className="rounded-lg bg-viaturas-50 border border-viaturas-200 p-3 text-xs text-viaturas-800">
+            🚗 Este CAE é do setor automóvel — se o pedido for aprovado, a tua conta passa a
+            poder contactar diretamente outros stands verificados no StandGo.
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">

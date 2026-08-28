@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { EntryChoiceModal } from "@/components/entidades/entry-choice-modal";
 import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark, Recycle, Car, Home } from "lucide-react";
 
 export default async function HomePage() {
@@ -70,12 +69,6 @@ export default async function HomePage() {
           )}
         </div>
 
-        {!user && (
-          <div className="max-w-2xl mx-auto mb-4">
-            <EntryChoiceModal />
-          </div>
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 py-12">
           <FeatureCard
             icon={<MessageSquare className="w-8 h-8" />}
@@ -104,13 +97,13 @@ export default async function HomePage() {
           <FeatureCard
             icon={<Car className="w-8 h-8" />}
             title="StandGo"
-            description="Compra e vende viaturas — venda direta ou em leilão."
+            description="Compra, vende, aluga ou cede viaturas — venda direta, leilão ou aluguer."
             href="/viaturas"
           />
           <FeatureCard
             icon={<Home className="w-8 h-8" />}
             title="Imóveis"
-            description="Compra, vende e leiloa imóveis — apartamentos, moradias, terrenos e mais."
+            description="Compra, vende, arrenda, permuta ou troca por companhia — apartamentos, quartos, moradias, terrenos e mais."
             href="/imoveis"
           />
           <FeatureCard

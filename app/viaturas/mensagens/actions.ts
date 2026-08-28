@@ -137,5 +137,10 @@ export async function markAsRead(conversationId: number) {
     .neq("sender_id", user.id)
     .is("read_at", null);
 
-  revalidatePath("/viaturas/mensagens");
+  // Sem revalidatePath aqui de propósito: esta função é chamada durante o
+  // render da página da conversa (app/viaturas/mensagens/[id]/page.tsx), e
+  // o Next.js 16 não permite revalidatePath durante o render -- dá "used
+  // revalidatePath ... during render which is unsupported". O próprio
+  // pedido já traz os dados frescos; a lista em /viaturas/mensagens já
+  // corre sempre dinâmica (usa auth/cookies), não fica em cache.
 }

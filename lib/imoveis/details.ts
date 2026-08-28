@@ -39,5 +39,67 @@ export function buildImovelDetails(type: string, formData: FormData): Record<str
     details.ends_at = endsAt;
   }
 
+  if (type === "arrendamento") {
+    const mobilado = formData.get("mobilado") as string;
+    const despesasIncluidas = formData.get("despesasIncluidas") as string;
+    const caucao = formData.get("caucao") as string;
+    const disponivelDesde = formData.get("disponivelDesde") as string;
+    const duracaoMinima = formData.get("duracaoMinima") as string;
+    if (mobilado) details.mobilado = mobilado;
+    if (despesasIncluidas) details.despesas_incluidas = despesasIncluidas;
+    if (caucao) details.caucao = caucao;
+    if (disponivelDesde) details.disponivel_desde = disponivelDesde;
+    if (duracaoMinima) details.duracao_minima = duracaoMinima;
+  }
+
+  if (type === "permuta") {
+    const procuraEmTroca = formData.get("procuraEmTroca") as string;
+    const aceitaComDiferenca = formData.get("aceitaComDiferenca") as string;
+    if (procuraEmTroca) details.procura_em_troca = procuraEmTroca;
+    if (aceitaComDiferenca) details.aceita_com_diferenca = "true";
+  }
+
+  if (type === "quarto") {
+    const tipoQuarto = formData.get("tipoQuarto") as string;
+    const casaBanho = formData.get("casaBanho") as string;
+    const pessoasNaCasa = formData.get("pessoasNaCasa") as string;
+    const aceitaCasais = formData.get("aceitaCasais") as string;
+    const mobilado = formData.get("mobilado") as string;
+    const despesasIncluidas = formData.get("despesasIncluidas") as string;
+    const caucao = formData.get("caucao") as string;
+    const disponivelDesde = formData.get("disponivelDesde") as string;
+    const duracaoMinima = formData.get("duracaoMinima") as string;
+    const comodidades = formData.getAll("comodidades") as string[];
+    if (tipoQuarto) details.tipo_quarto = tipoQuarto;
+    if (casaBanho) details.casa_banho = casaBanho;
+    if (pessoasNaCasa) details.pessoas_na_casa = pessoasNaCasa;
+    if (aceitaCasais) details.aceita_casais = "true";
+    if (mobilado) details.mobilado = mobilado;
+    if (despesasIncluidas) details.despesas_incluidas = despesasIncluidas;
+    if (caucao) details.caucao = caucao;
+    if (disponivelDesde) details.disponivel_desde = disponivelDesde;
+    if (duracaoMinima) details.duracao_minima = duracaoMinima;
+    if (comodidades.length > 0) details.comodidades = comodidades.join(",");
+  }
+
+  if (type === "companhia") {
+    const apoioEsperado = formData.get("apoioEsperado") as string;
+    const regrasDaCasa = formData.get("regrasDaCasa") as string;
+    const duracaoMinima = formData.get("duracaoMinima") as string;
+    if (apoioEsperado) details.apoio_esperado = apoioEsperado;
+    if (regrasDaCasa) details.regras_da_casa = regrasDaCasa;
+    if (duracaoMinima) details.duracao_minima = duracaoMinima;
+  }
+
+  // "Para estudantes" e "vagas disponíveis" (partilha de casa) aplicam-se a
+  // arrendamento e companhia — nos outros tipos o formulário nem sequer
+  // mostra estes campos (ver mostra("paraEstudantes") em
+  // imoveis-ad-form.tsx), por isso não há risco de aparecerem fora de
+  // contexto.
+  const paraEstudantes = formData.get("paraEstudantes") as string;
+  const vagasDisponiveis = formData.get("vagasDisponiveis") as string;
+  if (paraEstudantes) details.para_estudantes = "true";
+  if (vagasDisponiveis) details.vagas_disponiveis = vagasDisponiveis;
+
   return details;
 }

@@ -2,54 +2,43 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Rotas públicas: nunca exigem sessão nem MFA.
-// (login, registo, recuperação de password, callback de email/OAuth)
+// (página inicial, login, registo, recuperação de password, callback de
+// email/OAuth) -- a página inicial ("/") é a montra pública do site: tem de
+// abrir para visitantes não autenticados, com a caixa de entrar/criar conta,
+// e não deve nunca forçar redirect para /login. Os módulos aqui listados são
+// conteúdo informativo/institucional sem nenhuma rota de ação separada, por
+// isso ficam públicos por inteiro (a árvore toda do prefixo).
 const PUBLIC_PATH_PREFIXES = [
+  "/",
   "/login",
   "/registo",
   "/forgot-password",
   "/reset-password",
   "/auth",
-];
-
-// Secções de conteúdo público -- qualquer visitante pode ver a página
-// inicial, navegar os módulos de marketplace, ler o fórum, o almanaque,
-// etc., sem sessão nenhuma.
-//
-// Bug corrigido em 2026-08-27: antes disto, NENHUMA destas secções estava
-// listada como pública -- incluindo a própria "/". Um visitante sem conta
-// era mandado para /login só por tentar ver a homepage, o que tornava
-// impossível navegar o site sem te registares primeiro. Errado para uma
-// plataforma comunitária pública (o objetivo do gate de MFA sempre foi
-// proteger ações/dados pessoais, não bloquear a leitura pública).
-const PUBLIC_CONTENT_PREFIXES = [
-  "/almanaque",
-  "/alojamento",
+  "/forum",
   "/calendario",
   "/comer",
-  "/forum",
+  "/alojamento",
   "/freguesia",
-  "/gran-bazar",
-  "/imoveis",
-  "/lup",
-  "/mercado-da-terra",
-  "/parceiros",
-  "/viaturas",
+  "/freguesias",
 ];
 
-// Dentro das secções públicas acima, estes segmentos continuam sempre a
-// exigir sessão -- são ações pessoais (publicar, editar, mensagens,
-// favoritos, "os meus anúncios", pedidos de parceria), nunca leitura
-// pública, mesmo que vivam debaixo de um prefixo público (ex:
-// "/gran-bazar/novo").
-const PRIVATE_ACTION_SEGMENTS = [
-  "/novo",
-  "/editar",
-  "/mensagens",
-  "/messages",
-  "/favoritos",
-  "/meus-anuncios",
-  "/pedido",
-];
+// Módulos tipo "montra" (mercados/leilões): ver anúncios e detalhes é
+// público -- só as ações que pressupõem conta (publicar, editar, mensagens,
+// meus anúncios, favoritos, pedidos) continuam a exigir sessão. Registo só é
+// obrigatório para interagir, nunca só para ver. A chave é o prefixo do
+// módulo; o valor é a lista dos primeiros segmentos a seguir ao prefixo que
+// ficam de fora do acesso público (todo o resto -- a listagem, "/leiloes",
+// e a página de detalhe "/[id]" -- é público).
+const PUBLIC_VIEW_MODULES: Record<string, string[]> = {
+  "/gran-bazar": ["novo", "editar", "mensagens", "meus-anuncios", "favoritos"],
+  "/imoveis": ["novo", "editar", "mensagens", "meus-anuncios", "favoritos"],
+  "/lup": ["novo", "editar", "mensagens", "meus-anuncios", "favoritos"],
+  "/viaturas": ["novo", "editar", "mensagens", "meus-anuncios", "favoritos"],
+  "/mercado-da-terra": ["novo", "editar", "messages", "meus-anuncios", "favoritos"],
+  "/almanaque": ["dashboard"],
+  "/parceiros": ["pedido"],
+};
 
 // Rotas do próprio fluxo de MFA: exigem sessão (AAL1) mas não AAL2 --
 // é precisamente aqui que se completa o AAL2.
@@ -59,10 +48,17 @@ function matchesPrefix(pathname: string, prefixes: string[]) {
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-function isPublicContentRoute(pathname: string) {
-  if (pathname === "/") return true;
-  if (!matchesPrefix(pathname, PUBLIC_CONTENT_PREFIXES)) return false;
-  return !PRIVATE_ACTION_SEGMENTS.some((seg) => pathname.includes(seg));
+function isPublicModuleView(pathname: string) {
+  for (const [moduleRoot, privateSegments] of Object.entries(
+    PUBLIC_VIEW_MODULES
+  )) {
+    if (pathname === moduleRoot) return true;
+    if (pathname.startsWith(`${moduleRoot}/`)) {
+      const firstSegment = pathname.slice(moduleRoot.length + 1).split("/")[0];
+      return !privateSegments.includes(firstSegment);
+    }
+  }
+  return false;
 }
 
 export async function updateSession(request: NextRequest) {
@@ -109,9 +105,12 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Rotas totalmente públicas (login/registo/etc.) e conteúdo público
-  // (homepage, módulos de marketplace, fórum, almanaque, ...).
-  if (matchesPrefix(pathname, PUBLIC_PATH_PREFIXES) || isPublicContentRoute(pathname)) {
+  // Rotas totalmente públicas + páginas de visualização dos módulos tipo
+  // montra (ver é público, interagir exige conta -- ver PUBLIC_VIEW_MODULES).
+  if (
+    matchesPrefix(pathname, PUBLIC_PATH_PREFIXES) ||
+    isPublicModuleView(pathname)
+  ) {
     return supabaseResponse;
   }
 

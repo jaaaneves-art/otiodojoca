@@ -11,8 +11,11 @@ export default async function InboxViaturasPage() {
     redirect("/login");
   }
 
-  // As conversas são genéricas (ligadas só por ad_id) — para mostrar aqui
-  // só as de Viaturas, primeiro filtramos os ids de anúncios deste módulo.
+  // As conversas ligadas a anúncio são genéricas (só por ad_id) — para
+  // mostrar aqui só as de Viaturas, filtramos os ids de anúncios deste
+  // módulo. As conversas DIRETAS entre stands (ad_id null) não têm
+  // anúncio para as identificar, por isso usam a coluna "module" (ver
+  // migration 20260828140000_stand_automovel_contacto_direto.sql).
   const { data: viaturaAds } = await supabase
     .from("marketplace_ads")
     .select("id")
@@ -20,20 +23,22 @@ export default async function InboxViaturasPage() {
 
   const viaturaAdIds = (viaturaAds || []).map((a: any) => a.id);
 
-  let conversationList: any[] = [];
-  if (viaturaAdIds.length > 0) {
-    const { data: conversations } = await supabase
-      .from("marketplace_conversations")
-      .select(`
-        id, ad_id, buyer_id, seller_id, updated_at, created_at,
-        ad:marketplace_ads(id, title, price, price_type, status, details)
-      `)
-      .in("ad_id", viaturaAdIds)
-      .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
-      .order("updated_at", { ascending: false });
+  const orCondicao =
+    viaturaAdIds.length > 0
+      ? `ad_id.in.(${viaturaAdIds.join(",")}),and(ad_id.is.null,module.eq.viaturas)`
+      : `and(ad_id.is.null,module.eq.viaturas)`;
 
-    conversationList = conversations || [];
-  }
+  const { data: conversations } = await supabase
+    .from("marketplace_conversations")
+    .select(`
+      id, ad_id, buyer_id, seller_id, updated_at, created_at,
+      ad:marketplace_ads(id, title, price, price_type, status, details)
+    `)
+    .or(orCondicao)
+    .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+    .order("updated_at", { ascending: false });
+
+  const conversationList = conversations || [];
 
   const participantIds = Array.from(
     new Set(conversationList.flatMap((c: any) => [c.buyer_id, c.seller_id]))
@@ -71,7 +76,7 @@ export default async function InboxViaturasPage() {
     return { ...conv, lastMsg, unreadCount: unreadCount || 0, otherParty, isBuyer };
   }));
 
-  const adIds = enriched.map((c: any) => c.ad_id);
+  const adIds = enriched.map((c: any) => c.ad_id).filter((id: any) => id != null);
   const photosMap: Record<number, string> = {};
   if (adIds.length > 0) {
     const { data: photos } = await supabase
@@ -107,8 +112,11 @@ export default async function InboxViaturasPage() {
                 const preview = conv.lastMsg?.content || "Sem mensagens";
                 const previewTruncated = preview.length > 60 ? preview.substring(0, 60) + "..." : preview;
                 const hasUnread = conv.unreadCount > 0;
+                const isDirect = conv.ad_id == null;
                 const d = conv.ad?.details ?? {};
-                const adTitulo = d.marca && d.modelo ? `${d.marca} ${d.modelo}` : (conv.ad?.title || "Anúncio removido");
+                const adTitulo = isDirect
+                  ? "🤝 Conversa direta com stand"
+                  : d.marca && d.modelo ? `${d.marca} ${d.modelo}` : (conv.ad?.title || "Anúncio removido");
 
                 return (
                   <Link key={conv.id} href={`/viaturas/mensagens/${conv.id}`}>
@@ -116,7 +124,7 @@ export default async function InboxViaturasPage() {
                       {photo ? (
                         <img src={photo} alt={adTitulo} className="w-16 h-16 object-cover rounded-lg" />
                       ) : (
-                        <div className="w-16 h-16 bg-viaturas-50 rounded-lg flex items-center justify-center text-2xl">🚗</div>
+                        <div className="w-16 h-16 bg-viaturas-50 rounded-lg flex items-center justify-center text-2xl">{isDirect ? "🤝" : "🚗"}</div>
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
@@ -126,7 +134,7 @@ export default async function InboxViaturasPage() {
                           )}
                         </div>
                         <p className="text-sm text-viaturas-600 mb-1">
-                          {conv.isBuyer ? "Anunciante" : "Interessado"}: <span className="font-medium">{otherName}</span>
+                          {isDirect ? "Stand" : conv.isBuyer ? "Anunciante" : "Interessado"}: <span className="font-medium">{otherName}</span>
                         </p>
                         <p className={`text-sm truncate ${hasUnread ? "text-viaturas-900 font-medium" : "text-viaturas-500"}`}>{previewTruncated}</p>
                       </div>

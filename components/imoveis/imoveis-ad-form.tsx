@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ImageUpload from "@/components/mercado-da-terra/image-upload";
 import { MunicipioAutocomplete } from "@/components/mercado-da-terra/municipio-autocomplete";
-import { IMOVEL_AD_TYPES, getImovelAdType, PROPERTY_CONDITIONS } from "@/lib/imoveis/ad-types";
+import { IMOVEL_AD_TYPES, getImovelAdType, PROPERTY_CONDITIONS, COMODIDADES_QUARTO } from "@/lib/imoveis/ad-types";
 
 interface Categoria { id: number; name: string; }
 interface Municipio { nome: string; distrito_regiao: string; }
@@ -29,6 +29,22 @@ interface AdInicial {
   /** ISO (UTC) — idem */
   auction_ends_at?: string | null;
   auction_status?: string | null;
+  mobilado?: string | null;
+  despesas_incluidas?: string | null;
+  caucao?: number | null;
+  disponivel_desde?: string | null;
+  duracao_minima?: number | null;
+  para_estudantes?: boolean | string | null;
+  vagas_disponiveis?: number | null;
+  procura_em_troca?: string | null;
+  aceita_com_diferenca?: boolean | string | null;
+  apoio_esperado?: string | null;
+  regras_da_casa?: string | null;
+  tipo_quarto?: string | null;
+  casa_banho?: string | null;
+  pessoas_na_casa?: number | null;
+  comodidades?: string | null;
+  aceita_casais?: boolean | string | null;
 }
 
 // <input type="datetime-local"> não sabe nada de fusos-horários — mesma
@@ -102,7 +118,7 @@ export function ImovelAdForm({
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl border border-imoveis-200 space-y-4">
       <div>
         <label className="text-sm font-medium">Tipo de anúncio *</label>
-        <div className="grid grid-cols-2 gap-2 mt-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
           {Object.values(IMOVEL_AD_TYPES).map((type) => (
             <button
               key={type.id}
@@ -146,20 +162,22 @@ export function ImovelAdForm({
         />
       </div>
 
-      <div>
-        <label className="text-sm font-medium">Tipo de imóvel *</label>
-        <select
-          name="categoryId"
-          defaultValue={inicial?.category_id ?? ""}
-          required
-          className="w-full border rounded-lg p-2 mt-1"
-        >
-          <option value="">Seleciona um tipo</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-      </div>
+      {mostra("categoryId") && (
+        <div>
+          <label className="text-sm font-medium">Tipo de imóvel *</label>
+          <select
+            name="categoryId"
+            defaultValue={inicial?.category_id ?? ""}
+            required
+            className="w-full border rounded-lg p-2 mt-1"
+          >
+            <option value="">Seleciona um tipo</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {mostra("price") && (
         <div className="grid grid-cols-2 gap-4">
@@ -176,14 +194,16 @@ export function ImovelAdForm({
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium">Preço (EUR) *</label>
+            <label className="text-sm font-medium">
+              {tipo === "arrendamento" || tipo === "quarto" ? "Renda mensal (EUR) *" : "Preço (EUR) *"}
+            </label>
             <input
               name="price"
               type="number"
               step="0.01"
               min="0"
               defaultValue={inicial?.price ?? ""}
-              placeholder="250000"
+              placeholder={tipo === "arrendamento" || tipo === "quarto" ? "350" : "250000"}
               required
               className="w-full border rounded-lg p-2 mt-1"
             />
@@ -191,6 +211,7 @@ export function ImovelAdForm({
         </div>
       )}
 
+      {tipo !== "quarto" && (
       <div className="bg-imoveis-50 border border-imoveis-100 rounded-lg p-4 space-y-4">
         <p className="text-sm font-semibold text-imoveis-900">🏠 Características do imóvel</p>
         <div className="grid grid-cols-2 gap-4">
@@ -257,6 +278,329 @@ export function ImovelAdForm({
           </div>
         </div>
       </div>
+      )}
+
+      {mostra("tipoQuarto") && (
+        <div className="bg-imoveis-50 border border-imoveis-100 rounded-lg p-4 space-y-4">
+          <p className="text-sm font-semibold text-imoveis-900">🛏️ Detalhes do quarto</p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Área do quarto (m²) *</label>
+              <input
+                name="area"
+                type="number"
+                min="0"
+                defaultValue={inicial?.area ?? ""}
+                placeholder="12"
+                required
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Quartos na casa</label>
+              <input
+                name="bedrooms"
+                type="number"
+                min="0"
+                defaultValue={inicial?.bedrooms ?? ""}
+                placeholder="3"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Tipo de quarto *</label>
+              <select
+                name="tipoQuarto"
+                defaultValue={inicial?.tipo_quarto ?? ""}
+                required
+                className="w-full border rounded-lg p-2 mt-1"
+              >
+                <option value="">Seleciona</option>
+                <option value="privado">Privado (só para ti)</option>
+                <option value="partilhado">Partilhado (com outra pessoa)</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Casa de banho *</label>
+              <select
+                name="casaBanho"
+                defaultValue={inicial?.casa_banho ?? ""}
+                required
+                className="w-full border rounded-lg p-2 mt-1"
+              >
+                <option value="">Seleciona</option>
+                <option value="privada">Privada</option>
+                <option value="partilhada">Partilhada</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Pessoas a viver na casa</label>
+              <input
+                name="pessoasNaCasa"
+                type="number"
+                min="0"
+                defaultValue={inicial?.pessoas_na_casa ?? ""}
+                placeholder="Ex: 3, incluindo quem arrenda"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Mobilado</label>
+              <select
+                name="mobilado"
+                defaultValue={inicial?.mobilado ?? ""}
+                className="w-full border rounded-lg p-2 mt-1"
+              >
+                <option value="">Não especificado</option>
+                <option value="sim">Sim</option>
+                <option value="nao">Não</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Comodidades da casa</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
+              {COMODIDADES_QUARTO.map((c) => (
+                <label key={c.value} className="flex items-center gap-2 text-sm border border-imoveis-200 rounded-lg p-2">
+                  <input
+                    type="checkbox"
+                    name="comodidades"
+                    value={c.value}
+                    defaultChecked={inicial?.comodidades?.split(",").includes(c.value) ?? false}
+                  />
+                  {c.icon} {c.label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Despesas incluídas</label>
+              <select
+                name="despesasIncluidas"
+                defaultValue={inicial?.despesas_incluidas ?? ""}
+                className="w-full border rounded-lg p-2 mt-1"
+              >
+                <option value="">Não especificado</option>
+                <option value="sim">Sim</option>
+                <option value="nao">Não</option>
+                <option value="parcialmente">Parcialmente</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Caução (EUR)</label>
+              <input
+                name="caucao"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.caucao ?? ""}
+                placeholder="Ex: 1 mês de renda"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Disponível a partir de</label>
+              <input
+                name="disponivelDesde"
+                type="date"
+                defaultValue={inicial?.disponivel_desde ?? ""}
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Duração mínima (meses)</label>
+              <input
+                name="duracaoMinima"
+                type="number"
+                min="0"
+                defaultValue={inicial?.duracao_minima ?? ""}
+                placeholder="12"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" name="aceitaCasais" value="true" defaultChecked={!!inicial?.aceita_casais} />
+            Aceita casais
+          </label>
+
+          <div>
+            <label className="text-sm font-medium">Regras da casa</label>
+            <textarea
+              name="regrasDaCasa"
+              rows={2}
+              defaultValue={inicial?.regras_da_casa ?? ""}
+              placeholder="Fumar, animais, visitas, horários..."
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" name="paraEstudantes" value="true" defaultChecked={!!inicial?.para_estudantes} />
+            🎓 Dirigido a estudantes
+          </label>
+        </div>
+      )}
+
+      {mostra("mobilado") && tipo !== "quarto" && (
+        <div className="bg-imoveis-50 border border-imoveis-100 rounded-lg p-4 space-y-4">
+          <p className="text-sm font-semibold text-imoveis-900">🔑 Condições do arrendamento</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium">Mobilado</label>
+              <select
+                name="mobilado"
+                defaultValue={inicial?.mobilado ?? ""}
+                className="w-full border rounded-lg p-2 mt-1"
+              >
+                <option value="">Não especificado</option>
+                <option value="sim">Sim</option>
+                <option value="nao">Não</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Despesas incluídas</label>
+              <select
+                name="despesasIncluidas"
+                defaultValue={inicial?.despesas_incluidas ?? ""}
+                className="w-full border rounded-lg p-2 mt-1"
+              >
+                <option value="">Não especificado</option>
+                <option value="sim">Sim</option>
+                <option value="nao">Não</option>
+                <option value="parcialmente">Parcialmente</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium">Caução (EUR)</label>
+              <input
+                name="caucao"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.caucao ?? ""}
+                placeholder="Ex: 1 mês de renda"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Disponível a partir de</label>
+              <input
+                name="disponivelDesde"
+                type="date"
+                defaultValue={inicial?.disponivel_desde ?? ""}
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Duração mínima (meses)</label>
+              <input
+                name="duracaoMinima"
+                type="number"
+                min="0"
+                defaultValue={inicial?.duracao_minima ?? ""}
+                placeholder="12"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {mostra("paraEstudantes") && tipo !== "quarto" && (
+        <div className="bg-imoveis-50 border border-imoveis-100 rounded-lg p-4 space-y-3">
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" name="paraEstudantes" value="true" defaultChecked={!!inicial?.para_estudantes} />
+            🎓 Dirigido a estudantes
+          </label>
+          <div>
+            <label className="text-sm font-medium">Vagas disponíveis na casa</label>
+            <input
+              name="vagasDisponiveis"
+              type="number"
+              min="0"
+              defaultValue={inicial?.vagas_disponiveis ?? ""}
+              placeholder="Ex: 1, se for um quarto numa casa partilhada"
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+        </div>
+      )}
+
+      {mostra("procuraEmTroca") && (
+        <div className="bg-imoveis-50 border border-imoveis-100 rounded-lg p-4 space-y-4">
+          <p className="text-sm font-semibold text-imoveis-900">🔄 Permuta</p>
+          <div>
+            <label className="text-sm font-medium">O que procuras em troca? *</label>
+            <textarea
+              name="procuraEmTroca"
+              rows={3}
+              defaultValue={inicial?.procura_em_troca ?? ""}
+              placeholder="Ex: apartamento T2 na mesma zona, ou terreno rústico"
+              required
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" name="aceitaComDiferenca" value="true" defaultChecked={!!inicial?.aceita_com_diferenca} />
+            Aceito compensar/receber diferença em dinheiro
+          </label>
+        </div>
+      )}
+
+      {mostra("apoioEsperado") && (
+        <div className="bg-imoveis-50 border border-imoveis-100 rounded-lg p-4 space-y-4">
+          <p className="text-sm font-semibold text-imoveis-900">🤝 Troca por companhia</p>
+          <div>
+            <label className="text-sm font-medium">O que se espera da pessoa? *</label>
+            <textarea
+              name="apoioEsperado"
+              rows={3}
+              defaultValue={inicial?.apoio_esperado ?? ""}
+              placeholder="Ex: companhia, pequenas tarefas domésticas, ajuda em deslocações..."
+              required
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Regras da casa</label>
+            <textarea
+              name="regrasDaCasa"
+              rows={2}
+              defaultValue={inicial?.regras_da_casa ?? ""}
+              placeholder="Horários, visitas, animais..."
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Duração mínima (meses)</label>
+            <input
+              name="duracaoMinima"
+              type="number"
+              min="0"
+              defaultValue={inicial?.duracao_minima ?? ""}
+              placeholder="Ex: 9, se for um ano letivo"
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+        </div>
+      )}
 
       {mostra("auctionStartPrice") && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-4">

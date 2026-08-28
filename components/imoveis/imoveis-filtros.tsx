@@ -13,6 +13,10 @@ interface FiltrosProps {
 const MODOS = [
   { value: "", label: "Todos", icon: "🏠" },
   { value: "venda", label: "Venda", icon: "💰" },
+  { value: "arrendamento", label: "Arrendamento", icon: "🔑" },
+  { value: "quarto", label: "Quarto", icon: "🛏️" },
+  { value: "permuta", label: "Permuta", icon: "🔄" },
+  { value: "companhia", label: "Troca por companhia", icon: "🤝" },
   { value: "leilao", label: "Leilão", icon: "🔨" },
 ];
 
@@ -26,6 +30,7 @@ export default function ImoveisFiltros({ categories }: FiltrosProps) {
   const [maxPrice, setMaxPrice] = useState(searchParams.get("max") ?? "");
   const [bedrooms, setBedrooms] = useState(searchParams.get("quartos") ?? "");
   const [sort, setSort] = useState(searchParams.get("sort") ?? "recentes");
+  const [paraEstudantes, setParaEstudantes] = useState(searchParams.get("estudantes") === "1");
   const [showFilters, setShowFilters] = useState(false);
 
   const activeType = searchParams.get("type") ?? "";
@@ -34,6 +39,7 @@ export default function ImoveisFiltros({ categories }: FiltrosProps) {
     const params = new URLSearchParams();
     const values: Record<string, string> = {
       q: query, category, min: minPrice, max: maxPrice, quartos: bedrooms, sort, type: activeType,
+      estudantes: paraEstudantes ? "1" : "",
       ...overrides,
     };
     Object.entries(values).forEach(([key, val]) => {
@@ -54,18 +60,18 @@ export default function ImoveisFiltros({ categories }: FiltrosProps) {
   };
 
   const clearFilters = () => {
-    setQuery(""); setCategory(""); setMinPrice(""); setMaxPrice(""); setBedrooms(""); setSort("recentes");
+    setQuery(""); setCategory(""); setMinPrice(""); setMaxPrice(""); setBedrooms(""); setSort("recentes"); setParaEstudantes(false);
     router.push("/imoveis");
   };
 
-  const hasAdvancedFilters = category || minPrice || maxPrice || bedrooms || (sort && sort !== "recentes");
+  const hasAdvancedFilters = category || minPrice || maxPrice || bedrooms || paraEstudantes || (sort && sort !== "recentes");
 
   return (
     <div>
       {/* Hero + pesquisa */}
       <div className="bg-imoveis-900 rounded-2xl p-8 mb-6 text-center">
         <h2 className="text-3xl font-bold text-white mb-1">IMÓVEIS</h2>
-        <p className="text-imoveis-100 mb-6">Compra, vende e leiloa imóveis.</p>
+        <p className="text-imoveis-100 mb-6">Compra, vende, arrenda um quarto, permuta ou troca por companhia.</p>
         <form onSubmit={applyFilters} className="max-w-xl mx-auto flex gap-2">
           <input
             type="text"
@@ -175,6 +181,17 @@ export default function ImoveisFiltros({ categories }: FiltrosProps) {
                 <option value="preco-asc">Mais baratos</option>
                 <option value="preco-desc">Mais caros</option>
               </select>
+            </div>
+
+            <div className="flex items-end pb-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-imoveis-800">
+                <input
+                  type="checkbox"
+                  checked={paraEstudantes}
+                  onChange={(e) => setParaEstudantes(e.target.checked)}
+                />
+                🎓 Só para estudantes
+              </label>
             </div>
           </div>
 

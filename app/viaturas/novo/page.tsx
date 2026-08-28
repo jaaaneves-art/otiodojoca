@@ -65,6 +65,49 @@ async function createViaturaAd(formData: FormData) {
       ...(startsAt ? { starts_at: startsAt } : {}),
       ends_at: endsAt,
     };
+  } else if (type === "comprar") {
+    // "Procuro comprar" -- sem preço propriamente dito, só um orçamento
+    // opcional (o mesmo padrão do "procura" no Gran Bazar). price_type tem
+    // um CHECK na base de dados (fixed/negotiable/free) -- "budget" não é
+    // um valor válido, por isso fica a null (o orçamento vive só em
+    // details.budget e em price, para dar para ordenar/filtrar).
+    const budget = formData.get("budget") as string;
+    priceType = null;
+    price = budget ? parseFloat(budget) : null;
+    details = { ...veiculoDetails, budget: budget || "" };
+  } else if (type === "ceder") {
+    // Ceder = dar/entregar de graça ou por valor simbólico (equivalente ao
+    // "oferta" do Gran Bazar) -- sem preço.
+    priceType = "free";
+    price = null;
+  } else if (type === "alugar") {
+    const precoDia = formData.get("precoDia") as string;
+    const preco3Dias = formData.get("preco3Dias") as string;
+    const precoSemana = formData.get("precoSemana") as string;
+    const preco2Semanas = formData.get("preco2Semanas") as string;
+    const precoMes = formData.get("precoMes") as string;
+    const caucao = formData.get("caucao") as string;
+    const seguro = (formData.get("seguroIncluido") as string) || "Incluído";
+
+    if (!precoDia) {
+      throw new Error("Alugar: o preço por dia é obrigatório");
+    }
+
+    // "fixed" (não "aluguer") porque price_type tem um CHECK na base de
+    // dados restrito a fixed/negotiable/free -- é mesmo um preço fixo
+    // (por dia), só que com esta o preço por dia guardado.
+    priceType = "fixed";
+    price = parseFloat(precoDia);
+    details = {
+      ...veiculoDetails,
+      preco_dia: precoDia,
+      ...(preco3Dias ? { preco_3_dias: preco3Dias } : {}),
+      ...(precoSemana ? { preco_semana: precoSemana } : {}),
+      ...(preco2Semanas ? { preco_2_semanas: preco2Semanas } : {}),
+      ...(precoMes ? { preco_mes: precoMes } : {}),
+      ...(caucao ? { caucao } : {}),
+      seguro,
+    };
   }
 
   const { data: ad, error: adError } = await supabase
@@ -150,8 +193,8 @@ export default async function NovoAnuncioViaturaPage() {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-viaturas-900">Vender Viatura</h1>
-            <p className="text-viaturas-700 mt-2">Venda direta ou leilão — tu escolhes</p>
+            <h1 className="text-3xl font-bold text-viaturas-900">Publicar Anúncio</h1>
+            <p className="text-viaturas-700 mt-2">Venda, leilão, procura, cedência ou aluguer — tu escolhes</p>
           </div>
 
           <ViaturaAdForm

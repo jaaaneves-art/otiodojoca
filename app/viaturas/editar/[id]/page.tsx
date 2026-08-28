@@ -98,6 +98,42 @@ export default async function EditarAnuncioViaturaPage({
     if (type === "venda") {
       priceType = (formData.get("priceType") as string) || "fixed";
       price = formData.get("price") ? parseFloat(formData.get("price") as string) : null;
+    } else if (type === "comprar") {
+      // price_type tem um CHECK (fixed/negotiable/free) -- "budget" não é
+      // valor válido, fica a null (ver a mesma nota em novo/page.tsx).
+      const budget = formData.get("budget") as string;
+      priceType = null;
+      price = budget ? parseFloat(budget) : null;
+      details = { ...veiculoDetails, budget: budget || "" };
+    } else if (type === "ceder") {
+      priceType = "free";
+      price = null;
+    } else if (type === "alugar") {
+      const precoDia = formData.get("precoDia") as string;
+      const preco3Dias = formData.get("preco3Dias") as string;
+      const precoSemana = formData.get("precoSemana") as string;
+      const preco2Semanas = formData.get("preco2Semanas") as string;
+      const precoMes = formData.get("precoMes") as string;
+      const caucao = formData.get("caucao") as string;
+      const seguro = (formData.get("seguroIncluido") as string) || "Incluído";
+
+      if (!precoDia) {
+        throw new Error("Alugar: o preço por dia é obrigatório");
+      }
+
+      // "fixed" -- ver a mesma nota em novo/page.tsx (CHECK de price_type).
+      priceType = "fixed";
+      price = parseFloat(precoDia);
+      details = {
+        ...veiculoDetails,
+        preco_dia: precoDia,
+        ...(preco3Dias ? { preco_3_dias: preco3Dias } : {}),
+        ...(precoSemana ? { preco_semana: precoSemana } : {}),
+        ...(preco2Semanas ? { preco_2_semanas: preco2Semanas } : {}),
+        ...(precoMes ? { preco_mes: precoMes } : {}),
+        ...(caucao ? { caucao } : {}),
+        seguro,
+      };
     } else if (type === "leilao" && !auction) {
       // Anúncio a mudar para "leilão" pela primeira vez (ainda não existe
       // nenhuma linha em marketplace_auctions) — monta aqui o mesmo payload
@@ -249,6 +285,14 @@ export default async function EditarAnuncioViaturaPage({
               potencia: d.potencia,
               condicao: d.condicao,
               tipo_vendedor: d.tipo_vendedor,
+              budget: d.budget,
+              preco_dia: d.preco_dia,
+              preco_3_dias: d.preco_3_dias,
+              preco_semana: d.preco_semana,
+              preco_2_semanas: d.preco_2_semanas,
+              preco_mes: d.preco_mes,
+              caucao: d.caucao,
+              seguro: d.seguro,
               auction_start_price: auction?.start_price,
               auction_minimum_increment: auction?.minimum_increment,
               auction_starts_at: auction?.starts_at,

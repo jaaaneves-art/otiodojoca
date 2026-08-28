@@ -5,7 +5,7 @@ import ContactSellerForm from "@/components/imoveis/contact-seller-form";
 import FavoriteButton from "@/components/imoveis/favorite-button";
 import ImoveisNavbar from "@/components/imoveis/imoveis-navbar";
 import AuctionPanel from "@/components/imoveis/auction-panel";
-import { IMOVEL_AD_TYPES, propertyConditionLabel } from "@/lib/imoveis/ad-types";
+import { IMOVEL_AD_TYPES, propertyConditionLabel, comodidadeLabel } from "@/lib/imoveis/ad-types";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Rascunho",
@@ -90,6 +90,27 @@ export default async function ImovelPage({
     { label: "WC", value: details.bathrooms != null ? details.bathrooms : null },
     { label: "Ano de construção", value: details.year_built != null ? details.year_built : null },
     { label: "Estado", value: propertyConditionLabel(details.condition) },
+    { label: "Mobilado", value: details.mobilado === "sim" ? "Sim" : details.mobilado === "nao" ? "Não" : null },
+    {
+      label: "Despesas incluídas",
+      value: details.despesas_incluidas === "sim" ? "Sim" : details.despesas_incluidas === "nao" ? "Não" : details.despesas_incluidas === "parcialmente" ? "Parcialmente" : null,
+    },
+    { label: "Caução", value: details.caucao != null ? `${Number(details.caucao).toLocaleString("pt-PT")} €` : null },
+    {
+      label: "Disponível a partir de",
+      value: details.disponivel_desde ? new Date(details.disponivel_desde).toLocaleDateString("pt-PT") : null,
+    },
+    { label: "Duração mínima", value: details.duracao_minima != null ? `${details.duracao_minima} meses` : null },
+    { label: "Vagas disponíveis", value: details.vagas_disponiveis != null ? details.vagas_disponiveis : null },
+    { label: "Dirigido a estudantes", value: details.para_estudantes ? "Sim" : null },
+    { label: "Tipo de quarto", value: details.tipo_quarto === "privado" ? "Privado" : details.tipo_quarto === "partilhado" ? "Partilhado" : null },
+    { label: "Casa de banho", value: details.casa_banho === "privada" ? "Privada" : details.casa_banho === "partilhada" ? "Partilhada" : null },
+    { label: "Pessoas a viver na casa", value: details.pessoas_na_casa != null ? details.pessoas_na_casa : null },
+    { label: "Aceita casais", value: details.aceita_casais ? "Sim" : null },
+    {
+      label: "Comodidades",
+      value: details.comodidades ? (details.comodidades as string).split(",").map(comodidadeLabel).join(", ") : null,
+    },
   ].filter((c) => c.value != null && c.value !== "—");
 
   return (
@@ -146,6 +167,31 @@ export default async function ImovelPage({
                   Este leilão ainda não tem dados associados — tenta novamente dentro de instantes.
                 </div>
               )
+            ) : ad.type === "arrendamento" || ad.type === "quarto" ? (
+              <div className="text-2xl font-bold text-imoveis-700 mb-6">
+                {ad.price == null ? "Renda sob consulta" : ad.price.toLocaleString("pt-PT") + " €/mês"}
+                {ad.price_type === "negotiable" && ad.price != null && " (negociável)"}
+              </div>
+            ) : ad.type === "permuta" ? (
+              <div className="mb-6">
+                <p className="text-xl font-bold text-purple-700 mb-2">🔄 Permuta</p>
+                {details.procura_em_troca && (
+                  <p className="text-imoveis-800 whitespace-pre-wrap">Procura em troca: {details.procura_em_troca}</p>
+                )}
+                {details.aceita_com_diferenca && (
+                  <p className="text-sm text-imoveis-600 mt-1">Aceita compensar/receber diferença em dinheiro.</p>
+                )}
+              </div>
+            ) : ad.type === "companhia" ? (
+              <div className="mb-6">
+                <p className="text-xl font-bold text-rose-700 mb-2">🤝 Troca por companhia</p>
+                {details.apoio_esperado && (
+                  <p className="text-imoveis-800 whitespace-pre-wrap">O que se espera: {details.apoio_esperado}</p>
+                )}
+                {details.regras_da_casa && (
+                  <p className="text-imoveis-700 whitespace-pre-wrap mt-2">Regras da casa: {details.regras_da_casa}</p>
+                )}
+              </div>
             ) : (
               <div className="text-2xl font-bold text-imoveis-700 mb-6">
                 {ad.price == null ? "Preço sob consulta" : ad.price.toLocaleString("pt-PT") + " €"}

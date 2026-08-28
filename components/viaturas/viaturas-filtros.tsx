@@ -14,6 +14,9 @@ interface FiltrosProps {
 const MODOS = [
   { value: "", label: "Todos", icon: "🚗" },
   { value: "venda", label: "À venda", icon: "💰" },
+  { value: "alugar", label: "Alugar", icon: "🔑" },
+  { value: "ceder", label: "Ceder", icon: "🤝" },
+  { value: "comprar", label: "Procuro Comprar", icon: "🔍" },
 ];
 
 export default function ViaturasFiltros({ categories }: FiltrosProps) {
@@ -70,7 +73,7 @@ export default function ViaturasFiltros({ categories }: FiltrosProps) {
       {/* Hero + pesquisa */}
       <div className="bg-viaturas-900 rounded-2xl p-8 mb-6 text-center">
         <h2 className="text-3xl font-bold text-white mb-1">🚗 STANDGO</h2>
-        <p className="text-viaturas-100 mb-6">Compra e vende viaturas — à venda ou em leilão</p>
+        <p className="text-viaturas-100 mb-6">Compra, vende, aluga ou cede viaturas — à venda, em leilão ou aluguer</p>
         <form onSubmit={applyFilters} className="max-w-xl mx-auto flex gap-2">
           <input
             type="text"

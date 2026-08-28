@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { OAuthButtons } from "@/components/auth/oauth-buttons";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -73,7 +74,8 @@ export function RegisterForm() {
         <CardTitle>Criar conta</CardTitle>
         <CardDescription>Junta-te a comunidade do Almanaque</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <OAuthButtons />
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="username" className="text-sm font-medium">Nome de utilizador</label>

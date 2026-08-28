@@ -25,7 +25,7 @@ export default async function ConversationViaturaPage({
   const { data: conv, error } = await supabase
     .from("marketplace_conversations")
     .select(`
-      id, ad_id, buyer_id, seller_id,
+      id, ad_id, buyer_id, seller_id, module,
       ad:marketplace_ads(id, title, price, price_type, status, location, module, details)
     `)
     .eq("id", conversationId)
@@ -39,14 +39,25 @@ export default async function ConversationViaturaPage({
     notFound();
   }
 
-  // Conversa de um anúncio de outro módulo — não pertence a esta secção.
+  // Conversa DIRETA entre stands (sem anúncio) -- ver migration
+  // 20260828140000_stand_automovel_contacto_direto.sql. Nesse caso é a
+  // coluna "module" da própria conversa que diz se pertence a esta
+  // secção; com anúncio, continua a ser ad.module como antes.
+  const isDirect = conv.ad_id == null;
   const ad: any = conv.ad;
-  if (!ad || ad.module !== "viaturas") {
+
+  if (isDirect) {
+    if (conv.module !== "viaturas") {
+      notFound();
+    }
+  } else if (!ad || ad.module !== "viaturas") {
     notFound();
   }
 
-  const d = ad.details ?? {};
-  const adTitulo = d.marca && d.modelo ? `${d.marca} ${d.modelo}` : ad.title;
+  const d = ad?.details ?? {};
+  const adTitulo = isDirect
+    ? "Conversa direta"
+    : d.marca && d.modelo ? `${d.marca} ${d.modelo}` : ad.title;
 
   const { data: profiles } = await supabase
     .from("profiles")
@@ -78,13 +89,17 @@ export default async function ConversationViaturaPage({
     });
   }
 
-  const { data: photo } = await supabase
-    .from("marketplace_photos")
-    .select("storage_path")
-    .eq("ad_id", conv.ad_id)
-    .order("sort_order", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  let photo: { storage_path: string } | null = null;
+  if (!isDirect) {
+    const { data: photoRow } = await supabase
+      .from("marketplace_photos")
+      .select("storage_path")
+      .eq("ad_id", conv.ad_id)
+      .order("sort_order", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    photo = photoRow;
+  }
 
   const isBuyer = conv.buyer_id === user.id;
   const otherParty: any = isBuyer ? sellerProfile : buyerProfile;
@@ -96,29 +111,42 @@ export default async function ConversationViaturaPage({
           <Link href="/viaturas/mensagens" className="text-viaturas-700 hover:text-viaturas-900">←</Link>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-viaturas-900 truncate">{otherParty?.username || "Utilizador"}</p>
-            <p className="text-xs text-viaturas-500">{isBuyer ? "Anunciante" : "Interessado"}</p>
+            <p className="text-xs text-viaturas-500">{isDirect ? "Stand verificado" : isBuyer ? "Anunciante" : "Interessado"}</p>
           </div>
         </div>
       </nav>
 
       <div className="bg-white border-b border-viaturas-200 px-6 py-3">
-        <Link href={`/viaturas/${conv.ad_id}`}>
-          <div className="max-w-3xl mx-auto flex items-center gap-3 hover:bg-viaturas-50 -mx-2 px-2 py-1 rounded-lg cursor-pointer">
-            {photo ? (
-              <img src={photo.storage_path} alt={adTitulo} className="w-12 h-12 object-cover rounded-lg" />
-            ) : (
-              <div className="w-12 h-12 bg-viaturas-50 rounded-lg flex items-center justify-center text-xl">🚗</div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-viaturas-900 truncate">{adTitulo}</p>
-              <p className="text-xs text-viaturas-600">
-                {ad?.price == null ? "Consultar" : "€" + ad.price.toFixed(2)}
-                {ad?.location && " • 📍 " + ad.location}
-              </p>
+        {isDirect ? (
+          <Link href={`/perfil/${otherParty?.id ?? ""}`}>
+            <div className="max-w-3xl mx-auto flex items-center gap-3 hover:bg-viaturas-50 -mx-2 px-2 py-1 rounded-lg cursor-pointer">
+              <div className="w-12 h-12 bg-viaturas-50 rounded-lg flex items-center justify-center text-xl">🤝</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-viaturas-900 truncate">Contacto direto entre stands</p>
+                <p className="text-xs text-viaturas-600">Fora do fluxo normal comprador → vendedor</p>
+              </div>
+              <div className="text-xs text-viaturas-500">Ver perfil →</div>
             </div>
-            <div className="text-xs text-viaturas-500">Ver →</div>
-          </div>
-        </Link>
+          </Link>
+        ) : (
+          <Link href={`/viaturas/${conv.ad_id}`}>
+            <div className="max-w-3xl mx-auto flex items-center gap-3 hover:bg-viaturas-50 -mx-2 px-2 py-1 rounded-lg cursor-pointer">
+              {photo ? (
+                <img src={photo.storage_path} alt={adTitulo} className="w-12 h-12 object-cover rounded-lg" />
+              ) : (
+                <div className="w-12 h-12 bg-viaturas-50 rounded-lg flex items-center justify-center text-xl">🚗</div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-viaturas-900 truncate">{adTitulo}</p>
+                <p className="text-xs text-viaturas-600">
+                  {ad?.price == null ? "Consultar" : "€" + ad.price.toFixed(2)}
+                  {ad?.location && " • 📍 " + ad.location}
+                </p>
+              </div>
+              <div className="text-xs text-viaturas-500">Ver →</div>
+            </div>
+          </Link>
+        )}
       </div>
 
       <main className="flex-1 overflow-y-auto p-6">
