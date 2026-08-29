@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { MfaDisableButton } from "@/components/auth/mfa-disable-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -105,9 +106,12 @@ export default async function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {mfaAtivo ? (
-                  <p className="text-sm text-terra-600">
-                    A verificação em duas etapas está ativa na tua conta.
-                  </p>
+                  <>
+                    <p className="text-sm text-terra-600">
+                      A verificação em duas etapas está ativa na tua conta.
+                    </p>
+                    {profile?.role === "user" && <MfaDisableButton />}
+                  </>
                 ) : (
                   <>
                     <p className="text-sm text-terra-600">

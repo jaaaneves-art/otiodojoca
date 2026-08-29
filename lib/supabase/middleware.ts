@@ -44,6 +44,17 @@ const PUBLIC_VIEW_MODULES: Record<string, string[]> = {
 // é precisamente aqui que se completa o AAL2.
 const MFA_PATH_PREFIXES = ["/mfa/setup", "/mfa/verify"];
 
+// Rotas do próprio fluxo de autenticação: nunca interceptar por causa de
+// um desafio de MFA pendente, para não criar ciclos de redirect nem
+// quebrar login/registo/recuperação de password/callback de email-OAuth.
+const AUTH_FLOW_PREFIXES = [
+  "/login",
+  "/registo",
+  "/forgot-password",
+  "/reset-password",
+  "/auth",
+];
+
 function matchesPrefix(pathname: string, prefixes: string[]) {
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -105,23 +116,28 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Rotas totalmente públicas + páginas de visualização dos módulos tipo
-  // montra (ver é público, interagir exige conta -- ver PUBLIC_VIEW_MODULES).
-  if (
-    matchesPrefix(pathname, PUBLIC_PATH_PREFIXES) ||
-    isPublicModuleView(pathname)
-  ) {
-    return supabaseResponse;
-  }
-
-  // Sem sessão válida -> login, preservando o destino pretendido.
+  // Sem sessão -> as rotas públicas continuam livres, o resto vai para
+  // /login, preservando o destino pretendido.
   if (!user) {
+    if (
+      matchesPrefix(pathname, PUBLIC_PATH_PREFIXES) ||
+      isPublicModuleView(pathname)
+    ) {
+      return supabaseResponse;
+    }
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("next", pathname + search);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Sessão válida: verificar o nível de segurança (AAL) da sessão atual.
+  // A partir daqui há sempre sessão. Verificamos o nível de segurança (AAL)
+  // já aqui -- mesmo em rotas públicas -- porque um desafio de MFA
+  // pendente (a conta já tem um fator verificado, mas esta sessão ainda
+  // não completou o desafio) tem de ser resolvido logo a seguir ao login,
+  // seja qual for o destino. Antes, isto só era verificado em rotas
+  // privadas; como o destino por omissão do login passou a ser "/"
+  // (pública, ver login-form.tsx), o pedido do código deixava de
+  // acontecer -- bug reportado em 29/08/2026.
   const { data: aal, error: aalError } =
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
@@ -163,10 +179,30 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Qualquer outra rota (privada, por omissão) exige AAL2 -- com uma
-  // exceção: utilizadores de nível "user" (não moderator/admin) só são
-  // obrigados a passar pelo /mfa/setup uma vez; se dispensarem ("Agora
-  // não"), deixamos de os forçar a configurar o MFA.
+  // Desafio de MFA pendente: resolve-se antes de mais nada, mesmo em
+  // rotas públicas -- exceto as do próprio fluxo de autenticação, para não
+  // criar ciclos nem interferir com login/registo/recuperação/callback.
+  if (mfaPending && !matchesPrefix(pathname, AUTH_FLOW_PREFIXES)) {
+    const redirectUrl = new URL("/mfa/verify", request.url);
+    redirectUrl.searchParams.set("next", pathname + search);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // Rotas totalmente públicas + páginas de visualização dos módulos tipo
+  // montra (ver é público, interagir exige conta -- ver PUBLIC_VIEW_MODULES).
+  // Chegam aqui já sem desafio de MFA por resolver.
+  if (
+    matchesPrefix(pathname, PUBLIC_PATH_PREFIXES) ||
+    isPublicModuleView(pathname)
+  ) {
+    return supabaseResponse;
+  }
+
+  // Qualquer outra rota (privada, por omissão) exige MFA configurado --
+  // com uma exceção: utilizadores de nível "user" (não moderator/admin) só
+  // são obrigados a passar pelo /mfa/setup uma vez; se dispensarem ("Agora
+  // não"), deixamos de os forçar a configurar o MFA. O caso de desafio
+  // pendente (mfaPending) já foi tratado acima, antes da exceção pública.
   if (mfaNotEnrolled) {
     let enrollmentRequired = true;
     let dismissed = false;
@@ -190,10 +226,6 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     }
     // Opcional e já dispensado anteriormente -- deixa passar.
-  } else if (mfaPending) {
-    const redirectUrl = new URL("/mfa/verify", request.url);
-    redirectUrl.searchParams.set("next", pathname + search);
-    return NextResponse.redirect(redirectUrl);
   }
 
   return supabaseResponse;
