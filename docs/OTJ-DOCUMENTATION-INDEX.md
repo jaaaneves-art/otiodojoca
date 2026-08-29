@@ -119,6 +119,18 @@ Conteúdo:
 
 ---
 
+# 9. Módulos
+
+- Modules/Gran-Bazar/
+- Modules/Lup/
+- Modules/Imoveis/
+- Modules/Viaturas/
+
+Conteúdo:
+- Documentação e relatórios de sessão dos módulos de marketplace construídos a partir de agosto de 2026 (reunidos a 29/08/2026, 13:00, Europe/Lisbon — ver `docs/AUDITORIA-DOCS-OTIODOJOCA-20260829.md`)
+
+---
+
 # Fluxo recomendado
 
 1. Ler o README.
