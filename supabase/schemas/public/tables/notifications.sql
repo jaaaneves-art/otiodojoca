@@ -7,7 +7,7 @@ create table "public"."notifications" (
   "is_read"    boolean                  default false,
   "created_at" timestamp with time zone default now(),
   constraint "notifications_pkey" primary key (id),
-  constraint "notifications_type_check" check ((type = ANY (ARRAY['reply'::text, 'mention'::text, 'like'::text]))),
+  constraint "notifications_type_check" check ((type = ANY (ARRAY['reply'::text, 'mention'::text, 'like'::text, 'message'::text, 'call'::text, 'group_invite'::text]))),
   constraint "notifications_user_id_fkey" foreign key (user_id) references public.profiles(id) on delete cascade
 );
 
