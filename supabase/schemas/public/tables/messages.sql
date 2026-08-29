@@ -18,7 +18,10 @@ create table "public"."messages" (
 alter table "public"."messages"
   enable row level security;
 
-create index idx_messages_conversation
+-- Nome distinto de "idx_messages_conversation" porque esse nome já
+-- existe em produção (índice de marketplace_messages) -- nomes de
+-- índice são únicos por schema em Postgres, não por tabela.
+create index idx_social_messages_conversation
   on public.messages using btree (conversation_id, created_at desc);
 
 create policy "Participantes veem mensagens das suas conversas" on "public"."messages"
