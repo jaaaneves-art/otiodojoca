@@ -144,7 +144,7 @@ export async function updateSession(request: NextRequest) {
   if (matchesPrefix(pathname, MFA_PATH_PREFIXES)) {
     // Já cumpriu o AAL2 -- não há razão para estar no fluxo de MFA.
     if (mfaSatisfied) {
-      return NextResponse.redirect(new URL("/perfil", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
     }
     // Está em /mfa/verify mas ainda não tem nenhum fator configurado.
     if (pathname.startsWith("/mfa/verify") && mfaNotEnrolled) {

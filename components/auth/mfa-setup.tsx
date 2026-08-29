@@ -117,7 +117,7 @@ export function MfaSetup({ opcional = false }: MfaSetupProps) {
       return;
     }
 
-    const next = searchParams.get("next") || "/perfil";
+    const next = searchParams.get("next") || "/";
     router.push(next);
     router.refresh();
   }
@@ -134,7 +134,7 @@ export function MfaSetup({ opcional = false }: MfaSetupProps) {
       return;
     }
 
-    const next = searchParams.get("next") || "/perfil";
+    const next = searchParams.get("next") || "/";
     router.push(next);
     router.refresh();
   }

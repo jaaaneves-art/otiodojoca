@@ -63,7 +63,7 @@ export function RegisterForm() {
 
     // MFA é obrigatório para todas as contas -- toda a gente nova
     // passa sempre por aqui a seguir ao registo.
-    const next = searchParams.get("next") || "/perfil";
+    const next = searchParams.get("next") || "/";
     router.push(`/mfa/setup?next=${encodeURIComponent(next)}`);
     router.refresh();
   }

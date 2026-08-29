@@ -45,7 +45,7 @@ export function LoginForm() {
     // todos os logins seguintes, mesmo depois de o utilizador já ter dito
     // que não queria configurar. Navegar sempre para o destino e deixar o
     // middleware redirecionar se for mesmo preciso.
-    const next = searchParams.get("next") || "/perfil";
+    const next = searchParams.get("next") || "/";
     router.push(next);
     router.refresh();
   }
