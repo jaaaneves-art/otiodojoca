@@ -115,8 +115,21 @@ export default async function VagaDetalhePage({
     .select("skill_id, obrigatoria, skills(nome)")
     .eq("job_id", id);
 
-  type JobSkillRow = { skill_id: number; obrigatoria: boolean; skills: { nome: string } | null };
-  const jobSkills = ((jobSkillsRows ?? []) as JobSkillRow[]).filter((s) => s.skills?.nome);
+  // skills(nome) é uma relação embutida -- tal como empregos_empresas/municipios
+  // acima, o Supabase às vezes tipa-a como objeto único, às vezes como array de
+  // um elemento; normalizamos com o mesmo unwrap() em vez de assumir uma forma.
+  type JobSkillRow = {
+    skill_id: number;
+    obrigatoria: boolean;
+    skills: { nome: string } | { nome: string }[] | null;
+  };
+  const jobSkills = ((jobSkillsRows ?? []) as JobSkillRow[])
+    .map((s) => ({
+      skill_id: s.skill_id,
+      obrigatoria: s.obrigatoria,
+      skills: unwrap<{ nome: string }>(s.skills),
+    }))
+    .filter((s) => s.skills?.nome);
   const jobSkillsForMatch: MatchJobSkillInput[] = jobSkills.map((s) => ({
     skill_id: s.skill_id,
     obrigatoria: s.obrigatoria,

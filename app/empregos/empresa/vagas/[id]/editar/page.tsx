@@ -9,6 +9,15 @@ interface JobSkillInput {
   obrigatoria: boolean;
 }
 
+// skills(nome) é uma relação embutida (FK) -- o Supabase às vezes tipa-a como
+// objeto único, às vezes como array de um elemento (mesmo problema já
+// documentado em app/admin/entidades/page.tsx e app/empregos/page.tsx).
+// Normalizamos aqui para sempre objeto ou null.
+function unwrap<T>(rel: T | T[] | null | undefined): T | null {
+  if (Array.isArray(rel)) return (rel[0] as T) ?? null;
+  return (rel as T) ?? null;
+}
+
 export default async function EditarVagaPage({
   params,
 }: {
@@ -59,11 +68,15 @@ export default async function EditarVagaPage({
     .select("skill_id, obrigatoria, skills(nome)")
     .eq("job_id", job.id);
 
-  type JobSkillRow = { skill_id: number; obrigatoria: boolean; skills: { nome: string } | null };
+  type JobSkillRow = {
+    skill_id: number;
+    obrigatoria: boolean;
+    skills: { nome: string } | { nome: string }[] | null;
+  };
   const jobSkills: JobSkillValue[] = ((jobSkillsRows ?? []) as JobSkillRow[]).map((row) => ({
     skill_id: row.skill_id,
     obrigatoria: row.obrigatoria,
-    nome: row.skills?.nome ?? "",
+    nome: unwrap<{ nome: string }>(row.skills)?.nome ?? "",
   }));
 
   async function atualizarVaga(formData: FormData) {

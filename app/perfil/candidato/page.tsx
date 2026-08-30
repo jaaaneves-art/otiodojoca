@@ -3,6 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 import { CandidateProfileForm } from "@/components/candidatos/candidate-profile-form";
 import type { SelectedSkill } from "@/components/candidatos/skills-picker";
 
+// skills(nome) é uma relação embutida (FK) -- o Supabase às vezes tipa-a como
+// objeto único, às vezes como array de um elemento (mesmo problema já
+// documentado em app/admin/entidades/page.tsx e app/empregos/page.tsx).
+// Normalizamos aqui para sempre objeto ou null.
+function unwrap<T>(rel: T | T[] | null | undefined): T | null {
+  if (Array.isArray(rel)) return (rel[0] as T) ?? null;
+  return (rel as T) ?? null;
+}
+
 export default async function CandidateProfilePage() {
   const supabase = await createClient();
   const {
@@ -30,7 +39,7 @@ export default async function CandidateProfilePage() {
   type CandidateSkillRow = {
     skill_id: number;
     nivel: string;
-    skills: { nome: string } | null;
+    skills: { nome: string } | { nome: string }[] | null;
   };
 
   const initialSkills: SelectedSkill[] = (
@@ -38,7 +47,7 @@ export default async function CandidateProfilePage() {
   ).map((row) => ({
     skill_id: row.skill_id,
     nivel: row.nivel,
-    nome: row.skills?.nome ?? "",
+    nome: unwrap<{ nome: string }>(row.skills)?.nome ?? "",
   }));
 
   return (
