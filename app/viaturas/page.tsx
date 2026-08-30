@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
 import ViaturasFiltros from "@/components/viaturas/viaturas-filtros";
-import { ViaturaAdCard } from "@/components/viaturas/viatura-ad-card";
+import { ViaturasResultados } from "@/components/viaturas/viaturas-resultados";
 
 interface SearchParams {
   q?: string;
+  marca?: string;
   category?: string;
   type?: string;
   min?: string;
@@ -79,6 +80,10 @@ export default async function ViaturasPage({
   if (params.caixa) {
     ads = ads.filter((a) => a.details?.caixa === params.caixa);
   }
+  if (params.marca) {
+    const marca = params.marca.toLowerCase();
+    ads = ads.filter((a) => a.details?.marca?.toLowerCase() === marca);
+  }
 
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -125,8 +130,37 @@ export default async function ViaturasPage({
     });
   }
 
+  // Coordenadas para a vista de mapa: o campo `location` de cada anúncio é
+  // gravado pelo MunicipioAutocomplete como "Nome, Distrito" (ver
+  // components/mercado-da-terra/municipio-autocomplete.tsx) — cruza-se
+  // diretamente com `municipios.nome + ", " + municipios.distrito_regiao`,
+  // que já tem latitude/longitude. Sem geocodificação nova nem tabela nova.
+  const { data: municipiosGeo } = await supabase
+    .from("municipios")
+    .select("nome, distrito_regiao, latitude, longitude")
+    .not("latitude", "is", null)
+    .not("longitude", "is", null);
+
+  const coordsPorLocalizacao = new Map<string, { lat: number; lon: number }>();
+  municipiosGeo?.forEach((m: any) => {
+    coordsPorLocalizacao.set(`${m.nome}, ${m.distrito_regiao}`, {
+      lat: Number(m.latitude),
+      lon: Number(m.longitude),
+    });
+  });
+
+  const adsComCoords = ads.map((ad) => {
+    const coords = ad.location ? coordsPorLocalizacao.get(ad.location) : undefined;
+    return {
+      ...ad,
+      auction: auctionsMap[ad.id] ?? null,
+      lat: coords?.lat ?? null,
+      lon: coords?.lon ?? null,
+    };
+  });
+
   const hasFilters = !!(
-    params.q || params.category || params.type || params.min || params.max ||
+    params.q || params.marca || params.category || params.type || params.min || params.max ||
     params.anoMin || params.kmMax || params.combustivel || params.caixa ||
     (params.sort && params.sort !== "recentes")
   );
@@ -145,17 +179,12 @@ export default async function ViaturasPage({
           </div>
 
           {ads.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ads.map((ad) => (
-                <ViaturaAdCard
-                  key={ad.id}
-                  ad={{ ...ad, auction: auctionsMap[ad.id] ?? null }}
-                  isFavorite={favoriteIds.has(ad.id)}
-                  isLoggedIn={!!user}
-                  photo={photosMap[ad.id]}
-                />
-              ))}
-            </div>
+            <ViaturasResultados
+              ads={adsComCoords}
+              favoriteIds={Array.from(favoriteIds)}
+              isLoggedIn={!!user}
+              photosMap={photosMap}
+            />
           ) : (
             <div className="text-center py-16 bg-white rounded-lg border border-viaturas-200">
               <p className="text-viaturas-700 text-lg">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { COMBUSTIVEL_OPCOES, CAIXA_OPCOES } from "@/lib/viaturas/ad-types";
+import { MARCAS } from "@/lib/viaturas/marcas-modelos";
 
 interface Categoria { id: number; name: string; }
 
@@ -19,11 +20,24 @@ const MODOS = [
   { value: "comprar", label: "Procuro Comprar", icon: "🔍" },
 ];
 
+// Atalhos de um clique para os filtros mais pedidos — inspirado nos chips
+// rápidos do AutoNex (ver docs/pendentes/STANDGO-REFORCO-AUTONEX-RENOME-20260829.md).
+// Cada chip só define os parâmetros que lhe dizem respeito; os outros
+// filtros já ativos mantêm-se.
+const CHIPS: { label: string; overrides: Record<string, string> }[] = [
+  { label: "⚡ Elétrico", overrides: { combustivel: "Elétrico" } },
+  { label: "🔀 Híbrido", overrides: { combustivel: "Híbrido" } },
+  { label: "⚙️ Automática", overrides: { caixa: "Automática" } },
+  { label: "📉 Até 50.000 km", overrides: { kmMax: "50000" } },
+  { label: "💶 Até 10.000 €", overrides: { max: "10000" } },
+];
+
 export default function ViaturasFiltros({ categories }: FiltrosProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const [marca, setMarca] = useState(searchParams.get("marca") ?? "");
   const [category, setCategory] = useState(searchParams.get("category") ?? "");
   const [minPrice, setMinPrice] = useState(searchParams.get("min") ?? "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("max") ?? "");
@@ -39,7 +53,7 @@ export default function ViaturasFiltros({ categories }: FiltrosProps) {
   const buildParams = (overrides: Record<string, string>) => {
     const params = new URLSearchParams();
     const values: Record<string, string> = {
-      q: query, category, min: minPrice, max: maxPrice,
+      q: query, marca, category, min: minPrice, max: maxPrice,
       anoMin, kmMax, combustivel, caixa, sort, type: activeType,
       ...overrides,
     };
@@ -61,12 +75,27 @@ export default function ViaturasFiltros({ categories }: FiltrosProps) {
   };
 
   const clearFilters = () => {
-    setQuery(""); setCategory(""); setMinPrice(""); setMaxPrice("");
+    setQuery(""); setMarca(""); setCategory(""); setMinPrice(""); setMaxPrice("");
     setAnoMin(""); setKmMax(""); setCombustivel(""); setCaixa(""); setSort("recentes");
     router.push("/viaturas");
   };
 
-  const hasAdvancedFilters = category || minPrice || maxPrice || anoMin || kmMax || combustivel || caixa || (sort && sort !== "recentes");
+  // Chip aplica-se por cima dos filtros já ativos: atualiza só o(s) campo(s)
+  // que lhe dizem respeito no estado local (para o painel avançado refletir
+  // a escolha) e navega logo, sem esperar por "Aplicar".
+  const applyChip = (overrides: Record<string, string>) => {
+    if (overrides.combustivel !== undefined) setCombustivel(overrides.combustivel);
+    if (overrides.caixa !== undefined) setCaixa(overrides.caixa);
+    if (overrides.kmMax !== undefined) setKmMax(overrides.kmMax);
+    if (overrides.max !== undefined) setMaxPrice(overrides.max);
+    const qs = buildParams(overrides);
+    router.push(`/viaturas${qs ? "?" + qs : ""}`);
+  };
+
+  const isChipActive = (overrides: Record<string, string>) =>
+    Object.entries(overrides).every(([key, val]) => searchParams.get(key) === val);
+
+  const hasAdvancedFilters = marca || category || minPrice || maxPrice || anoMin || kmMax || combustivel || caixa || (sort && sort !== "recentes");
 
   return (
     <div>
@@ -121,10 +150,45 @@ export default function ViaturasFiltros({ categories }: FiltrosProps) {
         </button>
       </div>
 
+      {/* Chips rápidos */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {CHIPS.map((chip) => {
+          const active = isChipActive(chip.overrides);
+          return (
+            <button
+              key={chip.label}
+              type="button"
+              onClick={() => applyChip(active ? Object.fromEntries(Object.keys(chip.overrides).map((k) => [k, ""])) : chip.overrides)}
+              className={`text-sm font-medium py-1.5 px-3 rounded-full border transition ${
+                active
+                  ? "bg-viaturas-100 border-viaturas-400 text-viaturas-900"
+                  : "border-viaturas-200 text-viaturas-700 hover:bg-viaturas-50"
+              }`}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Filtros avançados */}
       {showFilters && (
         <form onSubmit={applyFilters} className="bg-white rounded-lg border border-viaturas-200 p-4 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label className="text-sm font-medium text-viaturas-800">Marca</label>
+              <select
+                value={marca}
+                onChange={(e) => setMarca(e.target.value)}
+                className="w-full border border-viaturas-200 rounded-lg p-2 mt-1"
+              >
+                <option value="">Todas</option>
+                {MARCAS.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="text-sm font-medium text-viaturas-800">Categoria</label>
               <select

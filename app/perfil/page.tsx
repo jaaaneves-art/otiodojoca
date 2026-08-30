@@ -87,9 +87,14 @@ export default async function ProfilePage() {
                   <Heart className="w-4 h-4 text-terra-500" />
                   <span className="text-sm text-terra-600">Reputacao: {profile?.reputation || 0}</span>
                 </div>
-                <Button asChild variant="outline">
-                  <Link href="/perfil/editar">Editar perfil</Link>
-                </Button>
+                <div className="flex gap-3">
+                  <Button asChild variant="outline">
+                    <Link href="/perfil/editar">Editar perfil</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/perfil/candidato">Perfil de candidato (Empregos)</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 

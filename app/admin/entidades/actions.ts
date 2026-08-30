@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
 async function resolverPedido(id: number, novoEstado: 'aprovado' | 'rejeitado') {
@@ -32,7 +33,7 @@ async function resolverPedido(id: number, novoEstado: 'aprovado' | 'rejeitado') 
     })
     .eq('id', id)
     .eq('estado', 'pendente')
-    .select('id')
+    .select('id, tipo_entidade, profile_id, nome_entidade, nipc, municipio_id, freguesia_id')
     .single();
 
   if (error || !data) {
@@ -41,6 +42,50 @@ async function resolverPedido(id: number, novoEstado: 'aprovado' | 'rejeitado') 
         error?.message ?? ''
       }`
     );
+  }
+
+  // Empregador aprovado: ao contrário dos outros tipos (cuja ligação a
+  // `entidades` fica mesmo para um passo manual à parte, ver nota na
+  // página), aqui o "registo" em empregos_empresas É o próprio acesso ao
+  // painel de empresa — não faz sentido pedir um segundo passo manual só
+  // para isto. A escrita no `entidade_pedidos` acima já passou pela RLS
+  // ("Administradores gerem todos os pedidos", profiles.role = 'admin'),
+  // por isso já sabemos que quem chamou esta função é admin; usamos o
+  // cliente com a service role só a partir daqui, porque a RLS de
+  // empregos_empresas ("Empresa gere o seu perfil", auth.uid() =
+  // profile_id) bloquearia silenciosamente um insert feito em nome de
+  // outro utilizador (o requerente, não o admin autenticado).
+  if (novoEstado === 'aprovado' && data.tipo_entidade === 'empregador') {
+    const admin = createAdminClient();
+
+    const { data: existente, error: existenteError } = await admin
+      .from('empregos_empresas')
+      .select('id')
+      .eq('profile_id', data.profile_id)
+      .maybeSingle();
+
+    if (existenteError) {
+      throw new Error(
+        `Pedido aprovado, mas falhou verificar se já existia empresa: ${existenteError.message}`
+      );
+    }
+
+    if (!existente) {
+      const { error: empresaError } = await admin.from('empregos_empresas').insert({
+        profile_id: data.profile_id,
+        nome_empresa: data.nome_entidade,
+        nipc: data.nipc,
+        municipio_id: data.municipio_id,
+        freguesia_id: data.freguesia_id,
+        estado: 'aprovado',
+      });
+
+      if (empresaError) {
+        throw new Error(
+          `Pedido aprovado, mas falhou criar o acesso de empresa: ${empresaError.message}`
+        );
+      }
+    }
   }
 
   revalidatePath('/admin/entidades');

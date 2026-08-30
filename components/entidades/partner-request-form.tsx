@@ -14,10 +14,11 @@ export function PartnerRequestForm({
 }: {
   categorias: Categoria[];
   userEmail?: string | null;
-  /** "outro" (omissão, Associação/Cooperativa/Produtor/Empresa) ou "stand_automovel". */
-  tipoEntidade?: "outro" | "stand_automovel";
+  /** "outro" (omissão, Associação/Cooperativa/Produtor/Empresa), "stand_automovel" ou "empregador". */
+  tipoEntidade?: "outro" | "stand_automovel" | "empregador";
 }) {
   const isStandAutomovel = tipoEntidade === "stand_automovel";
+  const isEmpregador = tipoEntidade === "empregador";
   const supabase = createClient();
   const [nomeEntidade, setNomeEntidade] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
@@ -91,11 +92,17 @@ export function PartnerRequestForm({
           required
           value={nomeEntidade}
           onChange={(e) => setNomeEntidade(e.target.value)}
-          placeholder={isStandAutomovel ? "ex.: Stand Auto Silva" : "ex.: Junta de Freguesia de..."}
+          placeholder={
+            isStandAutomovel
+              ? "ex.: Stand Auto Silva"
+              : isEmpregador
+                ? "ex.: Nome da Empresa, Lda."
+                : "ex.: Junta de Freguesia de..."
+          }
         />
       </div>
 
-      {!isStandAutomovel && (
+      {!isStandAutomovel && !isEmpregador && (
         <div className="space-y-2">
           <label htmlFor="categoria" className="text-sm font-medium">
             Tipo de entidade
@@ -173,10 +180,16 @@ export function PartnerRequestForm({
             na mesma — a nossa equipa confirma manualmente.
           </p>
         )}
-        {codigoAtividade.trim().startsWith("45") && (
+        {isStandAutomovel && codigoAtividade.trim().startsWith("45") && (
           <p className="rounded-lg bg-viaturas-50 border border-viaturas-200 p-3 text-xs text-viaturas-800">
             🚗 Este CAE é do setor automóvel — se o pedido for aprovado, a tua conta passa a
             poder contactar diretamente outros stands verificados no StandGo.
+          </p>
+        )}
+        {isEmpregador && (
+          <p className="rounded-lg bg-terra-50 border border-terra-200 p-3 text-xs text-terra-700">
+            💼 Se o pedido for aprovado, a tua conta passa a ter acesso ao painel de empresa
+            em <strong>/empregos/empresa</strong>, onde podes publicar e gerir vagas.
           </p>
         )}
       </div>

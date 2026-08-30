@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark, Recycle, Car, Home } from "lucide-react";
+import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark, Recycle, Car, Home, Briefcase } from "lucide-react";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -31,6 +31,9 @@ export default async function HomePage() {
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/imoveis">Imóveis</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/empregos">Empregos</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/perfil">Perfil</Link>
@@ -105,6 +108,12 @@ export default async function HomePage() {
             title="Imóveis"
             description="Compra, vende, arrenda, permuta ou troca por companhia — apartamentos, quartos, moradias, terrenos e mais."
             href="/imoveis"
+          />
+          <FeatureCard
+            icon={<Briefcase className="w-8 h-8" />}
+            title="Empregos"
+            description="Bolsa de emprego local — vagas, candidaturas e empresas parceiras da tua zona."
+            href="/empregos"
           />
           <FeatureCard
             icon={<UtensilsCrossed className="w-8 h-8" />}

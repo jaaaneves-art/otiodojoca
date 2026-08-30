@@ -16,6 +16,8 @@ const TIPO_LABEL: Record<string, string> = {
   freguesia: 'Freguesia',
   organismo_publico: 'Organismo público',
   outro: 'Outra entidade',
+  stand_automovel: 'Stand Automóvel',
+  empregador: 'Empresa (Empregos)',
 };
 
 const ESTADOS = ['pendente', 'aprovado', 'rejeitado'] as const;
@@ -103,7 +105,10 @@ export default async function AdminEntidadesPage({
         <p className="mb-6 text-sm text-terra-600">
           Revê e aprova ou rejeita pedidos de associação de entidades
           parceiras. A ligação a um registo em <code>entidades</code> (novo
-          ou existente) continua a ser feita à parte, depois de aprovado.
+          ou existente) continua a ser feita à parte, depois de aprovado —
+          exceto para pedidos de <strong>Empresa (Empregos)</strong>, cuja
+          aprovação já cria automaticamente o acesso ao painel de empresa em{' '}
+          <code>empregos_empresas</code>.
         </p>
 
         <div className="mb-6 flex gap-2">

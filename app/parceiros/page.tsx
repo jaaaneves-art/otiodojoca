@@ -8,7 +8,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Landmark, Users, HandHeart, Car, ArrowRight } from "lucide-react";
+import { Landmark, Users, HandHeart, Car, Briefcase, ArrowRight } from "lucide-react";
 
 // Município e Freguesia passaram a ter uma porta de entrada pública
 // própria, cada uma com a sua rota dedicada — /participar/municipio e
@@ -49,6 +49,12 @@ const TIPOS_AUTENTICADOS = [
     icon: Car,
     titulo: "Stand Automóvel",
     descricao: "Comerciante de viaturas — acesso ao contacto direto entre stands no StandGo.",
+  },
+  {
+    href: "/parceiros/pedido/empregador",
+    icon: Briefcase,
+    titulo: "Empresa (Empregos)",
+    descricao: "Publica e gere vagas no Empregos — acesso ao painel de empresa.",
   },
 ];
 

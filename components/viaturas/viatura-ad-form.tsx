@@ -3,6 +3,7 @@
 import { useState } from "react";
 import ImageUpload from "@/components/mercado-da-terra/image-upload";
 import { MunicipioAutocomplete } from "@/components/mercado-da-terra/municipio-autocomplete";
+import { MarcaModeloAutocomplete } from "@/components/viaturas/marca-modelo-autocomplete";
 import {
   VIATURAS_AD_TYPES,
   getViaturaAdType,
@@ -159,28 +160,12 @@ export function ViaturaAdForm({
           {tipo === "comprar" ? "🔍 O que procuras" : "🚗 Dados da viatura"}
         </p>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">Marca{obrigatorio("marca") && " *"}</label>
-            <input
-              name="marca"
-              defaultValue={inicial?.marca ?? ""}
-              placeholder="Ex: BMW"
-              required={obrigatorio("marca")}
-              className="w-full border rounded-lg p-2 mt-1"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Modelo{obrigatorio("modelo") && " *"}</label>
-            <input
-              name="modelo"
-              defaultValue={inicial?.modelo ?? ""}
-              placeholder="Ex: Série 3"
-              required={obrigatorio("modelo")}
-              className="w-full border rounded-lg p-2 mt-1"
-            />
-          </div>
-        </div>
+        <MarcaModeloAutocomplete
+          marcaInicial={inicial?.marca ?? ""}
+          modeloInicial={inicial?.modelo ?? ""}
+          marcaObrigatoria={obrigatorio("marca")}
+          modeloObrigatorio={obrigatorio("modelo")}
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <div>
