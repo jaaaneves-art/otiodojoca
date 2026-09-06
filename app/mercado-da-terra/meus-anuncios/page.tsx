@@ -54,8 +54,14 @@ export default async function MeusAnunciosPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeAds.map((ad) => (
-                <Link key={ad.id} href={`/mercado-da-terra/${ad.id}`}>
-                  <div className="bg-white rounded-lg border border-terra-200 hover:shadow-md transition cursor-pointer h-full overflow-hidden">
+                /* O cartão deixou de ser um <Link> inteiro: um link dentro
+                   de outro é HTML inválido. A área de conteúdo é o link;
+                   a barra de ações fica fora dele. */
+                <div
+                  key={ad.id}
+                  className="bg-white rounded-lg border border-terra-200 hover:shadow-md transition h-full overflow-hidden flex flex-col"
+                >
+                  <Link href={`/mercado-da-terra/${ad.id}`} className="block">
                     {photosMap[ad.id] ? (
                       <div className="w-full h-40 bg-terra-100">
                         <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
@@ -76,8 +82,24 @@ export default async function MeusAnunciosPage() {
                       </p>
                       <p className="text-sm text-terra-500">📍 {ad.location}</p>
                     </div>
+                  </Link>
+
+                  {/* Ações */}
+                  <div className="mt-auto flex border-t border-terra-100">
+                    <Link
+                      href={`/mercado-da-terra/editar/${ad.id}`}
+                      className="flex-1 text-center text-sm font-medium text-terra-700 py-3 hover:bg-terra-50 transition"
+                    >
+                      ✏️ Editar
+                    </Link>
+                    <Link
+                      href={`/mercado-da-terra/${ad.id}`}
+                      className="flex-1 text-center text-sm font-medium text-terra-600 py-3 border-l border-terra-100 hover:bg-terra-50 transition"
+                    >
+                      Ver anúncio
+                    </Link>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
@@ -91,26 +113,45 @@ export default async function MeusAnunciosPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {soldAds.map((ad) => (
-                <div key={ad.id} className="bg-white rounded-lg border border-terra-200 opacity-60 overflow-hidden">
-                  {photosMap[ad.id] ? (
-                    <div className="w-full h-40 bg-terra-100">
-                      <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
+                <div key={ad.id} className="bg-white rounded-lg border border-terra-200 overflow-hidden flex flex-col">
+                  <div className="opacity-60">
+                    {photosMap[ad.id] ? (
+                      <div className="w-full h-40 bg-terra-100">
+                        <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-40 bg-terra-100 flex items-center justify-center text-4xl">
+                        📦
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-semibold text-terra-800">{ad.title}</h3>
+                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">Vendido</span>
+                      </div>
+                      <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
+                      <p className="text-lg font-bold text-terra-700 mb-2">
+                        {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-terra-500">📍 {ad.location}</p>
                     </div>
-                  ) : (
-                    <div className="w-full h-40 bg-terra-100 flex items-center justify-center text-4xl">
-                      📦
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-semibold text-terra-800">{ad.title}</h3>
-                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">Vendido</span>
-                    </div>
-                    <p className="text-sm text-terra-600 mb-2">{ad.category_id}</p>
-                    <p className="text-lg font-bold text-terra-700 mb-2">
-                      {ad.price_type === "free" || ad.price == null ? "Grátis" : "€" + ad.price.toFixed(2)}
-                    </p>
-                    <p className="text-sm text-terra-500">📍 {ad.location}</p>
+                  </div>
+
+                  {/* Um anúncio vendido continua a poder ser corrigido —
+                      p. ex. para o reabrir ou acertar a descrição. */}
+                  <div className="mt-auto flex border-t border-terra-100">
+                    <Link
+                      href={`/mercado-da-terra/editar/${ad.id}`}
+                      className="flex-1 text-center text-sm font-medium text-terra-700 py-3 hover:bg-terra-50 transition"
+                    >
+                      ✏️ Editar
+                    </Link>
+                    <Link
+                      href={`/mercado-da-terra/${ad.id}`}
+                      className="flex-1 text-center text-sm font-medium text-terra-600 py-3 border-l border-terra-100 hover:bg-terra-50 transition"
+                    >
+                      Ver anúncio
+                    </Link>
                   </div>
                 </div>
               ))}

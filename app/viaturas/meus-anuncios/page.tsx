@@ -43,31 +43,70 @@ export default async function MeusAnunciosViaturasPage() {
 
   const renderCard = (ad: any, faded?: boolean) => {
     const d = ad.details ?? {};
+
     return (
-      <Link key={ad.id} href={`/viaturas/${ad.id}`}>
-        <div className={`bg-white rounded-lg border border-viaturas-200 hover:shadow-md transition cursor-pointer h-full overflow-hidden ${faded ? "opacity-60" : ""}`}>
+      <div
+        key={ad.id}
+        className={`bg-white rounded-lg border border-viaturas-200 hover:shadow-md transition h-full overflow-hidden ${
+          faded ? "opacity-60" : ""
+        }`}
+      >
+        <Link href={`/viaturas/${ad.id}`} className="block">
           {photosMap[ad.id] ? (
             <div className="w-full h-40 bg-viaturas-50">
-              <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
+              <img
+                src={photosMap[ad.id]}
+                alt={ad.title}
+                className="w-full h-full object-cover"
+              />
             </div>
           ) : (
-            <div className="w-full h-40 bg-viaturas-50 flex items-center justify-center text-4xl">🚗</div>
-          )}
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <h3 className="font-semibold text-viaturas-900">{d.marca && d.modelo ? `${d.marca} ${d.modelo}` : ad.title}</h3>
-              <span className="text-xs px-2 py-1 rounded-full bg-viaturas-100 text-viaturas-700">{STATUS_LABEL[ad.status] ?? ad.status}</span>
+            <div className="w-full h-40 bg-viaturas-50 flex items-center justify-center text-4xl">
+              🚗
             </div>
-            <p className="text-xs text-viaturas-500 mb-2">{VIATURAS_AD_TYPES[ad.type]?.icon} {VIATURAS_AD_TYPES[ad.type]?.label ?? ad.type}</p>
+          )}
+
+          <div className="p-4 pb-2">
+            <div className="flex items-start justify-between mb-3">
+              <h3 className="font-semibold text-viaturas-900">
+                {d.marca && d.modelo
+                  ? `${d.marca} ${d.modelo}`
+                  : ad.title}
+              </h3>
+
+              <span className="text-xs px-2 py-1 rounded-full bg-viaturas-100 text-viaturas-700">
+                {STATUS_LABEL[ad.status] ?? ad.status}
+              </span>
+            </div>
+
+            <p className="text-xs text-viaturas-500 mb-2">
+              {VIATURAS_AD_TYPES[ad.type]?.icon}{" "}
+              {VIATURAS_AD_TYPES[ad.type]?.label ?? ad.type}
+            </p>
+
             {ad.type === "venda" && (
               <p className="text-lg font-bold text-viaturas-700 mb-2">
-                {ad.price == null ? "Consultar" : "€" + ad.price.toFixed(2)}
+                {ad.price == null
+                  ? "Consultar"
+                  : "€" + ad.price.toFixed(2)}
               </p>
             )}
-            <p className="text-sm text-viaturas-500">📍 {ad.location}</p>
+
+            <p className="text-sm text-viaturas-500">
+              📍 {ad.location}
+            </p>
           </div>
+        </Link>
+
+        <div className="px-4 pb-4 pt-2 border-t border-viaturas-100">
+          <Link
+            href={`/viaturas/editar/${ad.id}`}
+            className="inline-flex items-center justify-center w-full bg-viaturas-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-viaturas-700 transition"
+          >
+            ✏️ Editar anúncio
+          </Link>
         </div>
-      </Link>
+      </div>
     );
   };
 

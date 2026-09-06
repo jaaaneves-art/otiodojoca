@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { COMBUSTIVEL_OPCOES, CAIXA_OPCOES } from "@/lib/viaturas/ad-types";
-import { MARCAS } from "@/lib/viaturas/marcas-modelos";
+import { VehicleMakeFilter } from "@/components/viaturas/vehicle-make-filter";
 
 interface Categoria { id: number; name: string; }
 
@@ -177,16 +177,10 @@ export default function ViaturasFiltros({ categories }: FiltrosProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label className="text-sm font-medium text-viaturas-800">Marca</label>
-              <select
+              <VehicleMakeFilter
                 value={marca}
-                onChange={(e) => setMarca(e.target.value)}
-                className="w-full border border-viaturas-200 rounded-lg p-2 mt-1"
-              >
-                <option value="">Todas</option>
-                {MARCAS.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
+                onChange={setMarca}
+              />
             </div>
 
             <div>
