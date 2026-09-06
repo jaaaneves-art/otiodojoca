@@ -22,9 +22,21 @@ async function createViaturaAd(formData: FormData) {
   const contactMethod = formData.get("contactMethod") as string;
   const imageCount = parseInt(formData.get("image_count") as string) || 0;
 
+  const parseCatalogId = (value: FormDataEntryValue | null) => {
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+  };
+
+  const vehicleMakeId = parseCatalogId(formData.get("vehicleMakeId"));
+  const vehicleModelId = parseCatalogId(formData.get("vehicleModelId"));
+  const vehicleGenerationId = parseCatalogId(formData.get("vehicleGenerationId"));
+  const vehicleVariantId = parseCatalogId(formData.get("vehicleVariantId"));
+
   const veiculoDetails: Record<string, string> = {
     marca: (formData.get("marca") as string) || "",
     modelo: (formData.get("modelo") as string) || "",
+    geracao: (formData.get("geracao") as string) || "",
+    variante: (formData.get("variante") as string) || "",
     ano: (formData.get("ano") as string) || "",
     quilometros: (formData.get("quilometros") as string) || "",
     combustivel: (formData.get("combustivel") as string) || "",
@@ -32,6 +44,8 @@ async function createViaturaAd(formData: FormData) {
     condicao: (formData.get("condicao") as string) || "",
     cor: (formData.get("cor") as string) || "",
     potencia: (formData.get("potencia") as string) || "",
+    cilindrada: (formData.get("cilindrada") as string) || "",
+    tracao: (formData.get("tracao") as string) || "",
     tipo_vendedor: (formData.get("tipoVendedor") as string) || "Particular",
   };
 
@@ -125,6 +139,10 @@ async function createViaturaAd(formData: FormData) {
       price,
       status: "active",
       details,
+      vehicle_make_id: vehicleMakeId,
+      vehicle_model_id: vehicleModelId,
+      vehicle_generation_id: vehicleGenerationId,
+      vehicle_variant_id: vehicleVariantId,
     })
     .select("id")
     .single();

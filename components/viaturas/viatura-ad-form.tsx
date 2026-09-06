@@ -34,6 +34,8 @@ interface AdInicial {
   caixa?: string;
   cor?: string;
   potencia?: string | number;
+  cilindrada?: string | number;
+  tracao?: string;
   condicao?: string;
   tipo_vendedor?: string;
   auction_start_price?: number | null;
@@ -87,6 +89,20 @@ export function ViaturaAdForm({
 }) {
   const [tipo, setTipo] = useState(inicial?.type ?? "venda");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
+  const [combustivel, setCombustivel] = useState(inicial?.combustivel ?? "");
+  const [caixa, setCaixa] = useState(inicial?.caixa ?? "");
+  const [potencia, setPotencia] = useState(
+    inicial?.potencia !== undefined && inicial?.potencia !== null
+      ? String(inicial.potencia)
+      : ""
+  );
+  const [cilindrada, setCilindrada] = useState(
+    inicial?.cilindrada !== undefined && inicial?.cilindrada !== null
+      ? String(inicial.cilindrada)
+      : ""
+  );
+  const [tracao, setTracao] = useState(inicial?.tracao ?? "");
   const config = getViaturaAdType(tipo);
   const mostra = (campo: string) => config.fields.includes(campo as any);
   const obrigatorio = (campo: string) => config.required.includes(campo as any);
@@ -97,6 +113,65 @@ export function ViaturaAdForm({
 
   const handleFilesSelected = (files: File[]) => {
     setUploadedFiles(files);
+  };
+
+  const handleVariantSelect = (variant: {
+    fuel_type: string | null;
+    displacement_cc: number | null;
+    power_hp: number | null;
+    transmission: string | null;
+    drivetrain: string | null;
+  }) => {
+    const fuel = (variant.fuel_type ?? "").toLowerCase();
+
+    if (fuel.includes("gasoline") || fuel.includes("petrol")) {
+      setCombustivel("Gasolina");
+    } else if (fuel.includes("diesel")) {
+      setCombustivel("Diesel");
+    } else if (fuel.includes("electric")) {
+      setCombustivel("Elétrico");
+    } else if (fuel.includes("hybrid")) {
+      setCombustivel("Híbrido");
+    } else if (fuel.includes("lpg")) {
+      setCombustivel("GPL");
+    }
+
+    const transmission = (variant.transmission ?? "").toLowerCase();
+
+    if (
+      transmission.includes("automatic") ||
+      transmission.includes("cvt") ||
+      transmission.includes("dct")
+    ) {
+      setCaixa("Automática");
+    } else if (transmission.includes("manual")) {
+      setCaixa("Manual");
+    }
+
+    if (variant.power_hp != null) {
+      setPotencia(String(variant.power_hp));
+    }
+
+    if (variant.displacement_cc != null) {
+      setCilindrada(String(variant.displacement_cc));
+    }
+
+    const drivetrain = (variant.drivetrain ?? "").toLowerCase();
+
+    if (drivetrain.includes("rear")) {
+      setTracao("Traseira (RWD)");
+    } else if (drivetrain.includes("front")) {
+      setTracao("Dianteira (FWD)");
+    } else if (drivetrain.includes("all wheel")) {
+      setTracao("Integral (AWD)");
+    } else if (
+      drivetrain.includes("four wheel") ||
+      drivetrain.includes("4wd")
+    ) {
+      setTracao("Integral (4WD)");
+    } else if (variant.drivetrain) {
+      setTracao(variant.drivetrain);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -165,6 +240,7 @@ export function ViaturaAdForm({
           modeloInicial={inicial?.modelo ?? ""}
           marcaObrigatoria={obrigatorio("marca")}
           modeloObrigatorio={obrigatorio("modelo")}
+          onVariantSelect={handleVariantSelect}
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -200,7 +276,8 @@ export function ViaturaAdForm({
             <label className="text-sm font-medium">Combustível{obrigatorio("combustivel") && " *"}</label>
             <select
               name="combustivel"
-              defaultValue={inicial?.combustivel ?? ""}
+              value={combustivel}
+              onChange={(e) => setCombustivel(e.target.value)}
               required={obrigatorio("combustivel")}
               className="w-full border rounded-lg p-2 mt-1"
             >
@@ -214,7 +291,8 @@ export function ViaturaAdForm({
             <label className="text-sm font-medium">Caixa{obrigatorio("caixa") && " *"}</label>
             <select
               name="caixa"
-              defaultValue={inicial?.caixa ?? ""}
+              value={caixa}
+              onChange={(e) => setCaixa(e.target.value)}
               required={obrigatorio("caixa")}
               className="w-full border rounded-lg p-2 mt-1"
             >
@@ -256,8 +334,36 @@ export function ViaturaAdForm({
               name="potencia"
               type="number"
               min="0"
-              defaultValue={inicial?.potencia ?? ""}
+              value={potencia}
+              onChange={(e) => setPotencia(e.target.value)}
               placeholder="150"
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium">Cilindrada (cc)</label>
+            <input
+              name="cilindrada"
+              type="number"
+              min="0"
+              value={cilindrada}
+              onChange={(e) => setCilindrada(e.target.value)}
+              placeholder="Ex: 1995"
+              className="w-full border rounded-lg p-2 mt-1"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Tração</label>
+            <input
+              name="tracao"
+              type="text"
+              value={tracao}
+              onChange={(e) => setTracao(e.target.value)}
+              placeholder="Ex: Traseira (RWD)"
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
