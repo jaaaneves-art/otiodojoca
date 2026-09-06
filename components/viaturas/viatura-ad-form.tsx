@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ImageUpload from "@/components/mercado-da-terra/image-upload";
 import { MunicipioAutocomplete } from "@/components/mercado-da-terra/municipio-autocomplete";
 import { MarcaModeloAutocomplete } from "@/components/viaturas/marca-modelo-autocomplete";
@@ -89,6 +89,8 @@ export function ViaturaAdForm({
 }) {
   const [tipo, setTipo] = useState(inicial?.type ?? "venda");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   const [combustivel, setCombustivel] = useState(inicial?.combustivel ?? "");
   const [caixa, setCaixa] = useState(inicial?.caixa ?? "");
@@ -176,6 +178,10 @@ export function ViaturaAdForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
 
@@ -648,9 +654,10 @@ export function ViaturaAdForm({
 
       <button
         type="submit"
+        disabled={isSubmitting}
         className="w-full bg-viaturas-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-viaturas-700"
       >
-        {submitLabel}
+        {isSubmitting ? "A processar..." : submitLabel}
       </button>
     </form>
   );
