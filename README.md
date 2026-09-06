@@ -20,7 +20,7 @@ português.
 -   TypeScript
 -   Supabase
 -   PostgreSQL
--   Netlify
+-   Vercel
 
 ## Estrutura do Projeto
 
