@@ -36,8 +36,9 @@ const EVENTO_LABEL: Record<PlantacaoHistoricoItem["evento"], string> = {
   fenologia: "Mudança fenológica",
 };
 
-export default async function FichaPlantacaoPage({ params }: { params: { id: string } }) {
-  const id = Number(params.id);
+export default async function FichaPlantacaoPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: idParam } = await params;
+  const id = Number(idParam);
   if (!Number.isFinite(id)) notFound();
 
   const supabase = await createClient();

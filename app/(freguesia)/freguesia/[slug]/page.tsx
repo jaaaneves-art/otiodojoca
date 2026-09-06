@@ -5,15 +5,16 @@ import { EntidadesList } from '@/components/entidades/freguesia/entidades-list';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface FreguesiPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({
   params,
 }: FreguesiPageProps): Promise<Metadata> {
-  const freguesia = await getFreguesiaByCodigo(params.slug);
+  const { slug } = await params;
+  const freguesia = await getFreguesiaByCodigo(slug);
 
   if (!freguesia) {
     return {
@@ -28,7 +29,8 @@ export async function generateMetadata({
 }
 
 export default async function FreguesiPage({ params }: FreguesiPageProps) {
-  const freguesia = await getFreguesiaByCodigo(params.slug);
+  const { slug } = await params;
+  const freguesia = await getFreguesiaByCodigo(slug);
 
   if (!freguesia) {
     notFound();

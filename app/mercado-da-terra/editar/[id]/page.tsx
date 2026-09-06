@@ -4,7 +4,8 @@ import Link from "next/link";
 import { AdForm } from "@/components/mercado-da-terra/ad-form";
 import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar";
 
-export default async function EditarAnuncioPage({ params }: { params: { id: string } }) {
+export default async function EditarAnuncioPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -16,7 +17,7 @@ export default async function EditarAnuncioPage({ params }: { params: { id: stri
   const { data: ad, error } = await supabase
     .from("marketplace_ads")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("module", "mercado-da-terra")
     .single();
 
@@ -88,7 +89,7 @@ export default async function EditarAnuncioPage({ params }: { params: { id: stri
         contact_method: contactMethod,
         price_type: priceType,
         price,
-        details: Object.keys(details).length > 0 ? details : null,
+        details,
       })
       .eq("id", ad.id);
 

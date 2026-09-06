@@ -2,14 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function PerfilPublicoPage({ params }: { params: { id: string } }) {
+export default async function PerfilPublicoPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
 
   // Buscar o perfil público (só campos públicos)
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("id, username, display_name, bio, location, avatar_url, reputation, created_at")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (error || !profile) {
