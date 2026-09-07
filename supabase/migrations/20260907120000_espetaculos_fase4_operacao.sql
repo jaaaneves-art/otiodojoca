@@ -1,7 +1,7 @@
 begin;
 -- Public projection is identical for anonymous users and organization members.
 -- Cancelled events remain addressable without granting access to organizer tables.
-create function public.event_public_detail(p_event bigint) returns jsonb
+create or replace function public.event_public_detail(p_event bigint) returns jsonb
 language sql stable security definer set search_path = '' as $$
  select jsonb_build_object('id',e.id,'name',e.nome,'description',e.descricao,'place',e.lugar,
  'organizer',org.nome,'status',e.estado,'sessions',coalesce((select jsonb_agg(jsonb_build_object(
