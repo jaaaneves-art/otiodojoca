@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark, Recycle, Car, Home, Briefcase } from "lucide-react";
+import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus, Sprout, Store, Landmark, Recycle, Car, Home, Briefcase, Ticket } from "lucide-react";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -114,6 +114,12 @@ export default async function HomePage() {
             title="Empregos"
             description="Bolsa de emprego local — vagas, candidaturas e empresas parceiras da tua zona."
             href="/empregos"
+          />
+          <FeatureCard
+            icon={<Ticket className="w-8 h-8" />}
+            title="Espetáculos"
+            description="Descobre espetáculos, consulta a agenda e acede à futura bilheteira do OTJ."
+            href="/espectaculos"
           />
           <FeatureCard
             icon={<UtensilsCrossed className="w-8 h-8" />}
