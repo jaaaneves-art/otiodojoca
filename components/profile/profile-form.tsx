@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { atualizarDataNascimento } from "@/lib/perfil/data-nascimento";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,11 +15,15 @@ interface Profile {
   location: string | null;
 }
 
+const HOJE = new Date().toISOString().slice(0, 10);
+
 export function ProfileForm({
   initialProfile,
+  initialDataNascimento,
   userId,
 }: {
   initialProfile: Profile | null;
+  initialDataNascimento: string | null;
   userId: string;
 }) {
   const [form, setForm] = useState({
@@ -27,6 +32,7 @@ export function ProfileForm({
     bio: initialProfile?.bio || "",
     location: initialProfile?.location || "",
   });
+  const [dataNascimento, setDataNascimento] = useState(initialDataNascimento || "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -48,14 +54,24 @@ export function ProfileForm({
       })
       .eq("id", userId);
 
+    if (error) {
+      setLoading(false);
+      setMessage("Erro ao guardar. O nome de utilizador pode ja existir.");
+      return;
+    }
+
+    // Campo privado, caminho à parte -- ver lib/perfil/data-nascimento.ts.
+    const resultadoData = await atualizarDataNascimento(dataNascimento || null);
+
     setLoading(false);
 
-    if (error) {
-      setMessage("Erro ao guardar. O nome de utilizador pode ja existir.");
-    } else {
-      setMessage("Perfil atualizado com sucesso!");
-      router.refresh();
+    if (!resultadoData.sucesso) {
+      setMessage(resultadoData.erro ?? "Perfil guardado, mas a data de nascimento falhou.");
+      return;
     }
+
+    setMessage("Perfil atualizado com sucesso!");
+    router.refresh();
   }
 
   return (
@@ -88,6 +104,21 @@ export function ProfileForm({
               onChange={(e) => setForm({ ...form, location: e.target.value })}
               placeholder="Concelho ou freguesia"
             />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Data de nascimento</label>
+            <Input
+              type="date"
+              value={dataNascimento}
+              onChange={(e) => setDataNascimento(e.target.value)}
+              max={HOJE}
+            />
+            <p className="text-xs text-terra-500">
+              Opcional e privada -- nunca é mostrada a outros utilizadores.
+              Usada só para saber se precisas da aprovação de um encarregado
+              de educação ao pedires para entrar nalguns grupos (Educação,
+              Escutismo, Universidades).
+            </p>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Bio</label>

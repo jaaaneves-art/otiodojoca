@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { obterDataNascimento } from "@/lib/perfil/data-nascimento";
 import { ProfileForm } from "@/components/profile/profile-form";
 
 export default async function EditProfilePage() {
@@ -16,6 +17,10 @@ export default async function EditProfilePage() {
     .eq("id", user.id)
     .single();
 
+  // data_nascimento não vem no select("*") de cima -- é privada, sem
+  // GRANT de coluna (ver lib/perfil/data-nascimento.ts). Lida à parte.
+  const dataNascimento = await obterDataNascimento();
+
   return (
     <div className="min-h-screen bg-terra-50">
       <nav className="bg-white border-b border-terra-200 px-6 py-4">
@@ -24,7 +29,11 @@ export default async function EditProfilePage() {
         </div>
       </nav>
       <main className="max-w-4xl mx-auto p-6">
-        <ProfileForm initialProfile={profile} userId={user.id} />
+        <ProfileForm
+          initialProfile={profile}
+          initialDataNascimento={dataNascimento}
+          userId={user.id}
+        />
       </main>
     </div>
   );
