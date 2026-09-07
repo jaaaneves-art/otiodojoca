@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { portugalLocalToUtc } from "@/lib/portugal-datetime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -56,7 +57,7 @@ async function criarSessao(formData: FormData) {
     throw new Error("Não tens permissão para gerir este espetáculo.");
   }
 
-  const inicio = new Date(inicioRaw);
+  const inicio = portugalLocalToUtc(inicioRaw);
 
   if (Number.isNaN(inicio.getTime())) {
     throw new Error("Data de início inválida.");
@@ -65,7 +66,7 @@ async function criarSessao(formData: FormData) {
   let fim: Date | null = null;
 
   if (fimRaw) {
-    fim = new Date(fimRaw);
+    fim = portugalLocalToUtc(fimRaw);
 
     if (Number.isNaN(fim.getTime()) || fim <= inicio) {
       throw new Error("A data de fim tem de ser posterior ao início.");

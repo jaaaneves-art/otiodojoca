@@ -171,7 +171,7 @@ export default async function EspectaculosPage({
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm text-rose-100 backdrop-blur">
               <Ticket className="h-4 w-4" />
-              Fase 0 · nova área OTJ
+              Espetáculos · OTJ
             </div>
 
             <div className="mb-5 flex items-center gap-3">
@@ -199,17 +199,13 @@ export default async function EspectaculosPage({
                 <Search className="h-5 w-5" />
                 Ver eventos
               </a>
-              <div
-                aria-disabled="true"
-                className="inline-flex cursor-not-allowed items-center gap-2 rounded-xl border border-white/25 bg-white/5 px-5 py-3 font-semibold text-white/70"
-                title="A criação de espetáculos entra na fase seguinte"
+              <Link
+                href="/espectaculos/organizador"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3 font-semibold text-white transition hover:bg-white/15"
               >
                 <Sparkles className="h-5 w-5" />
                 Organizar um espetáculo
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide">
-                  Fase 1
-                </span>
-              </div>
+              </Link>
             </div>
           </div>
 
@@ -364,8 +360,8 @@ export default async function EspectaculosPage({
               </div>
               <h2 className="text-2xl font-black">Bilheteira</h2>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                A área já fica integrada no módulo, sem inventar preços,
-                lotações ou bilhetes que ainda não existem na base de dados.
+                Consulta as sessões e os tipos de bilhete configurados
+                pelos organizadores.
               </p>
             </div>
 
@@ -398,9 +394,8 @@ export default async function EspectaculosPage({
                 <div className="py-5">
                   <h4 className="font-bold">Tipos de bilhete</h4>
                   <div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
-                    Ainda não existem tabelas de bilheteira nesta fase.
-                    Portanto não são mostrados preços, stocks ou bilhetes
-                    fictícios.
+                    A estrutura real de sessões e tipos de bilhete já está
+                    disponível. A compra online será ativada numa fase posterior.
                   </div>
                 </div>
 
@@ -410,8 +405,9 @@ export default async function EspectaculosPage({
                     Preparado para evoluir com segurança
                   </div>
                   <p className="mt-1 leading-5 text-emerald-700">
-                    Na fase seguinte entram inventário real, encomendas,
-                    pagamentos e QR codes únicos.
+                    A gestão de espetáculos, sessões e tipos de bilhete já
+                    está integrada. Encomendas, pagamentos e QR codes entram
+                    numa fase posterior.
                   </p>
                 </div>
 
@@ -420,7 +416,7 @@ export default async function EspectaculosPage({
                   disabled
                   className="mt-5 w-full cursor-not-allowed rounded-xl bg-rose-500 px-5 py-3 font-bold text-white opacity-50"
                 >
-                  Comprar bilhetes · Fase 1
+                  Compra online ainda indisponível
                 </button>
               </div>
             ) : (

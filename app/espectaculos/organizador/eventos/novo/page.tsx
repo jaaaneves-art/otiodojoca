@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { portugalLocalToUtc } from "@/lib/portugal-datetime";
 import { LocalSelector } from "@/components/entidades/local-selector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,7 +76,7 @@ async function criarEvento(formData: FormData) {
     throw new Error("Não tens permissão para criar espetáculos nesta entidade.");
   }
 
-  const inicio = new Date(inicioRaw);
+  const inicio = portugalLocalToUtc(inicioRaw);
 
   if (Number.isNaN(inicio.getTime())) {
     throw new Error("Data de início inválida.");
@@ -84,7 +85,7 @@ async function criarEvento(formData: FormData) {
   let fim: Date | null = null;
 
   if (fimRaw) {
-    fim = new Date(fimRaw);
+    fim = portugalLocalToUtc(fimRaw);
 
     if (Number.isNaN(fim.getTime()) || fim <= inicio) {
       throw new Error("A data de fim tem de ser posterior ao início.");
