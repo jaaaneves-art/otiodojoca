@@ -1,0 +1,22 @@
+import { beforeEach,describe,expect,it,vi } from 'vitest';
+import type Stripe from 'stripe';
+vi.mock('server-only',()=>({}));
+const f=vi.hoisted(()=>({rpc:vi.fn(),single:vi.fn(),update:vi.fn(),retrieve:vi.fn(),refund:vi.fn(),dispute:vi.fn()}));
+vi.mock('@/lib/supabase/admin',()=>({createAdminClient:()=>({rpc:f.rpc,from:()=>({select:()=>({eq:()=>({single:f.single,maybeSingle:f.single})}),update:(value:unknown)=>{f.update(value);return {eq:async()=>({error:null})};}})})}));
+vi.mock('stripe',()=>({default:class {paymentIntents={retrieve:f.retrieve};refunds={retrieve:f.refund};disputes={retrieve:f.dispute};}}));
+import { settleIntent,settleRefund,stripeConfigured } from './payments';
+import { processProviderEvent } from './reconciliation';
+const payment={id:'11111111-1111-4111-8111-111111111111',order_id:'22222222-2222-4222-8222-222222222222',amount_cents:1000,application_fee_cents:0,destination_account:'acct_fixture'};
+const intent=(status:string,extra={})=>({id:'pi_fixture',metadata:{otj_module:'espectaculos',otj_payment_id:payment.id,otj_order_id:payment.order_id},status,livemode:false,amount:1000,amount_received:status==='succeeded'?1000:0,currency:'eur',transfer_data:{destination:'acct_fixture'},...extra}) as unknown as Stripe.PaymentIntent;
+beforeEach(()=>{vi.clearAllMocks();vi.stubEnv('ESPECTACULOS_STRIPE_ENABLED','true');vi.stubEnv('ESPECTACULOS_STRIPE_MODE','test');vi.stubEnv('ESPECTACULOS_STRIPE_SECRET_KEY','sk_test_fixture');vi.stubEnv('NEXT_PUBLIC_ESPECTACULOS_STRIPE_KEY','pk_test_fixture');f.single.mockResolvedValue({data:payment,error:null});f.rpc.mockResolvedValue({error:null});});
+describe('Stripe doubles, no provider contact',()=>{
+ it.each([['approved','succeeded'],['card declined','requires_payment_method'],['3DS challenge','requires_action'],['abandoned','canceled'],['delayed webhook','processing']])('%s preserves provider state at financial RPC',async(_,status)=>{await settleIntent(intent(status));expect(f.rpc).toHaveBeenCalledWith('event_settle_payment',expect.objectContaining({p_status:status}));});
+ it('duplicate confirmation delegates twice to the idempotent SQL authority',async()=>{await settleIntent(intent('succeeded'));await settleIntent(intent('succeeded'));expect(f.rpc.mock.calls.filter(c=>c[0]==='event_settle_payment')).toHaveLength(2);});
+ it('late success is delegated to SQL stock/review decision, never issued in JS',async()=>{await settleIntent(intent('succeeded'));expect(f.rpc.mock.calls.map(c=>c[0])).toEqual(['event_bind_payment','event_settle_payment']);});
+ it.each([300,1000])('partial/total refund %i uses financial authority',async amount=>{await settleRefund({id:'re_fixture',metadata:{otj_module:'espectaculos',otj_refund_id:payment.id},payment_intent:'pi_fixture',amount,status:'succeeded'} as unknown as Stripe.Refund);expect(f.rpc).toHaveBeenCalledWith('event_settle_refund',expect.objectContaining({p_amount:amount,p_status:'succeeded'}));});
+ it('dispute flags order for review and acknowledges event only afterwards',async()=>{f.dispute.mockResolvedValue({payment_intent:'pi_fixture'});await processProviderEvent('evt_fixture','charge.dispute.created','dp_fixture');expect(f.update).toHaveBeenCalledWith({financial_review_required:true});expect(f.update).toHaveBeenLastCalledWith(expect.objectContaining({status:'processed'}));});
+ it('timeout leaves webhook unacknowledged for retry',async()=>{f.retrieve.mockRejectedValue(new Error('timeout'));await expect(processProviderEvent('evt_fixture','payment_intent.succeeded','pi_fixture')).rejects.toThrow();expect(f.update).not.toHaveBeenCalled();});
+ it('mismatched metadata cannot settle',async()=>{await expect(settleIntent(intent('succeeded',{metadata:{otj_module:'espectaculos',otj_payment_id:payment.id,otj_order_id:'other'}}))).rejects.toThrow();expect(f.rpc).not.toHaveBeenCalled();});
+ it('live object cannot settle even in test configuration',async()=>{await expect(settleIntent(intent('succeeded',{livemode:true}))).rejects.toThrow();expect(f.rpc).not.toHaveBeenCalled();});
+ it('live public key cannot configure Stripe',()=>{vi.stubEnv('NEXT_PUBLIC_ESPECTACULOS_STRIPE_KEY','pk_live_fixture');expect(stripeConfigured()).toBe(false);});
+});

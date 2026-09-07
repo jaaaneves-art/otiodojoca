@@ -12,7 +12,7 @@ export function stripeConfigured() {
 }
 export function stripeClient() {
   if (!stripeConfigured()) throw new Error('Pagamentos online ainda indisponíveis.');
-  return new Stripe(process.env.ESPECTACULOS_STRIPE_SECRET_KEY!, { maxNetworkRetries: 2, timeout: 15000 });
+  return new Stripe(process.env.ESPECTACULOS_STRIPE_SECRET_KEY!, { maxNetworkRetries: 0, timeout: 3000 });
 }
 async function checked(error: unknown) { if (error) throw new Error('Não foi possível atualizar o pagamento.'); }
 export async function loadPayment(id: string): Promise<Payment> {

@@ -182,6 +182,7 @@ export default async function GerirEventoPage({
 
       <div className="mx-auto flex max-w-6xl flex-wrap gap-4 px-5 pt-5">
         {["owner", "admin", "finance"].includes(membership.role) && <Link className="rounded border p-2" href={`/espectaculos/organizador/eventos/${evento.id}/encomendas`}>Encomendas e reembolsos</Link>}
+        {["owner", "admin", "finance"].includes(membership.role) && <Link className="rounded border p-3 focus-visible:ring-2" href={`/espectaculos/organizador/eventos/${evento.id}/operacao`}>Estado operacional</Link>}
         {podeGerir && evento.estado !== "publicado" && evento.estado !== "cancelado" && <form action={changeEventStatus}><input type="hidden" name="event_id" value={evento.id} /><input type="hidden" name="status" value="publicado" /><Button>Publicar espetáculo</Button></form>}
         {podeGerir && evento.estado !== "cancelado" && <form action={changeEventStatus}><input type="hidden" name="event_id" value={evento.id} /><input type="hidden" name="status" value="cancelado" /><Button variant="outline">Cancelar e sinalizar análise financeira</Button></form>}
       </div>

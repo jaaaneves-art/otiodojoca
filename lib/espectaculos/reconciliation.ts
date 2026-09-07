@@ -1,4 +1,7 @@
 import 'server-only';
+import { randomUUID } from 'node:crypto';
+import { processNotifications } from './notification-worker';
+import { logOperation } from './operation-log';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { ensureIntent, loadPayment, sendRefund, settleIntent, settleRefund, stripeClient, stripeConfigured } from './payments';
 
@@ -35,37 +38,55 @@ export async function processProviderEvent(id: string, type: string, objectId: s
   if (error) throw new Error('Reconciliação indisponível.');
 }
 export async function maintainTicketing() {
-  const deadline = Date.now() + 40000;
-  const db = createAdminClient();
-  const { data: expiredItems, error } = await db.rpc('event_expire_reservations');
-  if (error) throw new Error('Não foi possível expirar reservas.');
-  const { count, error: notificationError } = await db.from('event_notification_outbox').select('id', { count: 'exact', head: true }).is('delivered_at', null);
-  if (notificationError) throw new Error('Fila de notificações indisponível.');
-  const result = { expiredItems: expiredItems ?? 0, payments: 0, refunds: 0, events: 0, pendingReview: 0, notificationsDeferred: count ?? 0, interrupted: false };
-  if (!stripeConfigured()) return result;
-  const stripe = stripeClient();
-  const { data: orders, error: orderError } = await db.from('event_orders').select('id').eq('status', 'payment_pending').lt('expires_at', new Date().toISOString()).order('expires_at').limit(25);
-  if (orderError) throw new Error('Reconciliação indisponível.');
-  for (const o of orders ?? []) {
-    if (Date.now() >= deadline) { result.interrupted = true; break; }
-    try {
-      const { data: row, error: readError } = await db.from('event_payments').select('id').eq('order_id', o.id).single();
-      if (readError || !row) throw new Error('Pagamento indisponível.');
-      let intent = await ensureIntent(await loadPayment(row.id));
-      if (!['succeeded', 'canceled'].includes(intent.status)) {
-        try { intent = await stripe.paymentIntents.cancel(intent.id, {}, { idempotencyKey: `otj-expire-${row.id}` }); }
-        catch { intent = await stripe.paymentIntents.retrieve(intent.id); }
-      }
-      await settleIntent(intent);
-      if (!['succeeded', 'canceled'].includes(intent.status)) result.pendingReview++;
-      result.payments++;
-    } catch { result.pendingReview++; }
-  }
-  const { data: refunds, error: refundError } = await db.from('event_refunds').select('id').in('status', ['requested', 'pending']).order('created_at').limit(25);
-  if (refundError) throw new Error('Reconciliação indisponível.');
-  for (const refund of refunds ?? []) { if (Date.now() >= deadline) { result.interrupted = true; break; } try { await sendRefund(refund.id); result.refunds++; } catch { result.pendingReview++; } }
-  const { data: events, error: eventError } = await db.from('event_payment_events').select('id,event_type,object_id').eq('status', 'pending').order('received_at').limit(25);
-  if (eventError) throw new Error('Reconciliação indisponível.');
-  for (const e of events ?? []) { if (Date.now() >= deadline) { result.interrupted = true; break; } try { await processProviderEvent(e.id, e.event_type, e.object_id); result.events++; } catch { result.pendingReview++; } }
-  return result;
+ const requestId = randomUUID(); const started = Date.now(); const deadline = started + 40000;
+ const db = createAdminClient();
+ const { data: lease, error } = await db.rpc('event_maintenance_claim');
+ if (error) throw new Error('Manutenção indisponível.');
+ if (!lease) { logOperation({ operation: 'maintenance', outcome: 'busy', requestId, durationMs: Date.now()-started }); return { requestId, busy: true }; }
+ try {
+  const result = await runMaintenance(deadline, requestId);
+  logOperation({ operation: 'maintenance', outcome: 'success', requestId, durationMs: Date.now()-started });
+  return { requestId, busy: false, durationMs: Date.now()-started, ...result };
+ } catch {
+  logOperation({ operation: 'maintenance', outcome: 'failed', requestId, durationMs: Date.now()-started });
+  throw new Error('Manutenção pendente.');
+ } finally { await db.rpc('event_maintenance_release', { p_token: lease }); }
+}
+async function runMaintenance(deadline: number, requestId: string) {
+ const db = createAdminClient();
+ const { data: expiredItems, error } = await db.rpc('event_expire_reservations');
+ if (error) throw new Error('Não foi possível expirar reservas.');
+ const notifications = await processNotifications({ deadline: Math.min(deadline, Date.now()+8000), requestId });
+ const result = { expiredItems: expiredItems ?? 0, payments: 0, refunds: 0, events: 0, pendingReview: 0, notifications, interrupted: false };
+ if (!stripeConfigured()) return result;
+ // Every queue selects by next attempt, so repeated failures cannot starve newer work.
+ const due = new Date().toISOString();
+ const { data: payments, error: pe } = await db.from('event_payments').select('id,order_id,reconcile_attempts').in('status', ['creating','pending']).lte('next_reconcile_at',due).order('next_reconcile_at').limit(5);
+ const { data: refunds, error: re } = await db.from('event_refunds').select('id,reconcile_attempts').in('status',['requested','pending']).lte('next_reconcile_at',due).order('next_reconcile_at').limit(5);
+ const { data: events, error: ee } = await db.from('event_payment_events').select('id,event_type,object_id,attempts').eq('status','pending').lte('next_reconcile_at',due).order('next_reconcile_at').limit(5);
+ if (pe || re || ee) throw new Error('Reconciliação indisponível.');
+ const tasks = [
+  ...(events ?? []).map(e => ({ table: 'event_payment_events', id: e.id, attempts: e.attempts, operation: 'webhook' as const, count: 'events' as const, run: () => processProviderEvent(e.id,e.event_type,e.object_id) })),
+  ...(refunds ?? []).map(r => ({ table: 'event_refunds', id: r.id, attempts: r.reconcile_attempts, operation: 'refund' as const, count: 'refunds' as const, run: () => sendRefund(r.id) })),
+  ...(payments ?? []).map(p => ({ table: 'event_payments', id: p.id, attempts: p.reconcile_attempts, operation: 'payment' as const, count: 'payments' as const, run: async () => {
+   const { data: order, error } = await db.from('event_orders').select('expires_at').eq('id',p.order_id).single();
+   if (error || !order) throw new Error('Pagamento indisponível.');
+   let intent = await ensureIntent(await loadPayment(p.id));
+   if (Date.parse(order.expires_at)<=Date.now() && !['succeeded','canceled'].includes(intent.status)) {
+    try { intent = await stripeClient().paymentIntents.cancel(intent.id, {}, { idempotencyKey: `otj-expire-${p.id}` }); }
+    catch { intent = await stripeClient().paymentIntents.retrieve(intent.id); }
+   }
+   await settleIntent(intent);
+  } })),
+ ];
+ for (const task of tasks) {
+  if (Date.now()+12000>=deadline) { result.interrupted=true; break; }
+  const started=Date.now(); const attempts=task.attempts+1;
+  const retryAt=new Date(Date.now()+Math.min(86400000,30000*2**Math.min(attempts-1,12))).toISOString();
+  const { error } = await db.from(task.table).update({ next_reconcile_at:retryAt, [task.table==='event_payment_events'?'attempts':'reconcile_attempts']:attempts }).eq('id',task.id);
+  if (error) throw new Error('Reconciliação indisponível.');
+  try { await task.run(); result[task.count]++; logOperation({ operation: task.operation, outcome:'success',requestId,entityId:task.id,durationMs:Date.now()-started,retryCount:attempts }); }
+  catch { result.pendingReview++; logOperation({ operation:task.operation,outcome:'failed',requestId,entityId:task.id,durationMs:Date.now()-started,retryCount:attempts }); }
+ }
+ return result;
 }
