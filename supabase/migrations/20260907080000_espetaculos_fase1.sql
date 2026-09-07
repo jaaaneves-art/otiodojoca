@@ -102,61 +102,58 @@ alter table public.event_venues enable row level security;
 alter table public.event_sessions enable row level security;
 alter table public.event_ticket_types enable row level security;
 
+create or replace function public.is_event_org_member(
+  p_entidade_id bigint,
+  p_roles text[] default null
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.event_organization_members m
+    where m.entidade_id = p_entidade_id
+      and m.user_id = auth.uid()
+      and (p_roles is null or m.role = any(p_roles))
+  );
+$$;
+
+revoke all on function public.is_event_org_member(bigint, text[]) from public;
+grant execute on function public.is_event_org_member(bigint, text[]) to authenticated, service_role;
+
 drop policy if exists "event_org_members_select" on public.event_organization_members;
 create policy "event_org_members_select" on public.event_organization_members
 for select to authenticated
 using (
   user_id = auth.uid()
-  or exists (
-    select 1 from public.event_organization_members m
-    where m.entidade_id = event_organization_members.entidade_id
-      and m.user_id = auth.uid()
-      and m.role in ('owner','admin')
-  )
+  or public.is_event_org_member(entidade_id, array['owner','admin']::text[])
 );
 
 drop policy if exists "event_org_members_insert" on public.event_organization_members;
 create policy "event_org_members_insert" on public.event_organization_members
 for insert to authenticated
 with check (
-  exists (
-    select 1 from public.event_organization_members m
-    where m.entidade_id = event_organization_members.entidade_id
-      and m.user_id = auth.uid()
-      and m.role in ('owner','admin')
-  )
+  public.is_event_org_member(entidade_id, array['owner','admin']::text[])
 );
 
 drop policy if exists "event_org_members_update" on public.event_organization_members;
 create policy "event_org_members_update" on public.event_organization_members
 for update to authenticated
 using (
-  exists (
-    select 1 from public.event_organization_members m
-    where m.entidade_id = event_organization_members.entidade_id
-      and m.user_id = auth.uid()
-      and m.role in ('owner','admin')
-  )
+  public.is_event_org_member(entidade_id, array['owner','admin']::text[])
 )
 with check (
-  exists (
-    select 1 from public.event_organization_members m
-    where m.entidade_id = event_organization_members.entidade_id
-      and m.user_id = auth.uid()
-      and m.role in ('owner','admin')
-  )
+  public.is_event_org_member(entidade_id, array['owner','admin']::text[])
 );
 
 drop policy if exists "event_org_members_delete" on public.event_organization_members;
 create policy "event_org_members_delete" on public.event_organization_members
 for delete to authenticated
 using (
-  exists (
-    select 1 from public.event_organization_members m
-    where m.entidade_id = event_organization_members.entidade_id
-      and m.user_id = auth.uid()
-      and m.role in ('owner','admin')
-  )
+  public.is_event_org_member(entidade_id, array['owner','admin']::text[])
 );
 
 drop policy if exists "event_venues_public_read" on public.event_venues;
@@ -314,6 +311,9 @@ grant insert, update, delete on public.event_venues to authenticated;
 grant insert, update, delete on public.event_sessions to authenticated;
 grant insert, update, delete on public.event_ticket_types to authenticated;
 grant all on public.event_organization_members, public.event_venues, public.event_sessions, public.event_ticket_types to service_role;
-grant usage, select on all sequences in schema public to authenticated, service_role;
+grant usage, select on sequence public.event_organization_members_id_seq to authenticated, service_role;
+grant usage, select on sequence public.event_venues_id_seq to authenticated, service_role;
+grant usage, select on sequence public.event_sessions_id_seq to authenticated, service_role;
+grant usage, select on sequence public.event_ticket_types_id_seq to authenticated, service_role;
 
 commit;
