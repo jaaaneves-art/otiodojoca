@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { changeEventStatus } from "@/lib/espectaculos/actions";
 import { notFound, redirect } from "next/navigation";
 import {
   CalendarDays,
@@ -138,6 +139,11 @@ export default async function GerirEventoPage({
     membership.role
   );
 
+  const availability = new Map<number, number>();
+  for (const sessao of sessoes) {
+    const { data } = await supabase.rpc("event_availability", { p_session: sessao.id });
+    for (const row of data ?? []) availability.set(row.ticket_type_id, row.available);
+  }
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
@@ -171,6 +177,11 @@ export default async function GerirEventoPage({
         </div>
       </header>
 
+      <div className="mx-auto flex max-w-6xl flex-wrap gap-4 px-5 pt-5">
+        {["owner", "admin", "finance"].includes(membership.role) && <Link className="rounded border p-2" href={`/espectaculos/organizador/eventos/${evento.id}/encomendas`}>Encomendas e reembolsos</Link>}
+        {podeGerir && evento.estado !== "publicado" && evento.estado !== "cancelado" && <form action={changeEventStatus}><input type="hidden" name="event_id" value={evento.id} /><input type="hidden" name="status" value="publicado" /><Button>Publicar espetáculo</Button></form>}
+        {podeGerir && evento.estado !== "cancelado" && <form action={changeEventStatus}><input type="hidden" name="event_id" value={evento.id} /><input type="hidden" name="status" value="cancelado" /><Button variant="outline">Cancelar e sinalizar análise financeira</Button></form>}
+      </div>
       <main className="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
           <Card>
@@ -291,6 +302,7 @@ export default async function GerirEventoPage({
                             </div>
                           </div>
 
+                          {["owner", "admin", "checkin"].includes(membership.role) && <Link className="text-rose-600" href={`/espectaculos/organizador/eventos/${evento.id}/sessoes/${sessao.id}/checkin`}>Check-in</Link>}
                           {podeGerir && (
                             <Button variant="outline" size="sm" asChild>
                               <Link
@@ -333,7 +345,7 @@ export default async function GerirEventoPage({
                                           bilhete.price_cents / 100
                                         )}
                                     {" · "}
-                                    {bilhete.quantity} disponíveis
+                                    {availability.get(bilhete.id) ?? "—"} disponíveis
                                   </span>
                                 </div>
                               ))}

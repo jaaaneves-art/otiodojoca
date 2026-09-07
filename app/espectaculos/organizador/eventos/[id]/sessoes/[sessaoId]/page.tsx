@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cents } from "@/lib/espectaculos/validation";
+import { cancelSession, updateTicketInventory, updateSessionCapacity } from "@/lib/espectaculos/actions";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { Ticket } from "lucide-react";
@@ -32,17 +34,11 @@ async function criarTipoBilhete(formData: FormData) {
     formData.get("max_per_order") ?? ""
   ).trim();
 
-  if (!eventoId || !sessaoId || !nome || !quantidade || quantidade < 1) {
+  if (!eventoId || !sessaoId || !nome || !Number.isSafeInteger(quantidade) || quantidade < 1) {
     throw new Error("Preenche os campos obrigatórios.");
   }
 
-  const preco = Number(precoRaw || "0");
-
-  if (!Number.isFinite(preco) || preco < 0) {
-    throw new Error("Preço inválido.");
-  }
-
-  const priceCents = Math.round(preco * 100);
+  const priceCents = cents(precoRaw || "0");
 
   const maxPerOrder = maxPorEncomendaRaw
     ? Number(maxPorEncomendaRaw)
@@ -219,7 +215,7 @@ export default async function GerirSessaoPage({
     supabase
       .from("event_ticket_types")
       .select(
-        "id,name,description,price_cents,currency,quantity,max_per_order,active"
+        "id,name,description,price_cents,currency,quantity,max_per_order,active,sales_start,sales_end"
       )
       .eq("session_id", sessaoId)
       .order("sort_order"),
@@ -231,6 +227,13 @@ export default async function GerirSessaoPage({
     membership.role
   );
 
+  const { data: availability } = await supabase.rpc("event_availability", { p_session: sessao.id });
+  const stock = new Map<number, number>((availability ?? []).map((row: { ticket_type_id: number; available: number }) => [row.ticket_type_id, row.available]));
+  const localDate = (value: string | null) => {
+    if (!value) return "";
+    const parts = Object.fromEntries(new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(value)).map(p => [p.type, p.value]));
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+  };
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
@@ -257,6 +260,8 @@ export default async function GerirSessaoPage({
       </header>
 
       <main className="mx-auto max-w-4xl space-y-6 px-5 py-8">
+        {podeGerir && sessao.status !== "cancelled" && <form action={cancelSession}><input type="hidden" name="event_id" value={eventoId} /><input type="hidden" name="session_id" value={sessaoId} /><Button variant="outline">Cancelar sessão e sinalizar análise financeira</Button></form>}
+        {podeGerir && <form action={updateSessionCapacity} className="flex flex-wrap items-end gap-3 rounded border p-4"><input type="hidden" name="event_id" value={eventoId} /><input type="hidden" name="session_id" value={sessaoId} /><label>Capacidade total<Input name="capacity" type="number" min="1" step="1" defaultValue={sessao.capacity} required /></label><Button variant="outline">Atualizar capacidade</Button></form>}
         <Card>
           <CardHeader>
             <CardTitle>Estado da sessão</CardTitle>
@@ -343,7 +348,7 @@ export default async function GerirSessaoPage({
                       </div>
 
                       <div className="mt-1 text-sm text-slate-500">
-                        {tipo.quantity} bilhetes
+                        {tipo.quantity} configurados · {stock.get(tipo.id) ?? "—"} disponíveis
                         {tipo.max_per_order
                           ? ` · máximo ${tipo.max_per_order} por encomenda`
                           : ""}
@@ -365,6 +370,16 @@ export default async function GerirSessaoPage({
           </CardContent>
         </Card>
 
+        {podeGerir && tipos?.map(tipo => <details key={`edit-${tipo.id}`} className="rounded border p-4"><summary className="cursor-pointer font-semibold">Editar {tipo.name}</summary><form action={updateTicketInventory} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input type="hidden" name="event_id" value={eventoId} /><input type="hidden" name="session_id" value={sessaoId} /><input type="hidden" name="ticket_type_id" value={tipo.id} />
+          <label>Quantidade total<Input name="quantity" type="number" min="1" step="1" defaultValue={tipo.quantity} required /></label>
+          <label>Preço (€)<Input name="price" type="number" min="0" step="0.01" defaultValue={(tipo.price_cents / 100).toFixed(2)} required /></label>
+          <label>Máximo por encomenda<Input name="max_per_order" type="number" min="1" step="1" defaultValue={tipo.max_per_order ?? ""} /></label>
+          <label>Início de vendas (Portugal)<Input name="sales_start" type="datetime-local" defaultValue={localDate(tipo.sales_start)} /></label>
+          <label>Fim de vendas (Portugal)<Input name="sales_end" type="datetime-local" defaultValue={localDate(tipo.sales_end)} /></label>
+          <label><input name="active" type="checkbox" defaultChecked={tipo.active} /> Ativo</label>
+          <p className="text-sm text-slate-500">As encomendas existentes mantêm o preço e as condições da compra.</p><Button>Guardar tipo de bilhete</Button>
+        </form></details>)}
         {podeGerir && (
           <Card>
             <CardHeader>

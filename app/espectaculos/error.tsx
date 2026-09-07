@@ -1,0 +1,3 @@
+'use client';
+import Link from 'next/link';
+export default function ErrorPage({ reset }: { reset: () => void }) { return <main className="mx-auto max-w-xl space-y-4 p-8"><h1 className="text-xl font-bold">Não foi possível concluir a operação</h1><p>Confirma que tens sessão iniciada e volta a consultar a disponibilidade. Se já iniciaste uma compra, verifica a encomenda antes de criar outra.</p><button className="rounded border p-3" onClick={reset}>Voltar a tentar</button><Link className="block" href="/espectaculos/encomendas">Consultar encomendas</Link><Link className="block" href="/login">Iniciar sessão</Link></main>; }

@@ -29,7 +29,7 @@ async function criarSessao(formData: FormData) {
   const fimRaw = String(formData.get("ends_at") ?? "");
   const capacidade = Number(formData.get("capacity"));
 
-  if (!eventoId || !inicioRaw || !capacidade || capacidade < 1) {
+  if (!eventoId || !inicioRaw || !Number.isSafeInteger(capacidade) || capacidade < 1) {
     throw new Error("Preenche os campos obrigatórios.");
   }
 

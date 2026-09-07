@@ -6,12 +6,13 @@ import {
   Music2,
   PartyPopper,
   Search,
-  ShieldCheck,
   Sparkles,
   Theater,
   Ticket,
   Users,
 } from "lucide-react";
+import { TicketSelector } from "@/components/espectaculos/ticket-selector";
+import type { Availability } from "@/lib/espectaculos/types";
 import { createClient } from "@/lib/supabase/server";
 
 type EventoRow = {
@@ -79,21 +80,9 @@ export default async function EspectaculosPage({
 
   const supabase = await createClient();
 
-  let query = supabase
-    .from("eventos")
-    .select(
-      "id,nome,slug,descricao,inicio,fim,freguesia_id,lugar,entidade_organizadora_id,tipo,estado"
-    )
-    .eq("estado", "publicado")
-    .gte("inicio", new Date().toISOString())
-    .order("inicio", { ascending: true })
-    .limit(24);
-
-  if (tipo) {
-    query = query.eq("tipo", tipo);
-  }
-
-  const { data: eventosData, error: eventosError } = await query;
+  const { data: eventosData, error: eventosError } = await supabase
+    .rpc("event_upcoming", { p_type: tipo || null })
+    .select("id,nome,slug,descricao,inicio,fim,freguesia_id,lugar,entidade_organizadora_id,tipo,estado");
   const eventos = (eventosData ?? []) as EventoRow[];
 
   const freguesiaIds = [...new Set(eventos.map((e) => e.freguesia_id))];
@@ -132,6 +121,14 @@ export default async function EspectaculosPage({
   const selecionadoLocal = selecionado
     ? freguesias.get(selecionado.freguesia_id)
     : undefined;
+
+  const { data: sessions, error: sessionsError } = selecionado
+    ? await supabase.from("event_sessions").select("id,starts_at,status").eq("evento_id", selecionado.id).gte("starts_at", new Date().toISOString()).order("starts_at")
+    : { data: [], error: null };
+  const sessionTypes = await Promise.all((sessions ?? []).map(async session => {
+    const { data, error } = await supabase.rpc("event_availability", { p_session: session.id });
+    return { session, types: (data ?? []) as Availability[], error };
+  }));
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -391,33 +388,14 @@ export default async function EspectaculosPage({
                   </div>
                 </div>
 
-                <div className="py-5">
-                  <h4 className="font-bold">Tipos de bilhete</h4>
-                  <div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
-                    A estrutura real de sessões e tipos de bilhete já está
-                    disponível. A compra online será ativada numa fase posterior.
-                  </div>
+                <div className="space-y-4 py-5">
+                  <Link href="/espectaculos/encomendas" className="text-sm font-semibold text-rose-600">As minhas encomendas</Link>
+                  <h4 className="font-bold">Sessões e bilhetes</h4>
+                  {sessionsError ? <p>Não foi possível carregar as sessões.</p> : !sessionTypes.length ? <p>Sem sessões futuras disponíveis.</p> : sessionTypes.map(({ session, types, error }) => <section key={session.id} className="space-y-2">
+                    <h5 className="text-sm font-semibold">{formatarData(session.starts_at)}</h5>
+                    {error ? <p>Disponibilidade temporariamente indisponível.</p> : <TicketSelector sessionId={session.id} types={types} />}
+                  </section>)}
                 </div>
-
-                <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">
-                  <div className="flex items-center gap-2 font-bold">
-                    <ShieldCheck className="h-4 w-4" />
-                    Preparado para evoluir com segurança
-                  </div>
-                  <p className="mt-1 leading-5 text-emerald-700">
-                    A gestão de espetáculos, sessões e tipos de bilhete já
-                    está integrada. Encomendas, pagamentos e QR codes entram
-                    numa fase posterior.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  disabled
-                  className="mt-5 w-full cursor-not-allowed rounded-xl bg-rose-500 px-5 py-3 font-bold text-white opacity-50"
-                >
-                  Compra online ainda indisponível
-                </button>
               </div>
             ) : (
               <div className="p-8 text-center">

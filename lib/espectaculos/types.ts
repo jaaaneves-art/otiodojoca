@@ -1,0 +1,5 @@
+export type Availability = { ticket_type_id: number; name: string; price_cents: number; max_per_order: number | null; available: number; sales_open: boolean };
+export type Order = { id: string; buyer_id: string; session_id: number; entidade_id: number; status: string; total_cents: number; expires_at: string; financial_review_required: boolean; purchase_snapshot: { event_name: string; session_starts_at: string; place: string | null } };
+export type Payment = { id: string; order_id: string; destination_account: string; amount_cents: number; currency: string; application_fee_cents: number; payment_methods: string[]; provider_intent_id: string | null; created_at: string; status: string };
+export const money = (cents: number) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(cents / 100);
+export const orderLabels: Record<string, string> = { reserved: 'Reservada', payment_pending: 'Pagamento pendente', paid: 'Confirmada', expired: 'Expirada', cancelled: 'Cancelada', review: 'Em análise financeira', partially_refunded: 'Parcialmente reembolsada', refunded: 'Reembolsada' };
