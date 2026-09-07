@@ -1,3 +1,4 @@
+import { SubmitButton } from './submit-button';
 import { randomUUID } from 'node:crypto';
 import { reserveOrder } from '@/lib/espectaculos/actions';
 import { money, type Availability } from '@/lib/espectaculos/types';
@@ -12,6 +13,6 @@ export function TicketSelector({ sessionId, types }: { sessionId: number; types:
     </label>)}
     {types.length === 0 && <p>Sem tipos de bilhete disponíveis.</p>}
     <p className="text-xs text-slate-500">Reserva de 15 minutos. É necessário iniciar sessão. A disponibilidade é confirmada ao reservar.</p>
-    <button className="rounded bg-rose-600 px-4 py-2 font-semibold text-white disabled:opacity-40" disabled={!open}>Reservar bilhetes</button>
+    <SubmitButton disabled={!open}>{open ? (types.every(t => t.price_cents === 0) ? "Registar participação" : "Reservar bilhetes") : "Sem bilhetes disponíveis para reserva"}</SubmitButton>
   </form>;
 }

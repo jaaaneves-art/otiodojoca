@@ -1,3 +1,4 @@
+import { SalesSummary, type SalesRow } from "@/components/espectaculos/sales-summary";
 import Link from "next/link";
 import { changeEventStatus } from "@/lib/espectaculos/actions";
 import { notFound, redirect } from "next/navigation";
@@ -139,6 +140,8 @@ export default async function GerirEventoPage({
     membership.role
   );
 
+  const { data: sales, error: salesError } = membership.role !== 'checkin' ? await supabase.rpc('event_sales_summary', { p_event: eventoId }) : { data: null, error: null };
+  if (salesError) throw new Error('Não foi possível carregar o resumo de vendas.');
   const availability = new Map<number, number>();
   for (const sessao of sessoes) {
     const { data } = await supabase.rpc("event_availability", { p_session: sessao.id });
@@ -184,6 +187,7 @@ export default async function GerirEventoPage({
       </div>
       <main className="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
+          {sales && <SalesSummary rows={sales as SalesRow[]} />}
           <Card>
             <CardHeader>
               <CardTitle>Informação</CardTitle>

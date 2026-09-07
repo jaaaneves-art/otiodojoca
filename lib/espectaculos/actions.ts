@@ -26,6 +26,7 @@ export async function startPayment(form: FormData): Promise<{ clientSecret: stri
   try {
     const { order, user } = await ownOrder(uuid(form.get('order_id')));
     if (!stripeConfigured() || !qrConfigured()) return { error: 'Pagamentos online ainda indisponíveis.' };
+    if (order.financial_review_required) return { error: 'Encomenda em revisão manual. Aguarda o contacto do organizador.' };
     if (order.status !== 'reserved' && order.status !== 'payment_pending') return { error: 'Encomenda indisponível para pagamento.' };
     if (Date.parse(order.expires_at) <= Date.now()) return { error: 'O prazo da reserva terminou. Aguarda a reconciliação do pagamento.' };
     const { data, error } = await createAdminClient().rpc('event_prepare_payment', { p_order: order.id, p_buyer: user.id });
@@ -65,9 +66,11 @@ export async function cancelSession(form: FormData) {
 export async function checkIn(session: number, token: string, request: string) {
   try {
     const { db } = await signedIn();
-    const { data, error } = await db.rpc('event_checkin', { p_session: positiveId(session), p_hash: tokenHash(token), p_request: uuid(request) });
+    let hash: string;
+    try { hash = tokenHash(token); } catch { return { result: 'invalid' }; }
+    const { data, error } = await db.rpc('event_checkin_feedback', { p_session: positiveId(session), p_hash: hash, p_request: uuid(request) });
     if (error) return { result: 'error' };
-    return data as { result: string; replayed?: boolean };
+    return { result: typeof data?.result === 'string' ? data.result : 'error', replayed: data?.replayed === true };
   } catch { return { result: 'error' }; }
 }
 

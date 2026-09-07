@@ -1,3 +1,4 @@
+import { paymentLabels } from '@/lib/espectaculos/presentation';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireEventRole } from '@/lib/espectaculos/permissions';
@@ -23,8 +24,8 @@ export default async function FinanceOrder({ params }: { params: Promise<{ id: s
     <p>Data na compra: {new Date(order.purchase_snapshot.session_starts_at).toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' })}</p>
     {order.financial_review_required && <p className="rounded bg-amber-50 p-4">Análise financeira necessária. Não foram iniciados reembolsos automáticos.</p>}
     {items?.map(i => <p key={i.id}>{i.quantity} × {i.name} · {money(i.unit_price_cents)}</p>)}
-    {payment && <p>Pagamento: {payment.status} · Comissão OTJ: {money(payment.application_fee_cents)}</p>}
-    {refunds?.map(r => <div key={r.id} className="rounded border p-3">Reembolso: {money(r.amount_cents)} · {r.status}<p>{r.reason}</p></div>)}
+    {payment && <p>Pagamento: {paymentLabels[payment.status]} · Comissão OTJ: {money(payment.application_fee_cents)}</p>}
+    {refunds?.map(r => <div key={r.id} className="rounded border p-3">Reembolso: {money(r.amount_cents)} · {paymentLabels[r.status]}<p>{r.reason}</p></div>)}
     {payment && ['succeeded', 'review'].includes(payment.status) && order.status !== 'refunded' && <RefundForm orderId={order.id} tickets={tickets ?? []} reviewWithoutTickets={order.status === 'review' && !tickets?.length} />}
   </main>;
 }

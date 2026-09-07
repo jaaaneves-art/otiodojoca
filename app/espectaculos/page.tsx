@@ -126,7 +126,7 @@ export default async function EspectaculosPage({
     ? await supabase.from("event_sessions").select("id,starts_at,status").eq("evento_id", selecionado.id).gte("starts_at", new Date().toISOString()).order("starts_at")
     : { data: [], error: null };
   const sessionTypes = await Promise.all((sessions ?? []).map(async session => {
-    const { data, error } = await supabase.rpc("event_availability", { p_session: session.id });
+    const { data, error } = await supabase.rpc("event_public_availability", { p_session: session.id });
     return { session, types: (data ?? []) as Availability[], error };
   }));
 
@@ -273,9 +273,7 @@ export default async function EspectaculosPage({
                   Ainda não existem eventos publicados
                 </h3>
                 <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
-                  Esta área não usa dados fictícios. Assim que existirem
-                  eventos publicados na tabela atual do OTJ, aparecem aqui
-                  automaticamente.
+                  Volta em breve para descobrir novas datas e reservar os teus bilhetes.
                 </p>
               </div>
             ) : (
@@ -290,7 +288,7 @@ export default async function EspectaculosPage({
                   return (
                     <Link
                       key={evento.id}
-                      href={`/espectaculos${tipo ? `?tipo=${tipo}&` : "?"}evento=${evento.id}#bilheteira`}
+                      href={`/espectaculos/eventos/${evento.id}`}
                       className={`group grid gap-4 rounded-2xl border bg-white p-4 transition sm:grid-cols-[92px_1fr_auto] sm:items-center ${
                         ativo
                           ? "border-rose-300 shadow-sm ring-2 ring-rose-100"
@@ -390,7 +388,7 @@ export default async function EspectaculosPage({
 
                 <div className="space-y-4 py-5">
                   <Link href="/espectaculos/encomendas" className="text-sm font-semibold text-rose-600">As minhas encomendas</Link>
-                  <h4 className="font-bold">Sessões e bilhetes</h4>
+                  <Link className="block font-semibold text-rose-700" href={`/espectaculos/eventos/${selecionado.id}`}>Descrição e todas as sessões →</Link><h4 className="font-bold">Sessões e bilhetes</h4>
                   {sessionsError ? <p>Não foi possível carregar as sessões.</p> : !sessionTypes.length ? <p>Sem sessões futuras disponíveis.</p> : sessionTypes.map(({ session, types, error }) => <section key={session.id} className="space-y-2">
                     <h5 className="text-sm font-semibold">{formatarData(session.starts_at)}</h5>
                     {error ? <p>Disponibilidade temporariamente indisponível.</p> : <TicketSelector sessionId={session.id} types={types} />}

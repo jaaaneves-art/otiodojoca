@@ -6,7 +6,7 @@ import { paymentParams } from './stripe-params';
 
 export function stripeConfigured() {
   // This release deliberately cannot initiate live payments.
-  return process.env.ESPECTACULOS_STRIPE_ENABLED === 'true' &&
+  return (process.env.ESPECTACULOS_STRIPE_MODE ?? 'test') === 'test' && process.env.ESPECTACULOS_STRIPE_ENABLED === 'true' &&
     process.env.ESPECTACULOS_STRIPE_SECRET_KEY?.startsWith('sk_test_') === true &&
     process.env.NEXT_PUBLIC_ESPECTACULOS_STRIPE_KEY?.startsWith('pk_test_') === true;
 }

@@ -35,15 +35,19 @@ export async function processProviderEvent(id: string, type: string, objectId: s
   if (error) throw new Error('Reconciliação indisponível.');
 }
 export async function maintainTicketing() {
+  const deadline = Date.now() + 40000;
   const db = createAdminClient();
-  const { error } = await db.rpc('event_expire_reservations');
+  const { data: expiredItems, error } = await db.rpc('event_expire_reservations');
   if (error) throw new Error('Não foi possível expirar reservas.');
-  const result = { payments: 0, refunds: 0, events: 0, pendingReview: 0 };
+  const { count, error: notificationError } = await db.from('event_notification_outbox').select('id', { count: 'exact', head: true }).is('delivered_at', null);
+  if (notificationError) throw new Error('Fila de notificações indisponível.');
+  const result = { expiredItems: expiredItems ?? 0, payments: 0, refunds: 0, events: 0, pendingReview: 0, notificationsDeferred: count ?? 0, interrupted: false };
   if (!stripeConfigured()) return result;
   const stripe = stripeClient();
   const { data: orders, error: orderError } = await db.from('event_orders').select('id').eq('status', 'payment_pending').lt('expires_at', new Date().toISOString()).order('expires_at').limit(25);
   if (orderError) throw new Error('Reconciliação indisponível.');
   for (const o of orders ?? []) {
+    if (Date.now() >= deadline) { result.interrupted = true; break; }
     try {
       const { data: row, error: readError } = await db.from('event_payments').select('id').eq('order_id', o.id).single();
       if (readError || !row) throw new Error('Pagamento indisponível.');
@@ -59,9 +63,9 @@ export async function maintainTicketing() {
   }
   const { data: refunds, error: refundError } = await db.from('event_refunds').select('id').in('status', ['requested', 'pending']).order('created_at').limit(25);
   if (refundError) throw new Error('Reconciliação indisponível.');
-  for (const refund of refunds ?? []) { try { await sendRefund(refund.id); result.refunds++; } catch { result.pendingReview++; } }
+  for (const refund of refunds ?? []) { if (Date.now() >= deadline) { result.interrupted = true; break; } try { await sendRefund(refund.id); result.refunds++; } catch { result.pendingReview++; } }
   const { data: events, error: eventError } = await db.from('event_payment_events').select('id,event_type,object_id').eq('status', 'pending').order('received_at').limit(25);
   if (eventError) throw new Error('Reconciliação indisponível.');
-  for (const e of events ?? []) { try { await processProviderEvent(e.id, e.event_type, e.object_id); result.events++; } catch { result.pendingReview++; } }
+  for (const e of events ?? []) { if (Date.now() >= deadline) { result.interrupted = true; break; } try { await processProviderEvent(e.id, e.event_type, e.object_id); result.events++; } catch { result.pendingReview++; } }
   return result;
 }
