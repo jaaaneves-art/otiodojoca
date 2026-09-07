@@ -38,6 +38,7 @@ const PUBLIC_VIEW_MODULES: Record<string, string[]> = {
   "/mercado-da-terra": ["novo", "editar", "messages", "meus-anuncios", "favoritos"],
   "/almanaque": ["dashboard"],
   "/parceiros": ["pedido"],
+  "/espectaculos": ["organizador", "encomendas", "bilhetes"],
 };
 
 // Rotas do próprio fluxo de MFA: exigem sessão (AAL1) mas não AAL2 --
