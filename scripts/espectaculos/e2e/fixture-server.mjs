@@ -5,7 +5,13 @@ const starts=new Date(Date.now()+86400000).toISOString();
 let state;
 function reset(){state={status:'reserved',paid:false,qrHash:null,used:false,lastRequest:null,role:'owner',checkinResult:null};}reset();
 const event={id:1,nome:'Concerto E2E local',slug:'concerto-local',descricao:'Descrição do espetáculo local.',inicio:starts,fim:null,freguesia_id:1,lugar:'Sala local',entidade_organizadora_id:1,tipo:'cultural',estado:'publicado'};
+// Fase 7: rascunho (nunca público) e cancelado (endereçável mas sem venda), a espelhar
+// event_upcoming (estado='publicado') e event_public_detail (estado in publicado/cancelado).
+const draftEvent={id:2,nome:'Rascunho E2E local',slug:'rascunho-local',descricao:'Ainda não publicado.',inicio:starts,fim:null,freguesia_id:1,lugar:'Sala local',entidade_organizadora_id:1,tipo:'cultural',estado:'rascunho'};
+const cancelledEvent={id:3,nome:'Espetáculo cancelado E2E',slug:'cancelado-local',descricao:'Sessão anulada pela organização.',inicio:starts,fim:null,freguesia_id:1,lugar:'Sala local',entidade_organizadora_id:1,tipo:'cultural',estado:'cancelado'};
+const allEvents=[event,draftEvent,cancelledEvent];
 const session={id:1,evento_id:1,starts_at:starts,ends_at:null,capacity:10,status:'scheduled',sales_enabled:true};
+const cancelledSession={id:3,evento_id:3,starts_at:starts,ends_at:null,capacity:10,status:'cancelled',sales_enabled:false};
 const type={id:1,ticket_type_id:1,session_id:1,name:'Geral',price_cents:0,currency:'EUR',quantity:10,active:true,max_per_order:2,available:10,sales_open:true};
 function order(){return {id:orderId,buyer_id:buyer,session_id:1,entidade_id:1,status:state.status,total_cents:0,subtotal_cents:0,expires_at:new Date(Date.now()+600000).toISOString(),financial_review_required:state.status==='review',purchase_snapshot:{event_name:event.nome,session_starts_at:starts,place:'Sala local'},created_at:new Date().toISOString()};}
 createServer(async(req,res)=>{
@@ -18,10 +24,15 @@ createServer(async(req,res)=>{
  if(url.pathname==='/auth/v1/user')return sub?send({id:sub,email:'local@example.invalid',email_confirmed_at:starts,app_metadata:{provider:'email'},user_metadata:{},factors:[]}):send({message:'No session'},401);
  const table=url.pathname.split('/').pop();
  if(url.pathname.includes('/rpc/')){
-  if(table==='event_upcoming')return send([event]);
-  if(table==='event_public_detail')return send({id:1,name:event.nome,description:event.descricao,place:event.lugar,organizer:'Organização local',status:'publicado',sessions:[{...session,place:'Sala local'}]});
-  if(['event_public_availability','event_availability'].includes(table))return send([type]);
-  if(table==='event_reserve'){if(!sub)return send({message:'unauthorized'},401);return send(orderId);}
+  if(table==='event_upcoming')return send(allEvents.filter(e=>e.estado==='publicado'));
+  if(table==='event_public_detail'){
+   const target=allEvents.find(e=>e.id===Number(p.p_event));
+   if(!target||!['publicado','cancelado'].includes(target.estado))return send(null);
+   const sess=target.id===3?[{...cancelledSession,place:'Sala local'}]:[{...session,place:'Sala local'}];
+   return send({id:target.id,name:target.nome,description:target.descricao,place:target.lugar,organizer:'Organização local',status:target.estado,sessions:sess});
+  }
+  if(['event_public_availability','event_availability'].includes(table))return send(Number(p.p_session)===3?[]:[type]);
+  if(table==='event_reserve'){if(!sub)return send({message:'unauthorized'},401);if(Number(p.p_session)!==1)return send({code:'P0001',message:'Sessão indisponível.'},400);return send(orderId);}
   if(table==='event_confirm_free'){state.status='paid';state.paid=true;return send(null);}
   if(table==='event_set_ticket_hash'){state.qrHash=p.p_hash;return send(null);}
   if(table==='event_checkin_feedback'){
@@ -37,10 +48,10 @@ createServer(async(req,res)=>{
  }
  let rows=[];
  if(table==='profiles')rows=[{id:sub,role:'user',mfa_setup_dismissed_at:starts}];
- if(table==='eventos')rows=[event];
+ if(table==='eventos')rows=allEvents;
  if(table==='entidades')rows=[{id:1,nome:'Organização local'}];
  if(table==='freguesias')rows=[{id:1,nome:'Local',municipio:'Teste'}];
- if(table==='event_sessions')rows=[session];
+ if(table==='event_sessions')rows=[session,cancelledSession];
  if(table==='event_ticket_types')rows=[type];
  if(table==='event_organization_members')rows=sub===staff?[{role:state.role,entidade_id:1,user_id:staff}]:[];
  if(table==='event_orders')rows=sub===buyer||sub===staff?[order()]:[];

@@ -191,7 +191,7 @@ export default async function EspectaculosPage({
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#eventos"
-                className="inline-flex items-center gap-2 rounded-xl bg-rose-500 px-5 py-3 font-semibold text-white shadow-lg shadow-rose-950/30 transition hover:bg-rose-400"
+                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-3 font-semibold text-white shadow-lg shadow-rose-950/30 transition hover:bg-rose-500"
               >
                 <Search className="h-5 w-5" />
                 Ver eventos
@@ -249,7 +249,7 @@ export default async function EspectaculosPage({
           <section id="eventos">
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-600">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-700">
                   Agenda OTJ
                 </p>
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
@@ -333,7 +333,7 @@ export default async function EspectaculosPage({
                         )}
                       </div>
 
-                      <div className="flex items-center justify-end gap-2 font-semibold text-rose-600">
+                      <div className="flex items-center justify-end gap-2 font-semibold text-rose-700">
                         Bilheteira
                         <ChevronRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                       </div>
@@ -363,7 +363,7 @@ export default async function EspectaculosPage({
             {selecionado ? (
               <div className="p-6">
                 <div className="border-b border-slate-100 pb-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-600">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-rose-700">
                     Evento selecionado
                   </p>
                   <h3 className="mt-2 text-xl font-black">
@@ -387,7 +387,7 @@ export default async function EspectaculosPage({
                 </div>
 
                 <div className="space-y-4 py-5">
-                  <Link href="/espectaculos/encomendas" className="text-sm font-semibold text-rose-600">As minhas encomendas</Link>
+                  <Link href="/espectaculos/encomendas" className="text-sm font-semibold text-rose-700">As minhas encomendas</Link>
                   <Link className="block font-semibold text-rose-700" href={`/espectaculos/eventos/${selecionado.id}`}>Descrição e todas as sessões →</Link><h4 className="font-bold">Sessões e bilhetes</h4>
                   {sessionsError ? <p>Não foi possível carregar as sessões.</p> : !sessionTypes.length ? <p>Sem sessões futuras disponíveis.</p> : sessionTypes.map(({ session, types, error }) => <section key={session.id} className="space-y-2">
                     <h5 className="text-sm font-semibold">{formatarData(session.starts_at)}</h5>
