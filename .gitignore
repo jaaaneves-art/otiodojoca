@@ -13,6 +13,10 @@
 /.next/
 /out/
 
+# Espetaculos Fase 6 - servidor Next isolado da bateria E2E local
+/.next-e2e/
+/playwright-report/
+/test-results/
 # production
 /build
 

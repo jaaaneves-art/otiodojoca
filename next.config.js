@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Espetaculos Fase 6: a bateria E2E local (scripts/espectaculos/e2e/start.mjs)
+  // arranca `next dev` no proprio root do projeto, mas com um distDir dedicado
+  // para nao colidir com o `.next` do `next dev` normal nem com o build de
+  // producao. So e ativado quando OTJ_ESPECTACULOS_E2E === "1".
+  ...(process.env.OTJ_ESPECTACULOS_E2E === "1" ? { distDir: ".next-e2e" } : {}),
   turbopack: {
     root: __dirname,
   },

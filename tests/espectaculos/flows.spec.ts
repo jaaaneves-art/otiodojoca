@@ -4,7 +4,9 @@ const buyer='11111111-1111-4111-8111-111111111111', staff='22222222-2222-4222-82
 const order='33333333-3333-4333-8333-333333333333',ticket='44444444-4444-4444-8444-444444444444';
 async function authenticate(context: BrowserContext, sub=buyer) {
  const payload={sub,exp:Math.floor(Date.now()/1000)+3600,iat:Math.floor(Date.now()/1000),aal:'aal1',amr:[{method:'password',timestamp:Math.floor(Date.now()/1000)}]};
- const token=`${Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url')}.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.local-fixture`;
+ // Signature segment must be valid base64url or @supabase/ssr's local JWT decode
+ // (middleware AAL check) throws AuthInvalidJwtError and every page 500s.
+ const token=`${Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url')}.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.${Buffer.from('otj-local-fixture-signature').toString('base64url')}`;
  const session={access_token:token,refresh_token:'local-fixture',expires_at:payload.exp,expires_in:3600,token_type:'bearer',user:{id:sub,factors:[]}};
  await context.addCookies([{name:'sb-127-auth-token',value:`base64-${Buffer.from(JSON.stringify(session)).toString('base64url')}`,domain:'127.0.0.1',path:'/'}]);
 }
@@ -15,6 +17,7 @@ test.beforeEach(async({page,request})=>{
 test('public agenda, event detail and required login',async({page})=>{
  await page.goto('/espectaculos');await expect(page.getByRole('heading',{name:'Próximos eventos'})).toBeVisible();
  await page.getByRole('link').filter({hasText:'Concerto E2E local'}).first().click();
+ await page.waitForURL(/\/espectaculos\/eventos\/1$/);
  await expect(page.getByRole('heading',{name:'Concerto E2E local',exact:true})).toBeVisible();await expect(page.getByText('Descrição do espetáculo local.')).toBeVisible();
  await page.goto('/espectaculos/encomendas');await expect(page).toHaveURL(/\/login\?next=/);
 });
@@ -27,7 +30,15 @@ test('authenticated reservation, checkout, confirmation and printable QR ticket 
  await page.getByRole('link',{name:/Ver bilhete/}).click();await expect(page.getByRole('img',{name:'QR de entrada do bilhete'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Imprimir / guardar como PDF'})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
- const response=await page.request.get(`/espectaculos/bilhetes/${ticket}`);expect(response.headers()['cache-control']).toMatch(/private|no-store/);expect(await response.text()).not.toContain('token_hash');
+ const response=await page.request.get(`/espectaculos/bilhetes/${ticket}`);
+ // Página do bilhete nunca pode ser servida de cache partilhada nem "stale":
+ // `next build`+`start` emite `private, no-cache, no-store, …`; o `next dev`
+ // usado nesta bateria força `no-cache, must-revalidate` (base-server.js) —
+ // ambos impedem o armazenamento/reutilização do QR.
+ expect(response.headers()['cache-control']).toMatch(/no-store|no-cache/);
+ expect(response.headers()['cache-control']).toMatch(/no-store|must-revalidate/);
+ const body=await response.text();
+ expect(body).not.toContain('token_hash');expect(body).not.toContain('otj1_');
 });
 test('organization permissions and operational aggregates',async({page,context,request})=>{
  await authenticate(context,staff);await page.goto('/espectaculos/organizador/eventos/1');await page.getByRole('link',{name:'Estado operacional'}).click();
