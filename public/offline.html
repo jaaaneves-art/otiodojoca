@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#4d3a28">
+    <title>Sem ligação — O Tio do Joca</title>
+    <style>
+      body { margin: 0; padding: 2rem; min-height: 80vh; display: grid; place-items: center; background: #f7f5f0; color: #4d3a28; font: 1.125rem/1.6 system-ui, sans-serif; }
+      main { max-width: 32rem; }
+      h1 { line-height: 1.2; }
+      .actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+      button, a { display: inline-block; padding: .75rem 1rem; border: 2px solid #4d3a28; color: #f7f5f0; background: #4d3a28; border-radius: .4rem; font: inherit; text-decoration: none; cursor: pointer; }
+      a { color: #4d3a28; background: transparent; }
+      button:focus-visible, a:focus-visible { outline: 3px solid #4d3a28; outline-offset: 4px; }
+      @media (max-width: 28rem) { body { padding: 1.25rem; } .actions { align-items: stretch; flex-direction: column; } button, a { text-align: center; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p>O Tio do Joca</p>
+      <h1>Sem ligação</h1>
+      <p>Não foi possível ligar à aplicação. Verifica a tua ligação à Internet e tenta novamente.</p>
+      <p>As páginas e os dados da tua conta não estão disponíveis offline.</p>
+      <div class="actions">
+        <form action="/" method="get"><button type="submit">Tentar novamente</button></form>
+        <a href="/">Voltar à página inicial</a>
+      </div>
+    </main>
+  </body>
+</html>
