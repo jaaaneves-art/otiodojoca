@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { directConversation, isUuid, MEDIA_BUCKET, MEDIA_TYPES, socialSession } from "@/lib/social/messages";
+import { directConversation, isUuid, socialSession } from "@/lib/social/messages";
+import { MEDIA_BUCKET, validateMessageFile } from "@/lib/social/media";
 
 export async function startConversation(form: FormData) {
   const { db, user } = await socialSession();
@@ -22,21 +23,33 @@ export async function sendMessage(id: string, form: FormData) {
   const { db, user } = session;
   const content = String(form.get("content") || "").trim();
   const candidate = form.get("file");
-  const file = candidate instanceof File && candidate.size > 0 ? candidate : null;
+  const file = candidate instanceof File && (candidate.size > 0 || candidate.name !== "") ? candidate : null;
   if (content.length > 5000 || (!content && !file)) return { error: "Escreve uma mensagem (até 5000 caracteres) ou escolhe um anexo." };
-  if (file && (file.size > 5 * 1024 * 1024 || !MEDIA_TYPES.includes(file.type))) return { error: "Aceitamos JPG, PNG, WebP, PDF ou MP4 até 5 MB." };
-  const key = file ? `${id}/${user.id}/${crypto.randomUUID()}` : null;
-  if (file && key) {
-    const { error } = await db.storage.from(MEDIA_BUCKET).upload(key, file, { contentType: file.type, upsert: false });
-    if (error) return { error: "Não foi possível carregar o anexo." };
+  if (file) {
+    const validationError = await validateMessageFile(file);
+    if (validationError) return { error: validationError };
   }
-  const { error } = await db.rpc("social_send_message", {
-    p_conversation: id, p_content: content, p_key: key,
-    p_mime: file?.type ?? null, p_size: file?.size ?? null,
-  });
-  if (error) {
-    if (key) await db.storage.from(MEDIA_BUCKET).remove([key]);
-    return { error: "Não foi possível enviar. O texto foi preservado; tenta novamente." };
+  const key = file ? `${id}/${user.id}/${crypto.randomUUID()}` : null;
+  try {
+    if (file && key) {
+      const { error } = await db.storage.from(MEDIA_BUCKET).upload(key, file, {
+        contentType: file.type, upsert: false, cacheControl: "0",
+      });
+      if (error) throw new Error("upload");
+    }
+    const { error } = await db.rpc("social_send_message", {
+      p_conversation: id, p_content: content, p_key: key,
+      p_mime: file?.type ?? null, p_size: file?.size ?? null,
+    });
+    if (error) throw new Error("send");
+  } catch {
+    // A lost response may hide a committed message. The RPC checks ALL references
+    // under the same lock as association; never delete the object directly here.
+    if (key) {
+      try { await db.rpc("social_abandon_upload", { p_key: key }); }
+      catch { /* Scheduled orphan sweep recovers failed compensations after 24h. */ }
+    }
+    return { error: "Não foi possível confirmar o envio. Verifica a conversa antes de tentar novamente; o texto foi preservado." };
   }
   revalidatePath("/mensagens", "layout");
   return { success: true };

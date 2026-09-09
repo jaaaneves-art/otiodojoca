@@ -52,3 +52,6 @@ revoke all on table "public"."messages" from "anon";
 
 create trigger social_message_activity after insert on public.messages
 for each row execute function public.social_message_activity();
+
+create trigger social_message_delete_once before update of deleted_at on public.messages
+for each row execute function public.social_message_delete_once();

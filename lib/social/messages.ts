@@ -2,8 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export const isUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-export const MEDIA_BUCKET = "social-message-media";
-export const MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf", "video/mp4"];
 export async function socialSession() {
   const db = await createClient();
   const { data: { user } } = await db.auth.getUser();

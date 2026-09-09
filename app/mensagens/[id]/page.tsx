@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { directConversation, isUuid, MEDIA_BUCKET } from "@/lib/social/messages";
+import { directConversation, isUuid } from "@/lib/social/messages";
 import { ConversationUpdates, DeleteMessage, MessageForm } from "@/components/social/message-controls";
 
 export default async function ConversationPage({ params, searchParams }: {
@@ -14,7 +14,7 @@ export default async function ConversationPage({ params, searchParams }: {
   const otherId = conversation.direct_user_a === user.id ? conversation.direct_user_b : conversation.direct_user_a;
   const { data: profile, error: profileError } = await db.from("profiles").select("username").eq("id", otherId).maybeSingle();
   if (profileError) throw new Error("Não foi possível carregar o participante.");
-  const query = db.from("messages").select("id, sender_id, content, created_at, deleted_at, message_media(id,storage_provider,storage_key,mime_type)")
+  const query = db.from("messages").select("id, sender_id, content, created_at, deleted_at, message_media(id,storage_provider)")
     .eq("conversation_id", id).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(51);
   if (before) {
     if (!isUuid(before)) notFound();
@@ -26,14 +26,13 @@ export default async function ConversationPage({ params, searchParams }: {
   const { data, error } = await query;
   if (error) throw new Error("Não foi possível carregar as mensagens.");
   const messages = (data || []).slice(0, 50).reverse();
-  const rendered = await Promise.all(messages.map(async m => ({
+  const rendered = messages.map(m => ({
     ...m,
-    media: m.deleted_at ? [] : await Promise.all(m.message_media.map(async media => {
-      if (media.storage_provider !== "supabase") return { id: media.id, url: null };
-      const { data: signed } = await db.storage.from(MEDIA_BUCKET).createSignedUrl(media.storage_key, 60, { download: true });
-      return { id: media.id, url: signed?.signedUrl || null };
+    media: m.deleted_at ? [] : m.message_media.map(media => ({
+      id: media.id,
+      url: media.storage_provider === "supabase" ? `/mensagens/anexos/${media.id}` : null,
     })),
-  })));
+  }));
   return <>
     <h1 className="text-2xl font-bold">Conversa com @{profile?.username || "Utilizador"}</h1>
     <ConversationUpdates id={before ? undefined : id} latest={before ? undefined : messages.at(-1)?.id} />

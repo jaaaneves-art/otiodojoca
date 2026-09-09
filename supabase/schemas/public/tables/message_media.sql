@@ -10,8 +10,8 @@ create table "public"."message_media" (
   "height"           integer,
   "thumbnail_path"   text,
   "created_at"       timestamp with time zone not null default now(),
-  -- Data prevista de eliminação segundo a política de retenção (secção 17)
-  -- -- por definir; nullable até essa política ficar decidida.
+  -- Expiração interna opcional; NULL conserva anexos ativos.
+  -- Fase 5: apagados 30 dias; expirados +24h; órfãos 24h.
   "expires_at"       timestamp with time zone,
   constraint "message_media_pkey" primary key (id),
   constraint "message_media_message_id_fkey"
@@ -24,15 +24,13 @@ alter table "public"."message_media"
 create index idx_message_media_message
   on public.message_media using btree (message_id);
 
-create policy "Participantes veem media das suas conversas" on "public"."message_media"
-  for select
-  to "authenticated"
-  using (
-    message_id in (
-      select m.id from public.messages m
-      where public.is_conversation_participant(m.conversation_id)
-    )
-  );
+create policy "Participantes veem media das suas conversas" on public.message_media
+for select to authenticated using (
+  (expires_at is null or expires_at > now()) and exists (
+    select 1 from public.messages m where m.id = message_id and m.deleted_at is null
+      and public.is_conversation_participant(m.conversation_id))
+  and (storage_provider <> 'supabase' or not public.social_media_is_claimed(storage_key))
+);
 
 create policy "Autor da mensagem associa media" on public.message_media
 for insert to authenticated with check (
@@ -49,3 +47,8 @@ grant delete, insert, maintain, references, select, trigger, truncate, update
   on table "public"."message_media" to "postgres", "service_role";
 
 revoke all on table "public"."message_media" from "anon";
+
+create index social_media_storage_key on public.message_media(storage_key)
+  where storage_provider = 'supabase';
+create trigger social_media_guard_link before insert or update on public.message_media
+for each row execute function public.social_media_guard_link();
