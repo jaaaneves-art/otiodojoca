@@ -41,6 +41,7 @@ export default async function ProfilePage() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-terra-800">Almanaque</Link>
           <div className="flex items-center gap-3">
+            <Link href="/mensagens" className="text-terra-600 hover:text-terra-800">Mensagens privadas</Link>
             <Link href="/forum" className="text-terra-600 hover:text-terra-800">
               <MessageSquare className="w-5 h-5" />
             </Link>

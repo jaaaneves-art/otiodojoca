@@ -34,14 +34,14 @@ create policy "Participantes veem media das suas conversas" on "public"."message
     )
   );
 
-create policy "Autor da mensagem associa media" on "public"."message_media"
-  for insert
-  to "authenticated"
-  with check (
-    message_id in (
-      select id from public.messages where sender_id = auth.uid()
-    )
-  );
+create policy "Autor da mensagem associa media" on public.message_media
+for insert to authenticated with check (
+  storage_provider = 'supabase' and public.social_media_exists(storage_key, mime_type, size_bytes) and exists (
+    select 1 from public.messages m where m.id = message_id
+      and m.sender_id = auth.uid() and m.deleted_at is null
+      and public.is_conversation_participant(m.conversation_id)
+      and split_part(storage_key, '/', 1) = m.conversation_id::text
+      and split_part(storage_key, '/', 2) = auth.uid()::text));
 
 grant select, insert on table "public"."message_media" to "authenticated";
 

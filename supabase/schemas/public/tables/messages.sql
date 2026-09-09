@@ -49,3 +49,6 @@ grant delete, insert, maintain, references, select, trigger, truncate, update
   on table "public"."messages" to "postgres", "service_role";
 
 revoke all on table "public"."messages" from "anon";
+
+create trigger social_message_activity after insert on public.messages
+for each row execute function public.social_message_activity();
