@@ -33,14 +33,11 @@ create policy "Utilizador autenticado cria grupo (torna-se owner)" on "public"."
 create policy "Owner/admin atualiza os dados do grupo" on "public"."groups"
   for update
   to "authenticated"
-  using (
-    id in (
-      select group_id from public.group_members
-      where user_id = auth.uid() and role in ('owner', 'admin')
-    )
-  );
+  using (public.is_group_manager(id))
+  with check (public.is_group_manager(id));
 
-grant select, insert, update on table "public"."groups" to "authenticated";
+grant select, insert on table "public"."groups" to "authenticated";
+grant update (name, description, image_url) on table "public"."groups" to "authenticated";
 
 grant delete, insert, maintain, references, select, trigger, truncate, update
   on table "public"."groups" to "postgres", "service_role";

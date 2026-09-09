@@ -11,7 +11,9 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:social-rls": "node --test tests/social/rls-policy.test.mjs",
+    "test:social-rls:db": "supabase test db supabase/tests/database/social_rls.test.sql"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

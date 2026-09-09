@@ -26,9 +26,34 @@ create policy "Participantes veem quem esteve na chamada" on "public"."call_part
 create policy "Utilizador regista a sua propria entrada/saida" on "public"."call_participants"
   for insert
   to "authenticated"
-  with check (user_id = auth.uid());
+  with check (
+    user_id = auth.uid()
+    and call_room_id in (
+      select cr.id from public.call_rooms cr
+      where public.is_conversation_participant(cr.conversation_id)
+    )
+  );
+
+create policy "Utilizador regista a sua propria saida" on "public"."call_participants"
+  for update
+  to "authenticated"
+  using (
+    user_id = auth.uid()
+    and call_room_id in (
+      select cr.id from public.call_rooms cr
+      where public.is_conversation_participant(cr.conversation_id)
+    )
+  )
+  with check (
+    user_id = auth.uid()
+    and call_room_id in (
+      select cr.id from public.call_rooms cr
+      where public.is_conversation_participant(cr.conversation_id)
+    )
+  );
 
 grant select, insert on table "public"."call_participants" to "authenticated";
+grant update (left_at) on table "public"."call_participants" to "authenticated";
 
 grant delete, insert, maintain, references, select, trigger, truncate, update
   on table "public"."call_participants" to "postgres", "service_role";

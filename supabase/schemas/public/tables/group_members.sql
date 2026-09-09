@@ -33,15 +33,21 @@ create policy "Owner/admin adiciona membros" on "public"."group_members"
   for insert
   to "authenticated"
   with check (
-    -- o próprio dono ao criar o grupo, ou um owner/admin já existente
-    (user_id = auth.uid() and group_id in (select id from public.groups where owner_id = auth.uid()))
-    or group_id in (
-      select group_id from public.group_members
-      where user_id = auth.uid() and role in ('owner', 'admin')
-    )
+    public.is_group_manager(group_id)
+    and role in ('admin', 'moderator', 'member')
   );
 
-grant select, insert on table "public"."group_members" to "authenticated";
+create policy "Owner/admin altera membros" on "public"."group_members"
+  for update to "authenticated"
+  using (public.is_group_manager(group_id) and role <> 'owner')
+  with check (public.is_group_manager(group_id) and role in ('admin', 'moderator', 'member'));
+
+create policy "Owner/admin remove membros" on "public"."group_members"
+  for delete to "authenticated"
+  using (public.is_group_manager(group_id) and role <> 'owner');
+
+grant select, insert, delete on table "public"."group_members" to "authenticated";
+grant update (role) on table "public"."group_members" to "authenticated";
 
 grant delete, insert, maintain, references, select, trigger, truncate, update
   on table "public"."group_members" to "postgres", "service_role";

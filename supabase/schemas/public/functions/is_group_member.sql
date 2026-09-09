@@ -2,6 +2,7 @@ create or replace function public.is_group_member(p_group_id uuid)
 returns boolean
 language sql
 security definer
+set search_path = ''
 stable
 as $$
   select exists (

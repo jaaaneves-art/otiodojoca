@@ -39,10 +39,11 @@ create policy "Participantes enviam mensagens nas suas conversas" on "public"."m
 create policy "Autor apaga (soft delete) a sua mensagem" on "public"."messages"
   for update
   to "authenticated"
-  using (sender_id = auth.uid())
-  with check (sender_id = auth.uid());
+  using ((sender_id = auth.uid()) and public.is_conversation_participant(conversation_id))
+  with check ((sender_id = auth.uid()) and public.is_conversation_participant(conversation_id));
 
-grant select, insert, update on table "public"."messages" to "authenticated";
+grant select, insert on table "public"."messages" to "authenticated";
+grant update (deleted_at) on table "public"."messages" to "authenticated";
 
 grant delete, insert, maintain, references, select, trigger, truncate, update
   on table "public"."messages" to "postgres", "service_role";

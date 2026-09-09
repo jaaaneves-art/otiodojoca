@@ -11,12 +11,27 @@ create or replace function public.get_or_create_direct_conversation(
 returns uuid
 language plpgsql
 security definer
+set search_path = ''
 as $$
 declare
   v_id uuid;
-  v_lo uuid := least(user_a, user_b);
-  v_hi uuid := greatest(user_a, user_b);
+  v_lo uuid;
+  v_hi uuid;
 begin
+  if user_a is null or user_b is null or user_a = user_b then
+    raise exception 'Uma conversa direta exige dois utilizadores diferentes'
+      using errcode = '22023';
+  end if;
+
+  if coalesce(auth.role(), '') <> 'service_role'
+     and (auth.uid() is null or auth.uid() not in (user_a, user_b)) then
+    raise exception 'Sem permissao para criar esta conversa'
+      using errcode = '42501';
+  end if;
+
+  v_lo := least(user_a, user_b);
+  v_hi := greatest(user_a, user_b);
+
   insert into public.conversations (type, module, direct_user_a, direct_user_b)
   values ('direct', p_module, v_lo, v_hi)
   on conflict (direct_user_a, direct_user_b) where (type = 'direct')

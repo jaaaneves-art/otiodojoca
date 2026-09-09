@@ -6,6 +6,7 @@ create or replace function public.sync_group_conversation_participants()
 returns trigger
 language plpgsql
 security definer
+set search_path = ''
 as $$
 declare
   v_conversation_id uuid;
@@ -35,3 +36,6 @@ begin
   return coalesce(new, old);
 end;
 $$;
+
+revoke all on function public.sync_group_conversation_participants() from public;
+grant execute on function public.sync_group_conversation_participants() to postgres, service_role;

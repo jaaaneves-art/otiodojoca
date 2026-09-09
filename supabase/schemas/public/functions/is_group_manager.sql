@@ -1,0 +1,19 @@
+-- Helper SECURITY DEFINER para policies de group_members sem recursao RLS.
+create or replace function public.is_group_manager(p_group_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select exists (
+    select 1
+    from public.group_members
+    where group_id = p_group_id
+      and user_id = auth.uid()
+      and role in ('owner', 'admin')
+  );
+$$;
+
+revoke all on function public.is_group_manager(uuid) from public;
+grant execute on function public.is_group_manager(uuid) to authenticated, service_role;

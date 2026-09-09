@@ -5,6 +5,7 @@ create or replace function public.is_conversation_participant(p_conversation_id 
 returns boolean
 language sql
 security definer
+set search_path = ''
 stable
 as $$
   select exists (
