@@ -1,0 +1,89 @@
+ESPETÁCULOS — FASE 3
+Questões para decisão e autorização
+Data: 07/09/2026
+
+Este ficheiro reúne as decisões pendentes do plano de bilheteira real.
+A criação deste documento não autoriza alterações ao código ou à base de dados.
+Podes escrever as respostas por baixo de cada pergunta.
+
+1. AUTORIZAÇÃO PARA IMPLEMENTAR
+Autorizas a implementação local da Fase 3, por etapas, segundo o plano apresentado, incluindo novas migrations de Espetáculos, encomendas, inventário, pagamentos, bilhetes QR, check-in e reembolsos?
+Resposta:
+
+Limites que se mantêm: sem commit, push, merge, deploy ou alterações no Supabase remoto; sem alterar funcionalidades de outros módulos; sem editar migrations existentes; preservar todas as alterações locais não relacionadas; nunca usar git add .
+
+2. PRESTADOR DE PAGAMENTOS
+Que prestador queres utilizar? Já existe uma conta comercial para integrar?
+Indica apenas o nome do prestador e se a conta existe. Não escrevas chaves, palavras-passe ou outros segredos neste ficheiro.
+Resposta:
+
+3. DESTINATÁRIO DOS FUNDOS
+Quem recebe o pagamento do comprador: cada entidade organizadora diretamente ou o OTJ, com posterior transferência para o organizador?
+Resposta:
+
+4. MÉTODOS DE PAGAMENTO E MOEDA
+Que métodos queres disponibilizar (por exemplo: cartão, MB WAY, referência Multibanco)? Confirmas EUR como única moeda inicial?
+Métodos com confirmação diferida exigem regras de reserva compatíveis com o prazo de pagamento.
+Resposta:
+
+5. ÂMBITO INICIAL DA COMPRA
+Confirmas comprador autenticado e uma sessão por encomenda, podendo incluir vários tipos de bilhete dessa sessão?
+Proposta: adotar este âmbito na primeira implementação.
+Resposta:
+
+6. RESERVAS DE STOCK
+Qual deve ser o prazo de reserva durante a compra e quais os limites de bilhetes e encomendas pendentes por comprador?
+O prazo final terá de ser compatível com o prestador e os métodos escolhidos. Uma reserva não será libertada cegamente enquanto existir possibilidade de cobrança.
+Resposta:
+
+7. COMISSÕES E PREÇO FINAL
+O OTJ cobra uma comissão? Qual o valor ou percentagem, quem a suporta e se está incluída no preço apresentado? Quem suporta as taxas do prestador?
+Resposta:
+
+8. REEMBOLSOS E REVENDA
+Em que situações e até quando são permitidos reembolsos? Confirmas reembolsos totais ou parciais por bilhete? As comissões são devolvidas? Um bilhete reembolsado volta a ficar disponível para venda?
+Proposta técnica: sem reposição automática de stock até existir uma regra aprovada; confirmação do reembolso pelo prestador antes de o marcar como concluído.
+Resposta:
+
+9. CANCELAMENTO E ALTERAÇÃO DE SESSÕES
+O cancelamento deve iniciar reembolsos de todas as compras elegíveis ou exigir análise financeira? Como devem ser tratadas alterações de data ou recinto após a venda?
+Resposta:
+
+10. FATURAÇÃO
+Quem emite a fatura ao comprador e através de que sistema? Que dados de faturação são obrigatórios? Existe alguma integração a reutilizar?
+O bilhete QR e a confirmação de pagamento não constituem, por si, uma implementação de faturação.
+Resposta:
+
+11. PERMISSÕES
+Confirmas a seguinte distribuição?
+- Comprador: consultar apenas as próprias encomendas e bilhetes.
+- checkin: validar entradas, com acesso apenas aos dados necessários.
+- manager: gerir catálogo e inventário.
+- finance, owner e admin: consultar finanças e executar reembolsos.
+- Confirmação de pagamentos: apenas através da integração com o prestador.
+Confirmas também que apenas owner pode atribuir/remover o papel owner e que não pode ser removido o último proprietário?
+Resposta:
+
+12. QR E ENTREGA DE BILHETES
+Confirmas check-in exclusivamente online nesta fase e bilhetes disponíveis na área autenticada, com versão imprimível? É necessário envio por email já nesta fase? Os bilhetes devem ser nominativos ou podem ser utilizados por outra pessoa?
+Resposta:
+
+13. TESTES LOCAIS
+A proibição de dados fictícios/mocks também abrange registos temporários de testes numa base de dados local isolada?
+Proposta: permitir apenas registos de teste isolados e descartáveis, sem seeds na aplicação e sem qualquer escrita remota, para validar RLS, concorrência de stock e integridade.
+Se não autorizares, essas verificações ficam pendentes até existir um conjunto de dados autorizado.
+Resposta:
+
+14. VALIDAÇÃO EXTERNA POSTERIOR
+Confirmas que, nesta implementação, a configuração de contas, webhooks públicos, agendadores e testes no prestador fica pendente de autorização separada, mantendo o trabalho limitado ao repositório?
+Sem essa validação, a integração não será apresentada como pronta para vendas reais.
+Resposta:
+
+ORDEM PROPOSTA
+1) Fechar decisões de operação e âmbito.
+2) Criar novas migrations de schema, permissões e funções transacionais.
+3) Implementar inventário e encomendas; validar concorrência.
+4) Integrar pagamentos, webhooks e reconciliação.
+5) Implementar bilhetes QR e check-in.
+6) Implementar reembolsos, cancelamentos e auditoria.
+7) Validar e documentar limitações e configuração pendente.

@@ -1,0 +1,303 @@
+#!/usr/bin/env node
+/**
+ * Sincroniza catálogo automóvel global para Supabase.
+ *
+ * Fontes abertas:
+ *   1. VehiclesDB (CC-BY 4.0) — catálogo reconciliado a partir de registos
+ *      oficiais de 14 países.
+ *   2. gor3a/vehicle-makes-models (ODbL 1.0) — gerações e motores.
+ *
+ * Variáveis:
+ *   NEXT_PUBLIC_SUPABASE_URL
+ *   SUPABASE_SERVICE_ROLE_KEY
+ *
+ * Uso:
+ *   node scripts/sync-vehicle-catalog.mjs
+ *
+ * O script NÃO faz scraping de AutoScout/mobile.de.
+ */
+
+import { createClient } from "@supabase/supabase-js";
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!url || !key) {
+  throw new Error(
+    "Definir NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY antes de executar.",
+  );
+}
+
+const supabase = createClient(url, key, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+const VDB_MAKES =
+  "https://cdn.jsdelivr.net/gh/vehiclesdb/vehiclesdb@latest/catalog/car/makes.json";
+const VDB_MODELS =
+  "https://cdn.jsdelivr.net/gh/vehiclesdb/vehiclesdb@latest/catalog/car/models.json";
+const GOR3A =
+  "https://raw.githubusercontent.com/gor3a/vehicle-makes-models/refs/heads/main/data/json/all.json";
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function normalize(value = "") {
+  return String(value)
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+async function fetchJSON(url, attempts = 4) {
+  let last;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const r = await fetch(url, {
+        headers: { "User-Agent": "otiodojoca-vehicle-catalog/1.0" },
+      });
+      if (!r.ok) throw new Error(`${r.status} ${r.statusText}: ${url}`);
+      return await r.json();
+    } catch (e) {
+      last = e;
+      await sleep(700 * (i + 1));
+    }
+  }
+  throw last;
+}
+
+async function upsertChunk(table, rows, onConflict, size = 500) {
+  for (let i = 0; i < rows.length; i += size) {
+    const chunk = rows.slice(i, i + size);
+    const { error } = await supabase
+      .from(table)
+      .upsert(chunk, { onConflict, ignoreDuplicates: false });
+
+    if (error) throw new Error(`${table}: ${error.message}`);
+    console.log(`${table}: ${Math.min(i + size, rows.length)}/${rows.length}`);
+  }
+}
+
+console.log("1/5 VehiclesDB: marcas/modelos...");
+const [vdbMakesRaw, vdbModelsRaw] = await Promise.all([
+  fetchJSON(VDB_MAKES),
+  fetchJSON(VDB_MODELS),
+]);
+
+const makeByExternalId = new Map(vdbMakesRaw.map((m) => [m.id, m]));
+const makeRows = vdbMakesRaw.map((m) => ({
+  external_key: `vehiclesdb:${m.id}`,
+  name: m.name,
+  normalized_name: normalize(m.name),
+  aliases: m.aliases ?? [],
+  sources: ["vehiclesdb"],
+}));
+
+await upsertChunk("vehicle_makes", makeRows, "normalized_name");
+
+console.log("2/5 Resolver IDs locais...");
+const { data: dbMakes, error: makeError } = await supabase
+  .from("vehicle_makes")
+  .select("id,name,normalized_name");
+if (makeError) throw makeError;
+
+const localMakeId = new Map(dbMakes.map((m) => [m.normalized_name, m.id]));
+
+console.log("3/5 VehiclesDB: modelos...");
+const modelRows = [];
+for (const model of vdbModelsRaw) {
+  const make = makeByExternalId.get(model.make_id);
+  if (!make) continue;
+
+  const makeId = localMakeId.get(normalize(make.name));
+  if (!makeId) continue;
+
+  const availability = model.availability?.countries ?? model.availability ?? {};
+  const countries = Array.isArray(availability)
+    ? availability
+    : Object.keys(availability).filter((x) => /^[A-Za-z]{2}$/.test(x));
+
+  modelRows.push({
+    make_id: makeId,
+    external_key: `vehiclesdb:${model.id}`,
+    name: model.name,
+    normalized_name: normalize(model.name),
+    aliases: model.aliases ?? [],
+    body_types: model.body_types ?? [],
+    countries,
+    regions: model.regions ?? [],
+    popularity_decile:
+      model.popularity?.global_decile ??
+      model.global_popularity_decile ??
+      null,
+    sources: ["vehiclesdb"],
+  });
+}
+await upsertChunk("vehicle_models", modelRows, "make_id,normalized_name");
+
+console.log("4/5 gor3a: gerações/motores...");
+let gor3a;
+try {
+  gor3a = await fetchJSON(GOR3A);
+} catch (e) {
+  console.warn("Não foi possível obter gor3a; marcas/modelos VehiclesDB ficam válidos.", e.message);
+  gor3a = [];
+}
+
+const { data: dbModels, error: modelsError } = await supabase
+  .from("vehicle_models")
+  .select("id,make_id,name,normalized_name");
+if (modelsError) throw modelsError;
+
+const modelId = new Map(
+  dbModels.map((m) => [`${m.make_id}|||${m.normalized_name}`, m.id]),
+);
+
+const generationRows = [];
+const deferredEngines = [];
+
+// Estrutura esperada: [{ group, makes:[{name,models:[...]}] }]
+for (const group of gor3a ?? []) {
+  for (const make of group.makes ?? []) {
+    const mid = localMakeId.get(normalize(make.name));
+    if (!mid) continue;
+
+    for (const model of make.models ?? []) {
+      const localModelId = modelId.get(`${mid}|||${normalize(model.name)}`);
+      if (!localModelId) continue;
+
+      for (const gen of model.generations ?? []) {
+        generationRows.push({
+          model_id: localModelId,
+          external_key: gen.id ? `gor3a:${gen.id}` : null,
+          name: gen.name || `${model.name} ${gen.yearStart ?? ""}`.trim(),
+          normalized_name: normalize(
+            gen.name || `${model.name} ${gen.yearStart ?? ""}`.trim(),
+          ),
+          year_start: gen.yearStart ?? null,
+          year_end: gen.yearEnd ?? null,
+          body_type: gen.bodyType ?? null,
+          sources: ["gor3a"],
+        });
+
+        deferredEngines.push({
+          modelId: localModelId,
+          generationName: gen.name || `${model.name} ${gen.yearStart ?? ""}`.trim(),
+          generationYear: gen.yearStart ?? null,
+          engines: gen.engines ?? [],
+        });
+      }
+    }
+  }
+}
+
+// As gerações/variantes do gor3a são regeneradas de raiz em cada sync.
+// Isto evita deixar registos antigos quando o upstream muda entre execuções.
+await supabase.from("vehicle_variants").delete().gt("id", 0);
+await supabase.from("vehicle_generations").delete().gt("id", 0);
+
+if (generationRows.length) {
+  // O upstream pode conter a mesma geração mais de uma vez.
+  // PostgreSQL não permite que um único UPSERT afete duas vezes
+  // a mesma chave dentro do mesmo comando.
+  const uniqueGenerations = [
+    ...new Map(
+      generationRows.map((g) => [
+        `${g.model_id}|||${g.normalized_name}|||${g.year_start ?? ""}`,
+        g,
+      ]),
+    ).values(),
+  ];
+
+  console.log(
+    `vehicle_generations: ${generationRows.length} recebidas, ${uniqueGenerations.length} únicas`,
+  );
+
+  await upsertChunk(
+    "vehicle_generations",
+    uniqueGenerations,
+    "model_id,normalized_name,year_start",
+    300,
+  );
+}
+
+const { data: dbGenerations, error: genError } = await supabase
+  .from("vehicle_generations")
+  .select("id,model_id,normalized_name,year_start");
+if (genError) throw genError;
+
+const generationId = new Map(
+  dbGenerations.map((g) => [
+    `${g.model_id}|||${g.normalized_name}|||${g.year_start ?? ""}`,
+    g.id,
+  ]),
+);
+
+const variantRows = [];
+for (const item of deferredEngines) {
+  const gid = generationId.get(
+    `${item.modelId}|||${normalize(item.generationName)}|||${item.generationYear ?? ""}`,
+  );
+  if (!gid) continue;
+
+  for (const e of item.engines) {
+    const label =
+      e.label ||
+      [
+        e.displacement ? `${e.displacement}` : null,
+        e.transmission,
+        e.drivetrain,
+        e.powerHp ? `${e.powerHp} HP` : null,
+      ].filter(Boolean).join(" ");
+
+    if (!label) continue;
+
+    variantRows.push({
+      generation_id: gid,
+      external_key: e.id ? `gor3a:${e.id}` : null,
+      name: label,
+      normalized_name: normalize(label),
+      fuel_type: e.fuelType ?? null,
+displacement_cc:
+        Number.isFinite(Number(e.displacementCc)) ? Math.round(Number(e.displacementCc)) : null,
+      power_hp:
+        Number.isFinite(Number(e.powerHp)) ? Math.round(Number(e.powerHp)) : null,
+      power_kw:
+        Number.isFinite(Number(e.powerKw)) ? Math.round(Number(e.powerKw)) : null,
+      cylinders:
+        Number.isFinite(Number(e.cylinders)) ? Math.round(Number(e.cylinders)) : null,
+      transmission: e.transmission ?? null,
+      drivetrain: e.drivetrain ?? null,
+      sources: ["gor3a"],
+    });
+  }
+}
+
+if (variantRows.length) {
+  // Variantes não têm unique natural forte nesta migration; inserção limpa,
+  // porque os mocks/catálogo podem ser regenerados.
+  for (let i = 0; i < variantRows.length; i += 300) {
+    const { error } = await supabase
+      .from("vehicle_variants")
+      .insert(variantRows.slice(i, i + 300));
+    if (error) throw error;
+    console.log(`vehicle_variants: ${Math.min(i + 300, variantRows.length)}/${variantRows.length}`);
+  }
+}
+
+console.log("5/5 Estatísticas...");
+for (const table of [
+  "vehicle_makes",
+  "vehicle_models",
+  "vehicle_generations",
+  "vehicle_variants",
+]) {
+  const { count, error } = await supabase
+    .from(table)
+    .select("*", { count: "exact", head: true });
+  if (error) console.warn(table, error.message);
+  else console.log(`${table}: ${count}`);
+}
+
+console.log("Catálogo sincronizado.");

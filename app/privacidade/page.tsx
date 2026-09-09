@@ -69,9 +69,13 @@ export default function PoliticaPrivacidadePage() {
             <li>
               <strong>Início de sessão por terceiros (Google / Facebook):</strong>{" "}
               se optares por entrar através da tua conta Google ou Facebook,
-              recebemos do fornecedor o teu nome, endereço de email e,
+              receberíamos do fornecedor o teu nome, endereço de email e,
               quando disponível, a fotografia associada a essa conta — nunca
-              a tua palavra-passe dessas contas.
+              a tua palavra-passe dessas contas. <em>Esta opção está
+              preparada no código mas ainda inativa — os fornecedores
+              Google e Facebook ainda não estão ligados do lado do
+              servidor, pelo que esta forma de entrar não está, por
+              agora, disponível.</em>
             </li>
             <li>
               <strong>Conteúdo que publicas:</strong> mensagens de fórum,
@@ -145,7 +149,23 @@ export default function PoliticaPrivacidadePage() {
             <li><strong>Supabase</strong> — base de dados, autenticação e alojamento de ficheiros;</li>
             <li><strong>SendGrid</strong> — envio de emails transacionais (confirmação de conta, recuperação de password);</li>
             <li><strong>Vercel</strong> — alojamento da aplicação web;</li>
-            <li><strong>Google e/ou Meta (Facebook)</strong> — apenas se optares por entrar através dessas contas.</li>
+            <li>
+              <strong>Stripe</strong> — processamento de pagamentos na
+              compra de bilhetes para eventos (módulo Espetáculos). Os
+              dados do teu cartão seriam geridos diretamente pelo Stripe,
+              nunca pela Plataforma. <em>Esta funcionalidade está
+              preparada no código mas ainda inativa — ainda não existe
+              conta Stripe associada, pelo que, por agora, não há
+              nenhum pagamento real a passar por este prestador;</em>
+            </li>
+            <li>
+              <strong>Google e/ou Meta (Facebook)</strong> — apenas se
+              optares por entrar através dessas contas. <em>Tal como o
+              Stripe, esta funcionalidade está preparada mas ainda
+              inativa (por ligar do lado do servidor) — por agora
+              ninguém consegue mesmo entrar através do Google ou do
+              Facebook.</em>
+            </li>
           </ul>
           <p>
             Estes prestadores só têm acesso aos dados estritamente
@@ -157,29 +177,73 @@ export default function PoliticaPrivacidadePage() {
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">5. Transferências internacionais de dados</h2>
           <p>
-            Alguns dos prestadores listados na secção anterior (nomeadamente
-            Vercel, SendGrid, e Google/Meta quando usas o início de sessão
-            por essas contas) podem processar ou armazenar dados em
-            servidores localizados fora do Espaço Económico Europeu,
-            tipicamente nos Estados Unidos. Quando isso acontece, a
-            transferência é feita ao abrigo de um mecanismo de salvaguarda
-            reconhecido pelo RGPD — normalmente Cláusulas Contratuais-Tipo
-            aprovadas pela Comissão Europeia, ou uma decisão de adequação
-            aplicável ao país de destino.
+            Confirmámos, prestador a prestador, onde os teus dados são
+            efetivamente processados:
           </p>
-          <p>
-            Ainda estamos a confirmar e a documentar, prestador a
-            prestador, a região exata onde os dados ficam alojados; essa
-            informação será atualizada aqui assim que consolidada.
-          </p>
+          <ul className="list-disc pl-6 space-y-1">
+            <li>
+              <strong>Supabase</strong> — região <strong>eu-west-1</strong>{" "}
+              (Irlanda, AWS), dentro do Espaço Económico Europeu. Não há
+              transferência internacional de dados nesta componente
+              (base de dados, autenticação, ficheiros).
+            </li>
+            <li>
+              <strong>Vercel</strong> — região <strong>us-east-1</strong>{" "}
+              (Virgínia, Estados Unidos). Esta é uma transferência para
+              fora do EEE, feita ao abrigo de um mecanismo de salvaguarda
+              reconhecido pelo RGPD (normalmente Cláusulas
+              Contratuais-Tipo aprovadas pela Comissão Europeia).
+            </li>
+            <li>
+              <strong>SendGrid</strong> — processamento nos Estados
+              Unidos (não usamos a opção de residência de dados na UE
+              da SendGrid). Também uma transferência para fora do EEE,
+              sob o mesmo tipo de salvaguarda.
+            </li>
+            <li>
+              <strong>Stripe</strong> — funcionalidade ainda inativa (ver
+              secção 4); quando for ativada, esta secção será atualizada
+              com a região/entidade real da conta.
+            </li>
+            <li>
+              <strong>Google e/ou Meta (Facebook)</strong> — funcionalidade
+              ainda inativa (ver secção 4). Quando for ligada, podem
+              processar dados fora do EEE, tipicamente nos Estados
+              Unidos, apenas se optares por entrar através dessas
+              contas.
+            </li>
+          </ul>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">6. Cookies</h2>
           <p>
-            Usamos apenas cookies essenciais, necessários para manter a tua
-            sessão iniciada e para o funcionamento da autenticação. Não
-            usamos cookies de publicidade ou de rastreio de terceiros.
+            Usamos apenas cookies estritamente necessários ao
+            funcionamento da Plataforma. Não usamos cookies de
+            publicidade nem de rastreio para fins de marketing — por
+            isso, nos termos da lei aplicável, esta categoria de cookies
+            não exige o teu consentimento prévio. Ainda assim, detalhamos
+            aqui exatamente o que é usado:
+          </p>
+          <ul className="list-disc pl-6 space-y-1">
+            <li>
+              <strong>Cookies de sessão e autenticação (Supabase)</strong>{" "}
+              — mantêm-te com sessão iniciada entre páginas e protegem
+              contra acessos indevidos à tua conta.
+            </li>
+            <li>
+              <strong>Cookies de prevenção de fraude no pagamento
+              (Stripe)</strong> — seriam definidos apenas durante a
+              compra de bilhetes (módulo Espetáculos), enquanto o
+              formulário de pagamento do Stripe estivesse ativo na
+              página. Esta funcionalidade ainda está inativa (ver secção
+              4), pelo que, por agora, estes cookies nunca são
+              definidos.
+            </li>
+          </ul>
+          <p>
+            Não usamos Google Analytics, Meta Pixel nem qualquer outra
+            ferramenta de análise de audiência ou publicidade.
           </p>
         </section>
 

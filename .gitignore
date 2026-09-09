@@ -50,6 +50,7 @@ CORRECAO-*.txt
 TESTE-*.txt
 /relatorios/
 /docs/diagnosticos/
+/docs/sessions/
 
 # dados de importacao unica para o Supabase (correr manualmente, nao versionar)
 /sql/*.csv

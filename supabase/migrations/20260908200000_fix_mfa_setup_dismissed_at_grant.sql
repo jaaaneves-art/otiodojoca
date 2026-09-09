@@ -1,0 +1,25 @@
+-- Corrige loop de redirecionamento no fluxo de MFA opcional ("Agora não").
+--
+-- Causa: 20260906090000_seguranca_proteger_email_perfis.sql revogou o
+-- SELECT de tabela em public.profiles (para fechar uma fuga de emails) e
+-- só voltou a conceder um conjunto explícito de colunas -- sem incluir
+-- "mfa_setup_dismissed_at". Essa coluna é lida pelo middleware
+-- (lib/supabase/middleware.ts) para saber se um utilizador de nível
+-- "user" já dispensou a sugestão de configurar o MFA.
+--
+-- Sem permissão de SELECT nessa coluna, a query do middleware
+-- (`select("role, mfa_setup_dismissed_at")`) falha (insufficient
+-- privilege) e `profile` fica null -- o middleware assume então,
+-- silenciosamente, "ainda não dispensou" e reenvia sempre para
+-- /mfa/setup. O grant de UPDATE nessa coluna nunca foi tocado, por isso
+-- o "Agora não" grava com sucesso (mfa_setup_dismissed_at fica
+-- preenchido na base de dados) -- só a leitura seguinte é que falha,
+-- criando um ciclo sem saída (relatado 08/09/2026: utilizador teve de
+-- fechar o browser para conseguir sair).
+--
+-- Só authenticated precisa desta leitura -- é o próprio middleware, a
+-- pedido do próprio utilizador autenticado, que a consulta; anon nunca
+-- passa por este ramo do middleware (só corre depois de confirmar que
+-- existe sessão).
+
+GRANT SELECT (mfa_setup_dismissed_at) ON public.profiles TO authenticated;
