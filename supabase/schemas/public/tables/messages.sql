@@ -55,3 +55,6 @@ for each row execute function public.social_message_activity();
 
 create trigger social_message_delete_once before update of deleted_at on public.messages
 for each row execute function public.social_message_delete_once();
+
+create trigger social_message_events after insert or update of deleted_at on public.messages
+for each row execute function public.social_message_events();

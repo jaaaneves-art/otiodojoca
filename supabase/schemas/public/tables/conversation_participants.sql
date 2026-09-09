@@ -37,3 +37,6 @@ grant delete, insert, maintain, references, select, trigger, truncate, update
   on table "public"."conversation_participants" to "postgres", "service_role";
 
 revoke all on table "public"."conversation_participants" from "anon";
+
+create trigger social_participant_events after insert or update of last_read_at or delete
+on public.conversation_participants for each row execute function public.social_participant_events();

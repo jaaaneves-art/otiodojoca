@@ -4,6 +4,7 @@ create table "public"."notifications" (
   "type"       text                     not null,
   "message"    text                     not null,
   "link"       text,
+  "social_message_id" uuid references public.messages(id) on delete cascade,
   "is_read"    boolean                  default false,
   "created_at" timestamp with time zone default now(),
   constraint "notifications_pkey" primary key (id),
@@ -32,3 +33,19 @@ create policy "Sistema cria notificacoes" on "public"."notifications"
   with check (true);
 
 grant delete, insert, maintain, references, select, trigger, truncate, update on table "public"."notifications" to "anon", "authenticated", "postgres", "service_role";
+
+create unique index social_notification_once on public.notifications(user_id, social_message_id)
+  where social_message_id is not null;
+-- As policies existentes continuam a controlar as notificações dos outros módulos.
+create policy "social notification visibility" on public.notifications as restrictive
+for select to public using (social_message_id is null or exists (
+  select 1 from public.messages m where m.id = social_message_id and m.deleted_at is null
+    and public.is_conversation_participant(m.conversation_id)
+));
+
+
+create trigger social_notification_guard before update on public.notifications
+for each row execute function public.social_notification_guard();
+
+create trigger social_notification_read_event after update of is_read on public.notifications
+for each row execute function public.social_notification_read_event();

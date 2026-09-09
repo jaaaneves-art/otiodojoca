@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteMessage, markRead, sendMessage, startConversation } from "@/app/mensagens/actions";
+import { deleteMessage, sendMessage, startConversation } from "@/app/mensagens/actions";
 
 export function MessageForm({ conversationId }: { conversationId?: string }) {
   const router = useRouter();
@@ -41,20 +41,4 @@ export function DeleteMessage({ conversationId, messageId }: { conversationId: s
     catch { setError("Não foi possível apagar. Tenta novamente."); }
     finally { setPending(false); }
   }}>{pending ? "A apagar…" : "Apagar mensagem"}</button>{error && <p role="alert">{error}</p>}</>;
-}
-
-export function ConversationUpdates({ id, latest }: { id?: string; latest?: string }) {
-  const router = useRouter();
-  const [error, setError] = useState("");
-  useEffect(() => {
-    const read = () => {
-      if (document.visibilityState === "visible" && id && latest)
-        void markRead(id, latest).then(result => setError(result.error || "")).catch(() => setError("Não foi possível registar a leitura."));
-    };
-    read();
-    document.addEventListener("visibilitychange", read);
-    const timer = setInterval(() => { if (document.visibilityState === "visible") router.refresh(); }, 15000);
-    return () => { clearInterval(timer); document.removeEventListener("visibilitychange", read); };
-  }, [id, latest, router]);
-  return error ? <p role="status">{error}</p> : null;
 }

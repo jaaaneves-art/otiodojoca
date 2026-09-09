@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { ConversationUpdates } from "@/components/social/conversation-updates";
 import { socialSession } from "@/lib/social/messages";
-import { ConversationUpdates, MessageForm } from "@/components/social/message-controls";
+import { MessageForm } from "@/components/social/message-controls";
 
 export default async function MessagesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const { db, user } = await socialSession();
@@ -28,10 +29,23 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
     const otherId = c.direct_user_a === user.id ? c.direct_user_b : c.direct_user_a;
     return { ...c, username: profiles.data?.find(p => p.id === otherId)?.username || "Utilizador", last: last.data, unread: count.count || 0 };
   }));
+  const { data: notifications, count: notificationCount, error: notificationError } = await db.from("notifications")
+    .select("id, message, link", { count: "exact" }).eq("user_id", user.id).eq("type", "message")
+    .not("social_message_id", "is", null).eq("is_read", false)
+    .order("created_at", { ascending: false }).order("id", { ascending: false }).limit(5);
   return <>
     <h1 className="text-3xl font-bold">Mensagens privadas</h1>
+    <section aria-label="Notificações de mensagens" className="space-y-2 rounded-xl border p-4">
+      <h2 className="font-semibold">Notificações de mensagens{!notificationError && ` (${notificationCount || 0} por ler)`}</h2>
+      {notificationError ? <p role="status">Não foi possível carregar as notificações.</p> : <>
+        {!notifications?.length && <p>Não tens novas notificações de mensagens.</p>}
+        <ul>{notifications?.map(notification => <li key={notification.id}>
+          <Link className="underline" href={notification.link || "/mensagens"}>{notification.message}</Link>
+        </li>)}</ul>
+      </>}
+    </section>
     <MessageForm />
-    <ConversationUpdates />
+    <ConversationUpdates userId={user.id} />
     {items.length === 0 && <p>Ainda não há conversas nesta página. Inicia uma conversa pelo nome de utilizador.</p>}
     <ul className="space-y-3">{items.map(c => <li key={c.id}>
       <Link href={`/mensagens/${c.id}`} className="block rounded-xl border p-4 hover:bg-green-50">

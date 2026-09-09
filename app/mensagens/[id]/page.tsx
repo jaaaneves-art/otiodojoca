@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { ConversationUpdates } from "@/components/social/conversation-updates";
 import { notFound } from "next/navigation";
 import { directConversation, isUuid } from "@/lib/social/messages";
-import { ConversationUpdates, DeleteMessage, MessageForm } from "@/components/social/message-controls";
+import { DeleteMessage, MessageForm } from "@/components/social/message-controls";
 
 export default async function ConversationPage({ params, searchParams }: {
   params: Promise<{ id: string }>; searchParams: Promise<{ before?: string }>;
@@ -35,7 +36,7 @@ export default async function ConversationPage({ params, searchParams }: {
   }));
   return <>
     <h1 className="text-2xl font-bold">Conversa com @{profile?.username || "Utilizador"}</h1>
-    <ConversationUpdates id={before ? undefined : id} latest={before ? undefined : messages.at(-1)?.id} />
+    <ConversationUpdates userId={user.id} id={before ? undefined : id} latest={before ? undefined : messages.at(-1)?.id} />
     {before && <Link className="block underline" href={`/mensagens/${id}`}>Ver mensagens recentes</Link>}
     {(data?.length || 0) > 50 && <Link className="block underline" href={`/mensagens/${id}?before=${messages[0].id}`}>Carregar mensagens anteriores</Link>}
     {!messages.length && <p>Ainda não há mensagens. Diz olá!</p>}
