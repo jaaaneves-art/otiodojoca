@@ -35,6 +35,31 @@ export async function getFreguesiaByCodigo(codigo: string) {
   return freguesia;
 }
 
+export interface FreguesiaResumo {
+  id: number;
+  cod_ine: string;
+  nome: string;
+  municipio: string;
+}
+
+export async function getFreguesias(): Promise<FreguesiaResumo[]> {
+  const supabase = await createClient();
+
+  const { data: freguesias, error } = await supabase
+    .from('freguesias')
+    .select('id, cod_ine, nome, municipio')
+    .eq('active', true)
+    .order('municipio', { ascending: true })
+    .order('nome', { ascending: true });
+
+  if (error) {
+    console.error('Erro ao buscar freguesias:', error);
+    return [];
+  }
+
+  return freguesias || [];
+}
+
 export async function getEntidadesByFreguesia(
   frequesiaId: number
 ): Promise<EntidadeComCategoria[]> {
@@ -87,7 +112,8 @@ export async function getEntidadeBySlug(slug: string) {
       categorias_entidade(nome, descricao, icone),
       horarios(*),
       horarios_excecoes(*),
-      eventos(*)
+      eventos(*),
+      freguesias(cod_ine, nome)
     `)
     .eq('slug', slug)
     .eq('estado', 'publicado')
@@ -97,7 +123,20 @@ export async function getEntidadeBySlug(slug: string) {
     return null;
   }
 
-  return entidade;
+  // Tal como em getEntidadesByFreguesia, as relações 1:1 embutidas podem
+  // vir como array de um elemento consoante a forma como o PostgREST
+  // resolve a FK — normalizar aqui para não obrigar as páginas a lidar
+  // com as duas formas.
+  const paraObjeto = <T,>(valor: T | T[] | null | undefined): T | null => {
+    if (Array.isArray(valor)) return valor[0] ?? null;
+    return valor ?? null;
+  };
+
+  return {
+    ...entidade,
+    categorias_entidade: paraObjeto(entidade.categorias_entidade),
+    freguesias: paraObjeto(entidade.freguesias),
+  };
 }
 
 export async function getCategorias() {

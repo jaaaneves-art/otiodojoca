@@ -34,11 +34,11 @@ export function EntidadeCard({
     <Card
       role="button"
       tabIndex={0}
-      onClick={() => router.push(`/freguesias/${slug}`)}
+      onClick={() => router.push(`/entidades/${slug}`)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          router.push(`/freguesias/${slug}`);
+          router.push(`/entidades/${slug}`);
         }
       }}
       className="hover:shadow-lg transition-shadow cursor-pointer h-full"

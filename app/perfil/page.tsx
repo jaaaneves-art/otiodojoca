@@ -5,7 +5,7 @@ import { MfaDisableButton } from "@/components/auth/mfa-disable-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Bell, MessageSquare, Heart, ShoppingBag, ShieldCheck, ShieldAlert } from "lucide-react";
+import { Bell, MessageSquare, Heart, ShoppingBag, ShieldCheck, ShieldAlert, Users } from "lucide-react";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -42,6 +42,9 @@ export default async function ProfilePage() {
           <Link href="/" className="text-xl font-bold text-terra-800">Almanaque</Link>
           <div className="flex items-center gap-3">
             <Link href="/mensagens" className="text-terra-600 hover:text-terra-800">Mensagens privadas</Link>
+            <Link href="/grupos" className="text-terra-600 hover:text-terra-800">
+              <Users className="w-5 h-5" />
+            </Link>
             <Link href="/forum" className="text-terra-600 hover:text-terra-800">
               <MessageSquare className="w-5 h-5" />
             </Link>
