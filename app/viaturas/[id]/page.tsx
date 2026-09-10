@@ -1,284 +1,140 @@
-import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, CalendarDays, Fuel, Gauge, MapPin, Palette, Settings2, ShieldCheck, Sparkles, UserRound, Zap } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 import ContactSellerForm from "@/components/viaturas/contact-seller-form";
 import FavoriteButton from "@/components/viaturas/favorite-button";
 import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
 import AuctionPanel from "@/components/viaturas/auction-panel";
+import { ViaturaGallery } from "@/components/viaturas/viatura-gallery";
 import { VIATURAS_AD_TYPES } from "@/lib/viaturas/ad-types";
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: "Rascunho",
-  active: "Ativo",
-  reserved: "Reservado",
-  sold: "Vendido",
-  expired: "Expirado",
-  cancelled: "Cancelado",
-  inactive: "Indisponível",
+  draft: "Rascunho", active: "Ativo", reserved: "Reservado", sold: "Vendido",
+  expired: "Expirado", cancelled: "Cancelado", inactive: "Indisponível",
 };
 
 const formatKm = (km: string | number | undefined) =>
   km == null || km === "" ? null : `${Number(km).toLocaleString("pt-PT")} km`;
 
-export default async function ViaturaAdPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(price);
+
+export default async function ViaturaAdPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: ad, error } = await supabase.from("marketplace_ads").select(`*, author:profiles(id, username, avatar_url)`).eq("id", id).eq("module", "viaturas").single();
+  if (error || !ad) notFound();
 
-  const { data: ad, error } = await supabase
-    .from("marketplace_ads")
-    .select(`*, author:profiles(id, username, avatar_url)`)
-    .eq("id", id)
-    .eq("module", "viaturas")
-    .single();
-
-  if (error || !ad) {
-    notFound();
-  }
-
-  const { data: photos } = await supabase
-    .from("marketplace_photos")
-    .select("*")
-    .eq("ad_id", ad.id)
-    .order("sort_order", { ascending: true });
-
+  const { data: photos } = await supabase.from("marketplace_photos").select("id, storage_path, sort_order").eq("ad_id", ad.id).order("sort_order", { ascending: true });
   const { data: { user } } = await supabase.auth.getUser();
-
   let isFavorite = false;
   if (user) {
-    const { data: fav } = await supabase
-      .from("marketplace_favorites")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("ad_id", ad.id)
-      .maybeSingle();
+    const { data: fav } = await supabase.from("marketplace_favorites").select("id").eq("user_id", user.id).eq("ad_id", ad.id).maybeSingle();
     isFavorite = !!fav;
   }
 
   let auction: any = null;
   let auctionBids: any[] = [];
   if (ad.type === "leilao") {
-    const { data: auctionRow } = await supabase
-      .from("marketplace_auctions")
-      .select("id, ad_id, current_price, minimum_increment, starts_at, ends_at, status, winner_id")
-      .eq("ad_id", ad.id)
-      .maybeSingle();
+    const { data: auctionRow } = await supabase.from("marketplace_auctions").select("id, ad_id, current_price, minimum_increment, starts_at, ends_at, status, winner_id").eq("ad_id", ad.id).maybeSingle();
     auction = auctionRow;
-
     if (auction) {
-      const { data: bidsData } = await supabase
-        .from("marketplace_auction_bids")
-        .select("id, bidder_id, amount, created_at, bidder:profiles(username)")
-        .eq("auction_id", auction.id)
-        .order("amount", { ascending: false });
-      auctionBids = (bidsData ?? []).map((b: any) => ({
-        id: b.id,
-        bidder_id: b.bidder_id,
-        amount: b.amount,
-        created_at: b.created_at,
-        bidder_username: b.bidder?.username,
-      }));
+      const { data: bidsData } = await supabase.from("marketplace_auction_bids").select("id, bidder_id, amount, created_at, bidder:profiles(username)").eq("auction_id", auction.id).order("amount", { ascending: false });
+      auctionBids = (bidsData ?? []).map((bid: any) => ({ id: bid.id, bidder_id: bid.bidder_id, amount: bid.amount, created_at: bid.created_at, bidder_username: bid.bidder?.username }));
     }
   }
 
   const typeInfo = VIATURAS_AD_TYPES[ad.type];
   const d = ad.details ?? {};
+  const title = d.marca && d.modelo ? `${d.marca} ${d.modelo}` : ad.title;
+  const characteristics = [
+    { label: "Ano", value: d.ano, icon: CalendarDays },
+    { label: "Quilómetros", value: formatKm(d.quilometros), icon: Gauge },
+    { label: "Combustível", value: d.combustivel, icon: Fuel },
+    { label: "Caixa", value: d.caixa, icon: Settings2 },
+    { label: "Condição", value: d.condicao, icon: Sparkles },
+    { label: "Cor", value: d.cor, icon: Palette },
+    { label: "Potência", value: d.potencia ? `${d.potencia} cv` : null, icon: Zap },
+    { label: "Vendedor", value: d.tipo_vendedor, icon: UserRound },
+  ].filter((item) => Boolean(item.value));
 
-  const caracteristicas: Array<[string, string | null]> = [
-    ["Ano", d.ano ?? null],
-    ["Quilómetros", formatKm(d.quilometros)],
-    ["Combustível", d.combustivel ?? null],
-    ["Caixa", d.caixa ?? null],
-    ["Condição", d.condicao ?? null],
-    ["Cor", d.cor ?? null],
-    ["Potência", d.potencia ? `${d.potencia} cv` : null],
-    ["Vendedor", d.tipo_vendedor ?? null],
-  ].filter(
-    (item): item is [string, string | null] => Boolean(item[1])
-  );
+  const priceBlock = ad.type === "comprar" ? (
+    <div><p className="text-xs font-extrabold uppercase tracking-[.14em] text-purple-600">Orçamento disponível</p><p className="mt-1 text-3xl font-black tracking-tight text-slate-950">{ad.price == null ? "A combinar" : `Até ${formatPrice(ad.price)}`}</p></div>
+  ) : ad.type === "ceder" ? (
+    <div><p className="text-xs font-extrabold uppercase tracking-[.14em] text-emerald-600">Cedência</p><p className="mt-1 text-3xl font-black tracking-tight text-emerald-700">Grátis</p></div>
+  ) : ad.type === "alugar" ? (
+    <div><p className="text-xs font-extrabold uppercase tracking-[.14em] text-blue-600">Aluguer desde</p><p className="mt-1 text-3xl font-black tracking-tight text-slate-950">{ad.price == null ? "Consultar" : formatPrice(ad.price)}<span className="text-base font-bold text-slate-500">/dia</span></p></div>
+  ) : ad.type === "venda" ? (
+    <div><p className="text-xs font-extrabold uppercase tracking-[.14em] text-blue-600">Preço anunciado</p><p className="mt-1 text-3xl font-black tracking-tight text-slate-950">{ad.price == null ? "Consultar" : formatPrice(ad.price)}</p>{ad.price_type === "negotiable" && ad.price != null && <p className="mt-1 text-xs font-semibold text-slate-500">Valor negociável</p>}</div>
+  ) : null;
 
   return (
     <>
       <ViaturasNavbar />
-      <div className="min-h-screen bg-viaturas-50">
-        <main className="max-w-4xl mx-auto p-6">
-          <div className="mb-4">
-            <Link href="/viaturas" className="text-viaturas-700 hover:text-viaturas-900">
-              ← Voltar ao StandGo
-            </Link>
-          </div>
+      <div className="min-h-screen bg-[#f5f7fb]">
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-9">
+          <Link href="/viaturas" className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-600 transition hover:text-blue-700"><ArrowLeft size={17} aria-hidden="true" /> Voltar às viaturas</Link>
 
-          <div className="bg-white rounded-xl border border-viaturas-200 p-8">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <div className="flex flex-wrap gap-1 mb-2">
-                  <span className="inline-block text-xs font-bold px-2 py-1 rounded-full bg-viaturas-600 text-white">
-                    {typeInfo?.icon} {typeInfo?.label ?? ad.type}
-                  </span>
-                  {d.condicao === "Novo" && (
-                    <span className="inline-block text-xs font-bold px-2 py-1 rounded-full bg-green-600 text-white">NOVO</span>
-                  )}
-                  {d.tipo_vendedor === "Stand" && (
-                    <span className="inline-block text-xs font-bold px-2 py-1 rounded-full bg-slate-700 text-white">STAND</span>
-                  )}
-                </div>
-                <h1 className="text-3xl font-bold text-viaturas-900">
-                  {d.marca && d.modelo ? `${d.marca} ${d.modelo}` : ad.title}
-                </h1>
-                {d.marca && d.modelo && <p className="text-viaturas-600 mt-1">{ad.title}</p>}
+          <header className="mb-7 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+            <div className="min-w-0">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-blue-600 px-3 py-1 text-[10px] font-black uppercase tracking-[.12em] text-white">{typeInfo?.label ?? ad.type}</span>
+                {d.condicao === "Novo" && <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[.12em] text-emerald-700">Novo</span>}
+                {d.tipo_vendedor === "Stand" && <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-3 py-1 text-[10px] font-black uppercase tracking-[.12em] text-slate-700"><ShieldCheck size={12} /> Stand</span>}
+                <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[.12em] ${ad.status === "active" ? "bg-[#b7f34a] text-slate-950" : "bg-slate-200 text-slate-600"}`}>{STATUS_LABEL[ad.status] ?? ad.status}</span>
               </div>
-              <span className={`px-4 py-2 rounded-full font-semibold ${
-                ad.status === "active" ? "bg-green-100 text-green-700" :
-                ad.status === "sold" ? "bg-gray-100 text-gray-600" :
-                "bg-viaturas-100 text-viaturas-700"
-              }`}>
-                {STATUS_LABEL[ad.status] ?? ad.status}
-              </span>
+              <h1 className="text-3xl font-black leading-tight tracking-[-0.045em] text-slate-950 sm:text-5xl">{title}</h1>
+              {title !== ad.title && <p className="mt-2 text-sm text-slate-500">{ad.title}</p>}
             </div>
+            {ad.location && <p className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-slate-600"><MapPin size={17} className="text-blue-600" /> {ad.location}</p>}
+          </header>
 
-            {photos && photos.length > 0 && (
-              <div className="mb-6">
-                <div className="mb-3">
-                  <img src={photos[0].storage_path} alt={ad.title} className="w-full h-96 object-cover rounded-lg border border-viaturas-200" />
-                </div>
-                {photos.length > 1 && (
-                  <div className="grid grid-cols-5 gap-2">
-                    {photos.map((photo: any) => (
-                      <img key={photo.id} src={photo.storage_path} alt="" className="w-full h-20 object-cover rounded-lg border border-viaturas-200 cursor-pointer hover:border-viaturas-500" />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_23rem]">
+            <div className="space-y-6">
+              <section className="rounded-[2rem] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"><ViaturaGallery photos={photos ?? []} title={title} /></section>
 
-            {ad.type === "leilao" ? (
-              auction ? (
-                <AuctionPanel auction={auction} sellerId={ad.author_id} currentUserId={user?.id} bids={auctionBids} />
-              ) : (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-700">
-                  Este leilão ainda não tem dados associados — tenta novamente dentro de instantes.
-                </div>
-              )
-            ) : ad.type === "comprar" ? (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-purple-600 font-semibold mb-1">🔍 Anúncio de procura</p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {ad.price == null ? "Orçamento a combinar" : `Orçamento até €${ad.price.toFixed(2)}`}
-                </p>
-              </div>
-            ) : ad.type === "ceder" ? (
-              <div className="text-2xl font-bold text-green-700 mb-6">🤝 CEDÊNCIA GRÁTIS</div>
-            ) : ad.type === "alugar" ? (
-              <div className="mb-6">
-                <div className="text-2xl font-bold text-viaturas-700 mb-3">
-                  €{ad.price != null ? ad.price.toFixed(2) : "—"}<span className="text-base font-medium text-viaturas-600">/dia</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                  {d.preco_3_dias && (
-                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-viaturas-600">3 dias</p>
-                      <p className="font-bold text-viaturas-900">€{Number(d.preco_3_dias).toFixed(2)}</p>
-                    </div>
-                  )}
-                  {d.preco_semana && (
-                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-viaturas-600">1 semana</p>
-                      <p className="font-bold text-viaturas-900">€{Number(d.preco_semana).toFixed(2)}</p>
-                    </div>
-                  )}
-                  {d.preco_2_semanas && (
-                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-viaturas-600">2 semanas</p>
-                      <p className="font-bold text-viaturas-900">€{Number(d.preco_2_semanas).toFixed(2)}</p>
-                    </div>
-                  )}
-                  {d.preco_mes && (
-                    <div className="bg-viaturas-50 rounded-lg p-3 text-center">
-                      <p className="text-xs text-viaturas-600">1 mês</p>
-                      <p className="font-bold text-viaturas-900">€{Number(d.preco_mes).toFixed(2)}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-4 text-sm text-viaturas-700">
-                  {d.seguro && <p>🛡️ Seguro: <strong>{d.seguro}</strong></p>}
-                  {d.caucao && <p>💶 Caução: <strong>€{Number(d.caucao).toFixed(2)}</strong></p>}
-                </div>
-              </div>
-            ) : (
-              <div className="text-2xl font-bold text-viaturas-700 mb-6">
-                {ad.price == null ? "Consultar preço" : "€" + ad.price.toFixed(2)}
-                {ad.price_type === "negotiable" && ad.price != null && " (negociável)"}
-              </div>
-            )}
-
-            {caracteristicas.length > 0 && (
-              <div className="mb-8 pb-8 border-b border-viaturas-200">
-                <h2 className="text-lg font-semibold text-viaturas-900 mb-3">Características</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {caracteristicas.map(([label, valor]) => (
-                    <div key={label}>
-                      <p className="text-sm text-viaturas-600">{label}</p>
-                      <p className="font-semibold text-viaturas-900">{valor}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="mb-8 pb-8 border-b border-viaturas-200">
-              <h2 className="text-lg font-semibold text-viaturas-900 mb-3">Descrição</h2>
-              <p className="text-viaturas-800 whitespace-pre-wrap">{ad.description}</p>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8 pb-8 border-b border-viaturas-200">
-              <div>
-                <p className="text-sm text-viaturas-600">Localização</p>
-                <p className="font-semibold text-viaturas-900">📍 {ad.location}</p>
-              </div>
-              <div>
-                <p className="text-sm text-viaturas-600">Publicado em</p>
-                <p className="font-semibold text-viaturas-900">{new Date(ad.created_at).toLocaleDateString("pt-PT")}</p>
-              </div>
-              <div>
-                <p className="text-sm text-viaturas-600">Contacto</p>
-                <p className="font-semibold text-viaturas-900">
-                  {ad.contact_method === "message" ? "💬 Mensagem" :
-                   ad.contact_method === "phone" ? "📞 Telefone" : "📧 Email"}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-viaturas-50 p-6 rounded-lg mb-6">
-              <h2 className="text-lg font-semibold text-viaturas-900 mb-4">Anunciante</h2>
-              {ad.author ? (
-                <div className="flex items-center gap-4">
-                  {ad.author.avatar_url && (
-                    <img src={ad.author.avatar_url} alt={ad.author.username} className="w-16 h-16 rounded-full" />
-                  )}
-                  <div>
-                    <p className="font-semibold text-viaturas-900">{ad.author.username}</p>
-                    <Link href={`/perfil/${ad.author.id}`} className="text-viaturas-700 hover:text-viaturas-900">
-                      Ver Perfil →
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-viaturas-700">Utilizador não encontrado</p>
+              {characteristics.length > 0 && (
+                <section className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">
+                  <p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-600">Ficha rápida</p>
+                  <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">O essencial desta viatura</h2>
+                  <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {characteristics.map(({ label, value, icon: Icon }) => <div key={label} className="rounded-2xl bg-slate-50 p-4"><Icon size={19} className="mb-3 text-blue-600" aria-hidden="true" /><dt className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{label}</dt><dd className="mt-1 font-extrabold text-slate-900">{String(value)}</dd></div>)}
+                  </dl>
+                </section>
               )}
+
+              <section className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">
+                <p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-600">Descrição</p>
+                <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">Tudo o que precisas de saber</h2>
+                <p className="mt-5 whitespace-pre-wrap text-[15px] leading-7 text-slate-600">{ad.description}</p>
+              </section>
+
+              <section className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">
+                <p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-600">Anunciante</p>
+                {ad.author ? <div className="mt-4 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-3">{ad.author.avatar_url ? <img src={ad.author.avatar_url} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : <span className="grid h-14 w-14 place-items-center rounded-2xl bg-blue-50 text-blue-700"><UserRound size={25} /></span>}<div><p className="font-black text-slate-950">{ad.author.username}</p><p className="text-xs text-slate-500">Membro da comunidade OTJ</p></div></div><Link href={`/perfil/${ad.author.id}`} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700">Ver perfil</Link></div> : <p className="mt-4 text-sm text-slate-500">Utilizador não encontrado.</p>}
+              </section>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-3">
-              <ContactSellerForm adId={ad.id} sellerId={ad.author_id} currentUserId={user?.id} />
-              <FavoriteButton adId={ad.id} isFavorite={isFavorite} isLoggedIn={!!user} variant="detail" />
-              <Link href="/viaturas" className="flex-1">
-                <button className="w-full border border-viaturas-200 text-viaturas-700 font-medium py-3 px-4 rounded-lg hover:bg-viaturas-50">
-                  Voltar à Lista
-                </button>
-              </Link>
-            </div>
+            <aside className="space-y-4 lg:sticky lg:top-36">
+              <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5">
+                {ad.type === "leilao" ? auction ? <AuctionPanel auction={auction} sellerId={ad.author_id} currentUserId={user?.id} bids={auctionBids} /> : <p className="rounded-xl bg-red-50 p-4 text-sm font-semibold text-red-700">Os dados deste leilão ainda não estão disponíveis.</p> : priceBlock}
+
+                {ad.type === "alugar" && <div className="mt-5 grid grid-cols-2 gap-2">{[["3 dias", d.preco_3_dias], ["1 semana", d.preco_semana], ["2 semanas", d.preco_2_semanas], ["1 mês", d.preco_mes]].filter(([, value]) => value).map(([label, value]) => <div key={label} className="rounded-xl bg-slate-50 p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 text-sm font-black text-slate-900">{formatPrice(Number(value))}</p></div>)}</div>}
+
+                <div className="my-5 border-t border-slate-100" />
+                <div className="space-y-3">
+                  <ContactSellerForm adId={ad.id} sellerId={ad.author_id} currentUserId={user?.id} />
+                  <FavoriteButton adId={ad.id} isFavorite={isFavorite} isLoggedIn={!!user} variant="detail" />
+                </div>
+                <div className="mt-5 space-y-2 border-t border-slate-100 pt-5 text-xs text-slate-500">
+                  <p className="flex justify-between gap-3"><span>Publicado</span><strong className="text-slate-700">{new Date(ad.created_at).toLocaleDateString("pt-PT")}</strong></p>
+                  <p className="flex justify-between gap-3"><span>Contacto</span><strong className="text-slate-700">{ad.contact_method === "message" ? "Mensagem privada" : ad.contact_method === "phone" ? "Telefone" : "Email"}</strong></p>
+                  <p className="flex justify-between gap-3"><span>Referência</span><strong className="text-slate-700">SG-{ad.id}</strong></p>
+                </div>
+              </div>
+              <p className="px-4 text-center text-xs leading-5 text-slate-500">Confirma sempre a documentação e o estado da viatura antes de efetuares qualquer pagamento.</p>
+            </aside>
           </div>
         </main>
       </div>

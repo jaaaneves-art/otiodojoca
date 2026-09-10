@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
 import AuctionCountdownBadge from "@/components/viaturas/auction-countdown-badge";
+import { ArrowLeft, Gavel } from "lucide-react";
 
 export default async function LeiloesViaturasPage() {
   // Mesmo motor do Gran Bazar (licitação ascendente simples, nível 4) — ver
@@ -24,16 +25,17 @@ export default async function LeiloesViaturasPage() {
   return (
     <>
       <ViaturasNavbar />
-      <div className="min-h-screen bg-viaturas-50">
-        <main className="max-w-4xl mx-auto p-6">
+      <div className="min-h-screen bg-[#f5f7fb]">
+        <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-9">
           <div className="mb-6">
-            <Link href="/viaturas" className="text-viaturas-700 hover:text-viaturas-900">← Voltar ao StandGo</Link>
+            <Link href="/viaturas" className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 transition hover:text-blue-700"><ArrowLeft size={17} /> Voltar às viaturas</Link>
           </div>
 
-          <div className="bg-viaturas-900 rounded-2xl p-8 mb-8 text-center">
-            <p className="text-4xl mb-2">🔨</p>
-            <h1 className="text-3xl font-bold text-white mb-1">Leilões de Viaturas</h1>
-            <p className="text-viaturas-100">Licita nos leilões em curso — o lance vence quando o leilão termina.</p>
+          <div className="relative mb-8 overflow-hidden rounded-[2rem] bg-slate-950 p-8 text-white sm:p-10">
+            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-amber-500/20 blur-3xl" />
+            <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-amber-400 text-slate-950"><Gavel size={23} /></span>
+            <h1 className="relative mt-5 text-3xl font-black tracking-[-.04em] sm:text-4xl">Leilões de viaturas</h1>
+            <p className="relative mt-2 max-w-xl text-sm leading-6 text-slate-300">Acompanha os leilões em curso, consulta os detalhes e licita diretamente no anúncio.</p>
           </div>
 
           {auctions && auctions.length > 0 ? (
@@ -43,7 +45,7 @@ export default async function LeiloesViaturasPage() {
                 const titulo = d.marca && d.modelo ? `${d.marca} ${d.modelo}` : auction.ad?.title;
                 return (
                   <Link key={auction.id} href={`/viaturas/${auction.ad?.id}`}>
-                    <div className="bg-white rounded-lg border border-viaturas-200 p-4 hover:border-amber-500 transition">
+                    <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-amber-400 hover:shadow-lg">
                       <div className="flex items-center justify-between mb-2">
                         <span className="inline-block text-xs font-bold px-2 py-1 rounded-full bg-amber-800 text-white">🔨 Leilão</span>
                         <AuctionCountdownBadge
@@ -55,14 +57,14 @@ export default async function LeiloesViaturasPage() {
                       </div>
                       <h3 className="font-semibold text-viaturas-900 mb-2">{titulo}</h3>
                       <p className="text-lg font-bold text-amber-800">{Number(auction.current_price).toFixed(2)} €</p>
-                    </div>
+                    </article>
                   </Link>
                 );
               })}
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-viaturas-200 p-10 text-center text-viaturas-600">
-              Não há leilões de viaturas em curso ou agendados neste momento.
+            <div className="rounded-[2rem] border border-dashed border-slate-300 bg-white p-12 text-center text-slate-600">
+              <Gavel className="mx-auto mb-4 text-slate-400" size={28} /><p className="font-bold">Não há leilões em curso ou agendados neste momento.</p>
             </div>
           )}
         </main>

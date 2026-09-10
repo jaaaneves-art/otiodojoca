@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
 import { VIATURAS_AD_TYPES } from "@/lib/viaturas/ad-types";
+import { ArrowRight, LayoutDashboard, Pencil, Plus } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Rascunho", active: "Ativo", reserved: "Reservado", sold: "Vendido",
@@ -47,7 +48,7 @@ export default async function MeusAnunciosViaturasPage() {
     return (
       <div
         key={ad.id}
-        className={`bg-white rounded-lg border border-viaturas-200 hover:shadow-md transition h-full overflow-hidden ${
+        className={`h-full overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg ${
           faded ? "opacity-60" : ""
         }`}
       >
@@ -101,9 +102,9 @@ export default async function MeusAnunciosViaturasPage() {
         <div className="px-4 pb-4 pt-2 border-t border-viaturas-100">
           <Link
             href={`/viaturas/editar/${ad.id}`}
-            className="inline-flex items-center justify-center w-full bg-viaturas-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-viaturas-700 transition"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 font-bold text-white transition hover:bg-blue-600"
           >
-            ✏️ Editar anúncio
+            <Pencil size={16} /> Editar anúncio
           </Link>
         </div>
       </div>
@@ -113,10 +114,9 @@ export default async function MeusAnunciosViaturasPage() {
   return (
     <>
       <ViaturasNavbar />
-      <div className="min-h-screen bg-viaturas-50">
-        <main className="max-w-6xl mx-auto p-6">
-          <h1 className="text-3xl font-bold text-viaturas-900 mb-2">Meus Anúncios</h1>
-          <p className="text-viaturas-700 mb-8">Gere as tuas viaturas no StandGo</p>
+      <div className="min-h-screen bg-[#f5f7fb]">
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+          <header className="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-600">Área pessoal</p><div className="mt-2 flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-100 text-blue-700"><LayoutDashboard size={23} /></span><div><h1 className="text-3xl font-black tracking-[-.04em] text-slate-950 sm:text-4xl">Os meus anúncios</h1><p className="mt-1 text-sm text-slate-600">Gere todas as tuas viaturas num só lugar.</p></div></div></div><Link href="/viaturas/novo" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#b7f34a] px-4 py-3 text-sm font-extrabold text-slate-950"><Plus size={17} /> Nova publicação</Link></header>
 
           {activeAds.length > 0 && (
             <div className="mb-12">
@@ -137,13 +137,10 @@ export default async function MeusAnunciosViaturasPage() {
           )}
 
           {ads && ads.length === 0 && (
-            <div className="text-center py-16 bg-white rounded-lg border border-viaturas-200">
-              <p className="text-viaturas-700 text-lg mb-4">Ainda não tens nenhuma viatura anunciada</p>
-              <Link href="/viaturas/novo">
-                <button className="bg-viaturas-600 text-white font-medium py-2 px-6 rounded-lg hover:bg-viaturas-700">
-                  Vender Primeira Viatura
-                </button>
-              </Link>
+            <div className="rounded-[2rem] border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+              <h2 className="text-xl font-black text-slate-950">Ainda não tens viaturas anunciadas</h2>
+              <p className="mt-2 text-sm text-slate-500">Cria a primeira publicação e começa a receber contactos.</p>
+              <Link href="/viaturas/novo" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-extrabold text-white">Publicar primeira viatura <ArrowRight size={17} /></Link>
             </div>
           )}
         </main>

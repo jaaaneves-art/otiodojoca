@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { Heart, House, LayoutDashboard, LogIn, MessageCircle, Plus, Users } from "lucide-react";
+import { StandGoBrand } from "@/components/viaturas/standgo-brand";
 
 export default async function ViaturasNavbar() {
   const supabase = await createClient();
@@ -52,60 +54,59 @@ export default async function ViaturasNavbar() {
   }
 
   return (
-    <nav className="bg-viaturas-900 border-b border-viaturas-700 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/viaturas">
-          <h1 className="text-2xl font-bold text-white cursor-pointer">🚗 StandGo</h1>
-        </Link>
-
-        <div className="flex gap-3 items-center">
-          {user ? (
-            <>
-              {isStandVerificado && (
-                <Link href="/viaturas/stands">
-                  <button className="border border-viaturas-600 text-viaturas-50 font-medium py-2 px-4 rounded-lg hover:bg-viaturas-800">
-                    🤝 Stands
-                  </button>
-                </Link>
-              )}
-
-              <Link href="/viaturas/mensagens" className="relative">
-                <button className="border border-viaturas-600 text-viaturas-50 font-medium py-2 px-4 rounded-lg hover:bg-viaturas-800 flex items-center gap-2">
-                  💬 Mensagens
-                  {unreadTotal > 0 && (
-                    <span className="bg-viaturas-600 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {unreadTotal > 99 ? "99+" : unreadTotal}
-                    </span>
-                  )}
-                </button>
-              </Link>
-
-              <Link href="/viaturas/favoritos">
-                <button className="border border-viaturas-600 text-viaturas-50 font-medium py-2 px-4 rounded-lg hover:bg-viaturas-800">
-                  ❤️ Favoritos
-                </button>
-              </Link>
-
-              <Link href="/viaturas/meus-anuncios">
-                <button className="border border-viaturas-600 text-viaturas-50 font-medium py-2 px-4 rounded-lg hover:bg-viaturas-800">
-                  Meus Anúncios
-                </button>
-              </Link>
-
-              <Link href="/viaturas/novo">
-                <button className="bg-viaturas-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-viaturas-700">
-                  + Vender Viatura
-                </button>
-              </Link>
-            </>
-          ) : (
-            <Link href="/login">
-              <button className="bg-viaturas-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-viaturas-700">
-                Entrar
-              </button>
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/95 text-white shadow-lg shadow-slate-950/10 backdrop-blur-xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="flex h-[4.5rem] items-center justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link href="/" aria-label="Voltar a O Tio do Joca" className="hidden rounded-xl p-2 text-slate-400 transition hover:bg-white/10 hover:text-white sm:inline-flex">
+              <House size={18} aria-hidden="true" />
             </Link>
-          )}
+            <Link href="/viaturas" aria-label="Página inicial do StandGo">
+              <StandGoBrand />
+            </Link>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <Link href="/viaturas/novo" className="inline-flex items-center gap-2 rounded-xl bg-[#b7f34a] px-3.5 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-[#c8ff65] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:px-4">
+              <Plus size={17} strokeWidth={2.5} aria-hidden="true" />
+              <span className="hidden sm:inline">Publicar anúncio</span>
+              <span className="sm:hidden">Publicar</span>
+            </Link>
+            {!user && (
+              <Link href="/login" className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3.5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10">
+                <LogIn size={17} aria-hidden="true" />
+                <span className="hidden sm:inline">Entrar</span>
+              </Link>
+            )}
+          </div>
         </div>
+
+        {user && (
+          <div className="-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link href="/viaturas" className="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
+              <House size={16} aria-hidden="true" /> Mercado
+            </Link>
+            <Link href="/viaturas/favoritos" className="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
+              <Heart size={16} aria-hidden="true" /> Favoritos
+            </Link>
+            <Link href="/viaturas/mensagens" className="relative inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
+              <MessageCircle size={16} aria-hidden="true" /> Mensagens
+              {unreadTotal > 0 && (
+                <span className="grid min-w-5 place-items-center rounded-full bg-[#b7f34a] px-1.5 py-0.5 text-[10px] font-black text-slate-950">
+                  {unreadTotal > 99 ? "99+" : unreadTotal}
+                </span>
+              )}
+            </Link>
+            <Link href="/viaturas/meus-anuncios" className="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
+              <LayoutDashboard size={16} aria-hidden="true" /> Os meus anúncios
+            </Link>
+            {isStandVerificado && (
+              <Link href="/viaturas/stands" className="inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white">
+                <Users size={16} aria-hidden="true" /> Rede de stands
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
 import ViaturasFiltros from "@/components/viaturas/viaturas-filtros";
 import { ViaturasResultados } from "@/components/viaturas/viaturas-resultados";
+import { CarFront, SearchX } from "lucide-react";
 
 interface SearchParams {
   q?: string;
@@ -168,14 +169,22 @@ export default async function ViaturasPage({
   return (
     <>
       <ViaturasNavbar />
-      <div className="min-h-screen bg-viaturas-50">
-        <main className="max-w-6xl mx-auto px-6 py-8">
+      <div className="min-h-screen bg-[#f5f7fb]">
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-9">
           <ViaturasFiltros categories={categories || []} />
 
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-viaturas-900">
-              {hasFilters ? `Resultados (${ads.length})` : `Anúncios (${ads.length})`}
-            </h3>
+          <div className="mb-5 flex items-end justify-between gap-4 border-b border-slate-200 pb-4">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-600">
+                {hasFilters ? "A tua pesquisa" : "Acabados de chegar"}
+              </p>
+              <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-950">
+                {ads.length === 1 ? "1 viatura encontrada" : `${ads.length} viaturas encontradas`}
+              </h2>
+            </div>
+            <span className="hidden items-center gap-2 text-xs font-semibold text-slate-500 sm:inline-flex">
+              <CarFront size={16} aria-hidden="true" /> Anúncios da comunidade OTJ
+            </span>
           </div>
 
           {ads.length > 0 ? (
@@ -186,9 +195,11 @@ export default async function ViaturasPage({
               photosMap={photosMap}
             />
           ) : (
-            <div className="text-center py-16 bg-white rounded-lg border border-viaturas-200">
-              <p className="text-viaturas-700 text-lg">
-                {hasFilters ? "Nenhuma viatura encontrada com estes filtros" : "Ainda não há viaturas anunciadas"}
+            <div className="rounded-[2rem] border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+              <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-500"><SearchX size={26} aria-hidden="true" /></span>
+              <h3 className="mt-5 text-xl font-black text-slate-950">{hasFilters ? "Não encontrámos uma correspondência" : "A garagem ainda está vazia"}</h3>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+                {hasFilters ? "Experimenta retirar alguns filtros ou pesquisar apenas pela marca ou modelo." : "Sê a primeira pessoa a publicar uma viatura no StandGo."}
               </p>
             </div>
           )}

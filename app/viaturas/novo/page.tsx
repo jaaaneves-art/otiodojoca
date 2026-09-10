@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ViaturaAdForm } from "@/components/viaturas/viatura-ad-form";
 import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
+import { ArrowLeft, CircleCheckBig } from "lucide-react";
 
 async function createViaturaAd(formData: FormData) {
   "use server";
@@ -202,18 +203,16 @@ export default async function NovoAnuncioViaturaPage() {
   return (
     <>
       <ViaturasNavbar />
-      <div className="min-h-screen bg-viaturas-50">
-        <main className="max-w-2xl mx-auto p-6">
-          <div className="mb-6">
-            <Link href="/viaturas" className="text-viaturas-700 hover:text-viaturas-900">
-              ← Voltar ao StandGo
-            </Link>
-          </div>
+      <div className="min-h-screen bg-[#f5f7fb]">
+        <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-9">
+          <Link href="/viaturas" className="mb-7 inline-flex items-center gap-2 text-sm font-bold text-slate-600 transition hover:text-blue-700"><ArrowLeft size={17} /> Voltar às viaturas</Link>
 
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-viaturas-900">Publicar Anúncio</h1>
-            <p className="text-viaturas-700 mt-2">Venda, leilão, procura, cedência ou aluguer — tu escolhes</p>
-          </div>
+          <header className="mb-8">
+            <p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-600">Vender no StandGo</p>
+            <h1 className="mt-2 text-4xl font-black tracking-[-.045em] text-slate-950 sm:text-5xl">Publica sem complicações.</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">Preenche os dados com atenção. Uma descrição clara e fotografias reais ajudam-te a receber contactos mais relevantes.</p>
+            <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-slate-500"><span className="inline-flex items-center gap-1.5"><CircleCheckBig size={15} className="text-emerald-600" /> Publicação simples</span><span className="inline-flex items-center gap-1.5"><CircleCheckBig size={15} className="text-emerald-600" /> Até 5 fotografias</span><span className="inline-flex items-center gap-1.5"><CircleCheckBig size={15} className="text-emerald-600" /> Contacto protegido</span></div>
+          </header>
 
           <ViaturaAdForm
             categories={categories || []}

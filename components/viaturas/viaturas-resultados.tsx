@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ViaturaAdCard } from "@/components/viaturas/viatura-ad-card";
 import { ViaturasMapa, type PontoMapa } from "@/components/viaturas/viaturas-mapa";
+import { LayoutGrid, Map } from "lucide-react";
 
 interface ResultadoAd {
   id: number;
@@ -73,33 +74,33 @@ export function ViaturasResultados({
 
   return (
     <div>
-      <div className="flex justify-end gap-2 mb-3">
+      <div className="mb-5 flex justify-end gap-1 rounded-xl bg-slate-200/70 p-1 sm:ml-auto sm:w-fit">
         <button
           type="button"
           onClick={() => setVista("lista")}
-          className={`text-sm font-medium py-1.5 px-3 rounded-lg border transition ${
+          className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition sm:flex-none ${
             vista === "lista"
-              ? "bg-viaturas-600 border-viaturas-600 text-white"
-              : "border-viaturas-200 text-viaturas-700 hover:bg-viaturas-50"
+              ? "bg-white text-slate-950 shadow-sm"
+              : "text-slate-500 hover:text-slate-950"
           }`}
         >
-          📋 Lista
+          <LayoutGrid size={16} aria-hidden="true" /> Grelha
         </button>
         <button
           type="button"
           onClick={() => setVista("mapa")}
-          className={`text-sm font-medium py-1.5 px-3 rounded-lg border transition ${
+          className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-bold transition sm:flex-none ${
             vista === "mapa"
-              ? "bg-viaturas-600 border-viaturas-600 text-white"
-              : "border-viaturas-200 text-viaturas-700 hover:bg-viaturas-50"
+              ? "bg-white text-slate-950 shadow-sm"
+              : "text-slate-500 hover:text-slate-950"
           }`}
         >
-          🗺️ Mapa{pontos.length > 0 && ` (${pontos.length})`}
+          <Map size={16} aria-hidden="true" /> Mapa{pontos.length > 0 && ` (${pontos.length})`}
         </button>
       </div>
 
       {vista === "lista" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {ads.map((ad) => (
             <ViaturaAdCard
               key={ad.id}

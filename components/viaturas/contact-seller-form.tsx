@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { startConversation } from "@/app/viaturas/mensagens/actions";
+import Link from "next/link";
+import { LogIn, MessageCircle, Send, X } from "lucide-react";
 
 interface ContactSellerFormProps {
   adId: number;
@@ -16,11 +18,9 @@ export default function ContactSellerForm({ adId, sellerId, currentUserId }: Con
 
   if (!currentUserId) {
     return (
-      <a href="/login" className="flex-1">
-        <button className="w-full bg-viaturas-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-viaturas-700">
-          💬 Entrar para Enviar Mensagem
-        </button>
-      </a>
+      <Link href="/login" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-extrabold text-white transition hover:bg-blue-500">
+        <LogIn size={18} aria-hidden="true" /> Entrar para contactar
+      </Link>
     );
   }
 
@@ -28,7 +28,7 @@ export default function ContactSellerForm({ adId, sellerId, currentUserId }: Con
     return (
       <button
         disabled
-        className="flex-1 bg-viaturas-100 text-viaturas-500 font-medium py-3 px-4 rounded-lg cursor-not-allowed"
+        className="w-full cursor-not-allowed rounded-xl bg-slate-100 px-4 py-3 font-bold text-slate-400"
       >
         Este é o teu anúncio
       </button>
@@ -56,17 +56,17 @@ export default function ContactSellerForm({ adId, sellerId, currentUserId }: Con
     return (
       <button
         onClick={() => setShowForm(true)}
-        className="flex-1 bg-viaturas-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-viaturas-700"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-extrabold text-white transition hover:bg-blue-500"
       >
-        💬 Enviar Mensagem
+        <MessageCircle size={18} aria-hidden="true" /> Contactar anunciante
       </button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full bg-viaturas-50 p-4 rounded-lg border border-viaturas-200">
-      <label className="text-sm font-medium text-viaturas-800 block mb-2">
-        Envia uma mensagem ao anunciante:
+    <form onSubmit={handleSubmit} className="w-full rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+      <label className="mb-2 block text-sm font-bold text-slate-800">
+        Mensagem ao anunciante
       </label>
       <textarea
         value={content}
@@ -74,23 +74,24 @@ export default function ContactSellerForm({ adId, sellerId, currentUserId }: Con
         rows={3}
         placeholder="Ex: Olá! Ainda está disponível?"
         required
-        className="w-full border border-viaturas-200 rounded-lg p-2 focus:outline-none focus:border-viaturas-500 mb-3"
+        maxLength={2000}
+        className="mb-3 w-full resize-none rounded-xl border border-slate-200 bg-white p-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
       <div className="flex gap-2">
         <button
           type="button"
           onClick={() => setShowForm(false)}
           disabled={sending}
-          className="flex-1 border border-viaturas-200 text-viaturas-700 font-medium py-2 px-4 rounded-lg hover:bg-viaturas-100"
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition hover:bg-slate-50"
         >
-          Cancelar
+          <X size={16} aria-hidden="true" /> Cancelar
         </button>
         <button
           type="submit"
           disabled={sending || !content.trim()}
-          className="flex-1 bg-viaturas-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-viaturas-700 disabled:opacity-50"
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-blue-500 disabled:opacity-50"
         >
-          {sending ? "A enviar..." : "✉️ Enviar"}
+          <Send size={16} aria-hidden="true" /> {sending ? "A enviar…" : "Enviar"}
         </button>
       </div>
     </form>

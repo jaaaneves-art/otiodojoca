@@ -201,7 +201,7 @@ export function ViaturaAdForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl border border-viaturas-200 space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/5 sm:p-8 [&_input]:min-h-11 [&_input]:border-slate-200 [&_input]:bg-white [&_input]:outline-none [&_input]:transition [&_input:focus]:border-blue-500 [&_input:focus]:ring-2 [&_input:focus]:ring-blue-100 [&_select]:min-h-11 [&_select]:border-slate-200 [&_select]:bg-white [&_select]:outline-none [&_select]:transition [&_select:focus]:border-blue-500 [&_select:focus]:ring-2 [&_select:focus]:ring-blue-100 [&_textarea]:border-slate-200 [&_textarea]:bg-white [&_textarea]:outline-none [&_textarea]:transition [&_textarea:focus]:border-blue-500 [&_textarea:focus]:ring-2 [&_textarea:focus]:ring-blue-100">
       <div>
         <label className="text-sm font-medium">O que queres fazer? *</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
@@ -249,7 +249,7 @@ export function ViaturaAdForm({
           onVariantSelect={handleVariantSelect}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="text-sm font-medium">Ano{obrigatorio("ano") && " *"}</label>
             <input
@@ -277,7 +277,7 @@ export function ViaturaAdForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="text-sm font-medium">Combustível{obrigatorio("combustivel") && " *"}</label>
             <select
@@ -310,7 +310,7 @@ export function ViaturaAdForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div>
             <label className="text-sm font-medium">Condição{obrigatorio("condicao") && " *"}</label>
             <select
@@ -419,7 +419,7 @@ export function ViaturaAdForm({
       </div>
 
       {mostra("priceType") && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="text-sm font-medium">Tipo de Preço *</label>
             <select
@@ -457,7 +457,7 @@ export function ViaturaAdForm({
             </p>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Preço inicial (EUR) *</label>
               <input
@@ -487,7 +487,7 @@ export function ViaturaAdForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Início</label>
               <input
@@ -537,7 +537,7 @@ export function ViaturaAdForm({
             ajudam quem quer alugar por mais tempo (tal como nos sites de rent-a-car).
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Preço por dia (EUR) *</label>
               <input
@@ -565,7 +565,7 @@ export function ViaturaAdForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Preço 1 semana (EUR)</label>
               <input
@@ -592,7 +592,7 @@ export function ViaturaAdForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Preço 1 mês (EUR)</label>
               <input
@@ -655,7 +655,7 @@ export function ViaturaAdForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-viaturas-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-viaturas-700"
+        className="w-full rounded-xl bg-[#b7f34a] px-4 py-4 font-extrabold text-slate-950 shadow-lg shadow-lime-200/50 transition hover:bg-[#c8ff65] disabled:cursor-wait disabled:opacity-60"
       >
         {isSubmitting ? "A processar..." : submitLabel}
       </button>

@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ViaturaAdForm } from "@/components/viaturas/viatura-ad-form";
 import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
+import { ArrowLeft } from "lucide-react";
 
 export default async function EditarAnuncioViaturaPage({
   params,
@@ -249,17 +250,18 @@ export default async function EditarAnuncioViaturaPage({
   return (
     <>
       <ViaturasNavbar />
-      <div className="min-h-screen bg-viaturas-50">
-        <main className="max-w-2xl mx-auto p-6">
+      <div className="min-h-screen bg-[#f5f7fb]">
+        <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-9">
           <div className="mb-6">
-            <Link href={`/viaturas/${ad.id}`} className="text-viaturas-700 hover:text-viaturas-900">
-              ← Voltar ao Anúncio
+            <Link href={`/viaturas/${ad.id}`} className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 transition hover:text-blue-700">
+              <ArrowLeft size={17} /> Voltar ao anúncio
             </Link>
           </div>
 
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-viaturas-900">Editar Anúncio</h1>
-            <p className="text-viaturas-700 mt-2">{ad.title}</p>
+            <p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-600">Gestão do anúncio</p>
+            <h1 className="mt-2 text-4xl font-black tracking-[-.045em] text-slate-950 sm:text-5xl">Editar viatura</h1>
+            <p className="mt-2 text-slate-600">{ad.title}</p>
           </div>
 
           <ViaturaAdForm
