@@ -1,7 +1,27 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ShoppingBag, Calendar, BookOpen, UtensilsCrossed, BedDouble, Bus } from "lucide-react";
+import {
+  MessageSquare,
+  ShoppingBag,
+  Calendar,
+  BookOpen,
+  UtensilsCrossed,
+  BedDouble,
+  Bus,
+  MapPin,
+  Sprout,
+  Moon,
+  Briefcase,
+  Ticket,
+  Gavel,
+  Building2,
+  Recycle,
+  Car,
+  PawPrint,
+  Flower2,
+  Users,
+} from "lucide-react";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -19,6 +39,11 @@ export default async function HomePage() {
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/mercado-da-terra">Mercado da Terra</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/grupos">
+                  <Users className="w-4 h-4" />
+                </Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href="/perfil">Perfil</Link>
@@ -83,23 +108,81 @@ export default async function HomePage() {
             href="/alojamento"
           />
           <FeatureCard
-            icon={<Bus className="w-8 h-8" />}
-            title="Viagens"
-            description="Bilhetes de autocarro para a diaspora portuguesa na Europa."
-            href="#"
-            comingSoon
+            icon={<MapPin className="w-8 h-8" />}
+            title="Freguesias"
+            description="Entidades, eventos e horarios de cada freguesia."
+            href="/freguesias"
           />
           <FeatureCard
-            icon={<Calendar className="w-8 h-8" />}
-            title="Calendario"
-            description="Calendario agricola personalizado para a tua regiao."
-            href="#"
-            comingSoon
+            icon={<Sprout className="w-8 h-8" />}
+            title="Agenda Agricola"
+            description="Planeia sementeiras e colheitas para a tua regiao."
+            href="/agenda-agricola"
           />
           <FeatureCard
             icon={<BookOpen className="w-8 h-8" />}
-            title="O Tio do Joca"
-            description="Artigos e guias sobre culturas e tradicoes."
+            title="Almanaque"
+            description="Guias de culturas e tradicoes da terra portuguesa."
+            href="/almanaque"
+          />
+          <FeatureCard
+            icon={<Moon className="w-8 h-8" />}
+            title="Calendario Lunar"
+            description="Fases da lua e tradicao para o trabalho agricola."
+            href="/calendario"
+          />
+          <FeatureCard
+            icon={<Briefcase className="w-8 h-8" />}
+            title="Empregos"
+            description="Vagas e candidaturas ligadas ao mundo rural."
+            href="/empregos"
+          />
+          <FeatureCard
+            icon={<Ticket className="w-8 h-8" />}
+            title="Espetaculos"
+            description="Bilhetes para eventos e espetaculos na regiao."
+            href="/espectaculos"
+          />
+          <FeatureCard
+            icon={<Gavel className="w-8 h-8" />}
+            title="Gran Bazar"
+            description="Compra e venda por leilao de artigos diversos."
+            href="/gran-bazar"
+          />
+          <FeatureCard
+            icon={<Building2 className="w-8 h-8" />}
+            title="Imoveis"
+            description="Casas para venda ou leilao, incluindo quartos para estudantes."
+            href="/imoveis"
+          />
+          <FeatureCard
+            icon={<Recycle className="w-8 h-8" />}
+            title="Lup"
+            description="Doa, troca ou da nova vida a objetos usados."
+            href="/lup"
+          />
+          <FeatureCard
+            icon={<Car className="w-8 h-8" />}
+            title="Viaturas"
+            description="Carros e veiculos para venda, novos ou em leilao."
+            href="/viaturas"
+          />
+          <FeatureCard
+            icon={<PawPrint className="w-8 h-8" />}
+            title="Mundo dos Patudos"
+            description="Adocoes, casos e a comunidade de amigos dos animais."
+            href="/mundo-dos-patudos"
+          />
+          <FeatureCard
+            icon={<Flower2 className="w-8 h-8" />}
+            title="Rua da Saudade"
+            description="Um lugar digno para recordar quem ja partiu."
+            href="/rua-da-saudade"
+          />
+          <FeatureCard
+            icon={<Bus className="w-8 h-8" />}
+            title="Viagens"
+            description="Bilhetes de autocarro para a diaspora portuguesa na Europa."
             href="#"
             comingSoon
           />
