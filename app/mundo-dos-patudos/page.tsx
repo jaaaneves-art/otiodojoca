@@ -15,6 +15,9 @@ import {
   Users,
 } from "lucide-react";
 import styles from "./page.module.css";
+import { createClient } from "@/lib/supabase/server";
+import { PetCard } from "@/components/pets/pet-card";
+import type { PetPost } from "@/lib/pets/types";
 
 export const metadata: Metadata = {
   title: "Mundo dos Patudos | O Tio do Joca",
@@ -29,6 +32,7 @@ const paths = [
     title: "Adotar",
     text: "Conhece animais que procuram uma casa e inicia uma adoção responsável perto de ti.",
     action: "Ver animais",
+    href: "/mundo-dos-patudos/casos?kind=adoption",
     accent: "coral",
   },
   {
@@ -37,6 +41,7 @@ const paths = [
     title: "Perdidos e encontrados",
     text: "Publica um alerta local e mobiliza rapidamente pessoas da freguesia e arredores.",
     action: "Consultar alertas",
+    href: "/mundo-dos-patudos/casos?kind=lost",
     accent: "yellow",
   },
   {
@@ -45,11 +50,29 @@ const paths = [
     title: "Pedir ajuda",
     text: "Liga necessidades urgentes a associações, protetores e pessoas disponíveis para ajudar.",
     action: "Conhecer a rede",
+    href: "/mundo-dos-patudos/casos?kind=help",
     accent: "mint",
   },
 ];
 
-export default function MundoDosPatudosPage() {
+export default async function MundoDosPatudosPage() {
+  const supabase = await createClient();
+  const [{ data: recentData }, { data: { user } }] = await Promise.all([
+    supabase.from("pet_posts")
+      .select("*,freguesia:freguesias(nome,municipio),pet_photos(id,storage_path,sort_order)")
+      .in("status", ["published", "resolved"])
+      .order("is_urgent", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(6),
+    supabase.auth.getUser(),
+  ]);
+  const recent = (recentData ?? []) as unknown as PetPost[];
+  const withPhotoUrls = recent.map((post) => ({
+    post,
+    photoUrl: post.pet_photos?.[0]
+      ? supabase.storage.from("pet-media").getPublicUrl(post.pet_photos[0].storage_path).data.publicUrl
+      : undefined,
+  }));
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -58,7 +81,7 @@ export default function MundoDosPatudosPage() {
           <span>O Tio do Joca</span>
         </Link>
         <div className={styles.wordmark}><PawPrint size={18} aria-hidden="true" /> Mundo dos Patudos</div>
-        <span className={styles.status}>Em preparação</span>
+        <Link className={styles.status} href={user ? "/mundo-dos-patudos/publicar" : "/login"}>Publicar</Link>
       </header>
 
       <section className={styles.hero}>
@@ -73,9 +96,9 @@ export default function MundoDosPatudosPage() {
             Tudo começa na freguesia — onde as pessoas ainda se conhecem.
           </p>
           <div className={styles.actions}>
-            <a className={styles.primaryAction} href="#comecar">
+            <Link className={styles.primaryAction} href="/mundo-dos-patudos/casos">
               Explorar a comunidade <ArrowRight size={17} aria-hidden="true" />
-            </a>
+            </Link>
             <a className={styles.secondaryAction} href="#rede">
               Para associações
             </a>
@@ -123,7 +146,7 @@ export default function MundoDosPatudosPage() {
                 <p className={styles.cardTag}>{path.tag}</p>
                 <h3>{path.title}</h3>
                 <p className={styles.cardText}>{path.text}</p>
-                <span className={styles.cardAction}>{path.action} <ArrowRight size={16} /></span>
+                <Link className={styles.cardAction} href={path.href}>{path.action} <ArrowRight size={16} /></Link>
               </article>
             );
           })}
@@ -181,6 +204,18 @@ export default function MundoDosPatudosPage() {
           <p>Sem entregas sem verificação mínima.</p>
           <p>Com regras claras de bem-estar e segurança.</p>
         </div>
+      </section>
+
+      <section className={styles.liveSection}>
+        <div className={styles.liveHeading}>
+          <div><p className={styles.sectionLabel}>A acontecer agora</p><h2>Casos da comunidade</h2></div>
+          <Link href={user ? "/mundo-dos-patudos/publicar" : "/login"}>Criar publicação <ArrowRight size={16} /></Link>
+        </div>
+        {withPhotoUrls.length ? (
+          <div className={styles.liveGrid}>{withPhotoUrls.map(({ post, photoUrl }) => <PetCard key={post.id} post={post} photoUrl={photoUrl} />)}</div>
+        ) : (
+          <div className={styles.emptyState}><PawPrint size={34} /><h3>A comunidade começa contigo.</h3><p>Ainda não há casos publicados nesta versão.</p><Link href={user ? "/mundo-dos-patudos/publicar" : "/login"}>Fazer a primeira publicação</Link></div>
+        )}
       </section>
 
       <footer className={styles.footer}>

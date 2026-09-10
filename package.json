@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:social-rls": "node --test tests/social/rls-policy.test.mjs",
+    "test:pets-security": "node --test tests/pets/security.test.mjs",
     "test:social-rls:db": "supabase test db supabase/tests/database/social_rls.test.sql"
   },
   "dependencies": {
