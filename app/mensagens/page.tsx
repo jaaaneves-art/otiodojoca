@@ -3,7 +3,7 @@ import { ConversationUpdates } from "@/components/social/conversation-updates";
 import { socialSession } from "@/lib/social/messages";
 import { MessageForm } from "@/components/social/message-controls";
 
-export default async function MessagesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+export default async function MessagesPage({ searchParams }: { searchParams: Promise<{ page?: string; username?: string }> }) {
   const { db, user } = await socialSession();
   const params = await searchParams;
   const page = Math.min(10000, Math.max(1, Number(params.page) || 1)) | 0;
@@ -44,7 +44,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
         </li>)}</ul>
       </>}
     </section>
-    <MessageForm />
+    <MessageForm initialUsername={String(params.username ?? "").slice(0, 80)} />
     <ConversationUpdates userId={user.id} />
     {items.length === 0 && <p>Ainda não há conversas nesta página. Inicia uma conversa pelo nome de utilizador.</p>}
     <ul className="space-y-3">{items.map(c => <li key={c.id}>

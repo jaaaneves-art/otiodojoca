@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteMessage, sendMessage, startConversation } from "@/app/mensagens/actions";
 
-export function MessageForm({ conversationId }: { conversationId?: string }) {
+export function MessageForm({ conversationId, initialUsername = "" }: { conversationId?: string; initialUsername?: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -26,7 +26,7 @@ export function MessageForm({ conversationId }: { conversationId?: string }) {
     {conversationId ? <>
       <label className="block">Mensagem<textarea name="content" maxLength={5000} rows={3} className="block w-full rounded border p-2" /></label>
       <label className="block">Anexo (até 5 MB)<input className="block w-full" name="file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,video/mp4" /></label>
-    </> : <label className="block">Nome de utilizador<input name="username" required maxLength={80} placeholder="@nome" className="block w-full rounded border p-2" /></label>}
+    </> : <label className="block">Nome de utilizador<input name="username" required maxLength={80} defaultValue={initialUsername} placeholder="@nome" className="block w-full rounded border p-2" /></label>}
     {error && <p role="alert" className="text-red-700">{error}</p>}
     <button disabled={pending} className="rounded bg-green-800 px-4 py-2 text-white disabled:opacity-50">{pending ? "A processar…" : conversationId ? "Enviar" : "Iniciar conversa"}</button>
   </form>;

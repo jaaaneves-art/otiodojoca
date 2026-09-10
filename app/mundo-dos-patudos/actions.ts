@@ -149,6 +149,45 @@ export async function setPetPostStatus(id: string, status: PetPostStatus): Promi
   return {};
 }
 
+export async function updatePetPost(id: string, form: FormData): Promise<PetActionResult> {
+  if (!validUuid(id)) return { error: "Publicação inválida." };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Inicia sessão para editar." };
+  const kind = text(form, "kind", 20);
+  const species = text(form, "species", 20);
+  const sex = text(form, "sex", 20);
+  const size = text(form, "size", 20);
+  const title = text(form, "title", 120);
+  const description = text(form, "description", 5000);
+  const petName = text(form, "pet_name", 80);
+  const ageLabel = text(form, "age_label", 60);
+  const breed = text(form, "breed", 100);
+  const color = text(form, "color", 100);
+  const locationDetail = text(form, "location_detail", 180);
+  const freguesiaId = Number(form.get("freguesia_id"));
+  const eventAtRaw = text(form, "event_at", 40);
+  const eventAt = eventAtRaw ? new Date(eventAtRaw) : null;
+  const isUrgent = form.get("is_urgent") === "on";
+  if (!(kind in PET_KINDS) || !(species in PET_SPECIES) || !(sex in PET_SEX) || (size && !(size in PET_SIZE))) return { error: "Revê o tipo e as características do animal." };
+  if (title.length < 5 || description.length < 30) return { error: "O título ou a descrição são demasiado curtos." };
+  if (!Number.isSafeInteger(freguesiaId) || freguesiaId < 1) return { error: "Seleciona uma freguesia da lista." };
+  if ((kind === "lost" || kind === "found") && (!eventAt || Number.isNaN(eventAt.getTime()))) return { error: "Indica quando o animal foi visto pela última vez." };
+  const { data: freguesia } = await supabase.from("freguesias").select("id").eq("id", freguesiaId).eq("active", true).maybeSingle();
+  if (!freguesia) return { error: "A freguesia selecionada não está disponível." };
+  const { data, error } = await supabase.from("pet_posts").update({
+    kind, title, description, pet_name: petName || null, species, sex, size: size || null,
+    age_label: ageLabel || null, breed: breed || null, color: color || null,
+    freguesia_id: freguesiaId, location_detail: locationDetail || null,
+    event_at: kind === "lost" || kind === "found" ? eventAt?.toISOString() : null,
+    is_urgent: kind === "help" && isUrgent,
+  }).eq("id", id).eq("author_id", user.id).select("id");
+  if (error || !data?.length) return { error: "Não foi possível guardar as alterações." };
+  revalidatePath("/mundo-dos-patudos", "layout");
+  revalidatePath(`/mundo-dos-patudos/${id}`);
+  redirect(`/mundo-dos-patudos/${id}`);
+}
+
 export async function reportPetPost(id: string, form: FormData): Promise<PetActionResult> {
   if (!validUuid(id)) return { error: "Publicação inválida." };
   const supabase = await createClient();

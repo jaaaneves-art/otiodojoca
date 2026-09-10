@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 
 interface Freguesia {
   id: number;
@@ -15,36 +15,31 @@ interface Freguesia {
 interface FreguesiaAutocompleteProps {
   freguesias: Freguesia[];
   valorInicial?: string;
+  freguesiaInicial?: Freguesia;
   onFreguesiaSelect?: (freguesia: Freguesia | null) => void;
 }
 
 export function FreguesiaAutocomplete({
   freguesias,
   valorInicial = "",
+  freguesiaInicial,
   onFreguesiaSelect,
 }: FreguesiaAutocompleteProps) {
-  const [inputValue, setInputValue] = useState(valorInicial);
-  const [suggestions, setSuggestions] = useState<Freguesia[]>([]);
+  const [inputValue, setInputValue] = useState(
+    freguesiaInicial ? `${freguesiaInicial.nome} (${freguesiaInicial.municipio})` : valorInicial
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFreguesia, setSelectedFreguesia] = useState<Freguesia | null>(
-    null
+    freguesiaInicial ?? null
   );
 
-  useEffect(() => {
-    if (inputValue.trim().length === 0) {
-      setSuggestions([]);
-      setIsOpen(false);
-      return;
-    }
-
-    const filtered = freguesias.filter((f) =>
+  const suggestions = useMemo(() => {
+    if (inputValue.trim().length === 0) return [];
+    return freguesias.filter((f) =>
       f.nome.toLowerCase().includes(inputValue.toLowerCase()) ||
       f.municipio.toLowerCase().includes(inputValue.toLowerCase()) ||
-      f.localidade.toLowerCase().includes(inputValue.toLowerCase())
-    );
-
-    setSuggestions(filtered.slice(0, 10));
-    setIsOpen(true);
+      (f.localidade ?? "").toLowerCase().includes(inputValue.toLowerCase())
+    ).slice(0, 10);
   }, [inputValue, freguesias]);
 
   const handleSelect = (freguesia: Freguesia) => {
@@ -59,7 +54,6 @@ export function FreguesiaAutocomplete({
   const handleClear = () => {
     setInputValue("");
     setSelectedFreguesia(null);
-    setSuggestions([]);
     setIsOpen(false);
     if (onFreguesiaSelect) {
       onFreguesiaSelect(null);
@@ -74,7 +68,11 @@ export function FreguesiaAutocomplete({
         <input
           type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            setSelectedFreguesia(null);
+            setIsOpen(e.target.value.trim().length > 0);
+          }}
           onFocus={() => inputValue.length > 0 && setIsOpen(true)}
           placeholder="Procura pela freguesia, município ou localidade..."
           className="w-full border rounded-lg p-2"

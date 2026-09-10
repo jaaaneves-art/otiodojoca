@@ -10,6 +10,10 @@ const actions = readFileSync(
   new URL("../../app/mundo-dos-patudos/actions.ts", import.meta.url),
   "utf8",
 );
+const detailPage = readFileSync(
+  new URL("../../app/mundo-dos-patudos/[id]/page.tsx", import.meta.url),
+  "utf8",
+);
 
 test("all pet data tables enable RLS", () => {
   for (const table of ["pet_posts", "pet_photos", "pet_reports"]) {
@@ -51,4 +55,16 @@ test("storage writes are bound to the authenticated owner and post", () => {
 test("reports are private to their author and administrators", () => {
   assert.match(migration, /pets reports own or admin read[\s\S]*reporter_id = auth\.uid\(\) or public\.pet_is_admin\(\)/);
   assert.match(migration, /pets reports admin update[\s\S]*public\.pet_is_admin\(\)/);
+});
+
+test("editing is scoped to the authenticated author", () => {
+  const start = actions.indexOf("export async function updatePetPost");
+  const body = actions.slice(start, actions.indexOf("export async function reportPetPost", start));
+  assert.match(body, /supabase\.auth\.getUser\(\)/);
+  assert.match(body, /\.eq\("id", id\)\.eq\("author_id", user\.id\)/);
+});
+
+test("pet contact uses private messages without exposing contact fields", () => {
+  assert.match(detailPage, /\/mensagens\?username=/);
+  assert.doesNotMatch(detailPage, /post\.author\.(email|telefone|phone)/);
 });

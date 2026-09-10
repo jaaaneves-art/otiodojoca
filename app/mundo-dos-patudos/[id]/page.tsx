@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, MapPin, PawPrint, UserRound } from "lucide-react";
+import { CalendarDays, MapPin, MessageCircle, PawPrint, Pencil, UserRound } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PetCommunityNav } from "@/components/pets/pet-community-nav";
 import { PostControls } from "@/components/pets/post-controls";
@@ -32,9 +32,9 @@ export default async function PetPostPage({ params }: { params: Promise<{ id: st
           <div><h2 className="font-serif text-2xl">Sobre este caso</h2><p className="mt-4 whitespace-pre-wrap leading-8 text-[#40565b]">{post.description}</p></div>
           <dl className="space-y-3 rounded-2xl bg-white p-5 text-sm"><div><dt className="text-xs text-[#7a8584]">Animal</dt><dd className="font-bold">{PET_SPECIES[post.species]}{post.pet_name ? ` · ${post.pet_name}` : ""}</dd></div><div><dt className="text-xs text-[#7a8584]">Sexo e porte</dt><dd className="font-bold">{PET_SEX[post.sex]}{post.size ? ` · ${PET_SIZE[post.size]}` : ""}</dd></div>{post.age_label && <div><dt className="text-xs text-[#7a8584]">Idade</dt><dd className="font-bold">{post.age_label}</dd></div>}{post.breed && <div><dt className="text-xs text-[#7a8584]">Raça</dt><dd className="font-bold">{post.breed}</dd></div>}{post.color && <div><dt className="text-xs text-[#7a8584]">Identificação</dt><dd className="font-bold">{post.color}</dd></div>}{post.location_detail && <div><dt className="text-xs text-[#7a8584]">Local aproximado</dt><dd className="font-bold">{post.location_detail}</dd></div>}</dl>
         </div>
-        {post.author && <div className="mt-8 flex items-center justify-between gap-4 rounded-2xl border border-[#d8cfbd] bg-white p-5"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-full bg-[#8ed6b4]/30"><UserRound size={21} /></span><div><p className="text-xs text-[#657071]">Publicado por</p><p className="font-bold">{post.author.display_name || `@${post.author.username}`}</p></div></div><Link href={`/perfil/${post.author.id}`} className="text-sm font-bold underline">Ver perfil</Link></div>}
+        {post.author && <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#d8cfbd] bg-white p-5"><div className="flex items-center gap-3"><span className="grid h-11 w-11 place-items-center rounded-full bg-[#8ed6b4]/30"><UserRound size={21} /></span><div><p className="text-xs text-[#657071]">Publicado por</p><p className="font-bold">{post.author.display_name || `@${post.author.username}`}</p></div></div><div className="flex gap-2"><Link href={`/perfil/${post.author.id}`} className="rounded-lg border px-3 py-2 text-sm font-bold">Ver perfil</Link>{!isOwner && user && <Link href={`/mensagens?username=${encodeURIComponent(post.author.username)}`} className="flex items-center gap-1.5 rounded-lg bg-[#102a32] px-3 py-2 text-sm font-bold text-white"><MessageCircle size={16} />Contactar</Link>}</div></div>}
       </div>
     </article>
-    <div className="mt-5 grid gap-5 md:grid-cols-2">{isOwner ? <PostControls id={post.id} status={post.status} /> : <div />}<div className="md:justify-self-end"><ReportForm id={post.id} loggedIn={!!user} /></div></div>
+    <div className="mt-5 grid gap-5 md:grid-cols-2">{isOwner ? <div className="space-y-3"><Link href={`/mundo-dos-patudos/${post.id}/editar`} className="flex w-fit items-center gap-2 rounded-lg border border-[#d8cfbd] bg-white px-4 py-2 text-sm font-bold"><Pencil size={16} />Editar informação</Link><PostControls id={post.id} status={post.status} /></div> : <div />}<div className="md:justify-self-end"><ReportForm id={post.id} loggedIn={!!user} /></div></div>
   </div></main></>;
 }
