@@ -144,13 +144,20 @@
   font-style: italic;
 }
 
+.entrances {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(66rem, 100%);
+  margin-top: 1.75rem;
+}
+
 .entranceCard {
   position: relative;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 0.35rem 2rem;
-  width: min(32rem, 100%);
-  margin-top: 1.75rem;
+  width: 100%;
   padding: 1.25rem 4.5rem 1.25rem 1.4rem;
   overflow: hidden;
   border: 1px solid rgba(216, 168, 78, 0.38);
@@ -159,6 +166,21 @@
   background: rgba(246, 237, 218, 0.035);
   text-decoration: none;
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.petsCard {
+  border-color: rgba(128, 201, 169, 0.4);
+  background: rgba(128, 201, 169, 0.045);
+}
+
+.petsCard .entranceKicker,
+.petsCard .entranceArrow {
+  color: #8fd5b7;
+}
+
+.petsCard:hover {
+  border-color: rgba(143, 213, 183, 0.78);
+  background: rgba(128, 201, 169, 0.09);
 }
 
 .entranceCard:hover {
@@ -246,7 +268,7 @@
   .separator { display: none; }
   .value { font-size: clamp(2.4rem, 13vw, 4rem); }
   .label { letter-spacing: 0.08em; }
-  .entranceCard { margin-top: 1.5rem; }
+  .entrances { grid-template-columns: 1fr; margin-top: 1.5rem; }
 }
 
 @media (max-width: 390px) {

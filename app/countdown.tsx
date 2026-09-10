@@ -116,14 +116,25 @@ export function Countdown() {
 
         <p className={styles.note}>Guarda a data. Encontramo-nos aqui.</p>
 
-        <Link className={styles.entranceCard} href="/rua-da-saudade">
-          <span className={styles.entranceKicker}>Descobre</span>
-          <span className={styles.entranceTitle}>Rua da Saudade</span>
-          <span className={styles.entranceDescription}>
-            Anúncios, cerimónias e um lugar digno para recordar cada vida.
-          </span>
-          <span className={styles.entranceArrow} aria-hidden="true">→</span>
-        </Link>
+        <div className={styles.entrances}>
+          <Link className={styles.entranceCard} href="/rua-da-saudade">
+            <span className={styles.entranceKicker}>Descobre</span>
+            <span className={styles.entranceTitle}>Rua da Saudade</span>
+            <span className={styles.entranceDescription}>
+              Anúncios, cerimónias e um lugar digno para recordar cada vida.
+            </span>
+            <span className={styles.entranceArrow} aria-hidden="true">→</span>
+          </Link>
+
+          <Link className={`${styles.entranceCard} ${styles.petsCard}`} href="/mundo-dos-patudos">
+            <span className={styles.entranceKicker}>Comunidade animal</span>
+            <span className={styles.entranceTitle}>Mundo dos Patudos</span>
+            <span className={styles.entranceDescription}>
+              Adoção, animais perdidos e uma rede de ajuda que começa perto.
+            </span>
+            <span className={styles.entranceArrow} aria-hidden="true">→</span>
+          </Link>
+        </div>
       </section>
 
       <footer className={styles.footer}>
