@@ -1,0 +1,164 @@
+.page {
+  --ink: #16201c;
+  --forest: #153f34;
+  --deep: #0b2b24;
+  --paper: #f2ecdf;
+  --ember: #d99551;
+  --cream: #fffaf0;
+  min-height: 100svh;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.header {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  padding: 1.5rem clamp(1.25rem, 4vw, 4.5rem);
+  color: rgba(255, 250, 240, 0.75);
+  font-size: 0.72rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.back { display: inline-flex; align-items: center; gap: 0.55rem; width: fit-content; color: inherit; text-decoration: none; }
+.back:hover { color: var(--cream); }
+.headerName { color: var(--cream); font-family: Georgia, serif; font-size: 0.9rem; letter-spacing: 0.08em; text-transform: none; }
+.preview { justify-self: end; padding: 0.45rem 0.7rem; border: 1px solid rgba(255, 250, 240, 0.22); border-radius: 999px; font-size: 0.57rem; }
+
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(25rem, 1.1fr); min-height: 100svh; overflow: hidden; color: var(--cream); background: var(--deep); }
+.hero::before { content: ""; position: absolute; inset: 0; opacity: 0.08; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E"); pointer-events: none; }
+.heroCopy { position: relative; z-index: 2; align-self: center; padding: 8rem 2rem 6rem clamp(1.5rem, 7vw, 8rem); }
+.kicker, .sectionNumber { color: var(--ember); font-size: 0.68rem; font-weight: 750; letter-spacing: 0.22em; text-transform: uppercase; }
+.heroCopy h1 { margin: 1.2rem 0 1.75rem; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3.5rem, 6.8vw, 7rem); font-weight: 400; line-height: 0.88; letter-spacing: -0.055em; }
+.heroCopy h1 span { display: block; margin-left: clamp(0rem, 5vw, 5rem); color: var(--ember); font-style: italic; white-space: nowrap; }
+.heroText { max-width: 34rem; color: rgba(255, 250, 240, 0.68); font-size: clamp(1rem, 1.4vw, 1.18rem); line-height: 1.75; }
+.heroActions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 2.2rem; }
+.primaryAction, .secondaryAction { display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem; min-height: 3rem; padding: 0.85rem 1.2rem; border: 1px solid var(--ember); color: var(--deep); background: var(--ember); font-size: 0.74rem; font-weight: 750; letter-spacing: 0.08em; text-decoration: none; text-transform: uppercase; transition: transform 180ms ease, background 180ms ease; }
+.primaryAction:hover { transform: translateY(-2px); background: #e5a866; }
+.secondaryAction { color: var(--cream); background: transparent; border-color: rgba(255, 250, 240, 0.24); }
+.secondaryAction:hover { border-color: rgba(255, 250, 240, 0.58); }
+
+.streetScene { position: relative; min-height: 42rem; overflow: hidden; background: linear-gradient(180deg, #102f35 0%, #17483f 58%, #0d3028 58.2%, #081d19 100%); }
+.streetScene::before { content: ""; position: absolute; right: -10%; bottom: -10%; left: -10%; height: 47%; background: repeating-linear-gradient(97deg, transparent 0 5.5rem, rgba(255,255,255,.035) 5.6rem 5.7rem), linear-gradient(160deg, transparent 0 44%, rgba(217,149,81,.08) 44.2% 45%, transparent 45.2%); transform: perspective(20rem) rotateX(45deg); }
+.moon { position: absolute; top: 14%; right: 14%; width: 5.5rem; aspect-ratio: 1; border-radius: 50%; background: #f3ddaf; box-shadow: 0 0 4rem rgba(243,221,175,.35); }
+.stars { position: absolute; top: 10%; left: 13%; color: rgba(255,250,240,.48); font-size: 1rem; letter-spacing: 4rem; }
+.houseRow { position: absolute; right: -3%; bottom: 32%; left: -3%; display: flex; align-items: end; justify-content: center; gap: .3rem; }
+.house { position: relative; width: 22%; height: 13rem; border: 1px solid rgba(255,250,240,.09); background: #17392f; box-shadow: inset 0 0 3rem rgba(0,0,0,.18); }
+.house::before { content: ""; position: absolute; right: -8%; bottom: 100%; left: -8%; height: 2.4rem; background: #102b25; clip-path: polygon(50% 0,100% 100%,0 100%); }
+.house span { position: absolute; bottom: 1.2rem; left: 50%; width: 2.7rem; height: 4.7rem; border: 1px solid rgba(217,149,81,.35); background: rgba(217,149,81,.17); box-shadow: 0 0 1.5rem rgba(217,149,81,.13); transform: translateX(-50%); }
+.houseSmall { height: 10rem; opacity: .7; }
+.houseTall { height: 15rem; opacity: .88; }
+.houseMain { height: 17rem; background: #1c4438; }
+.houseMain span { background: rgba(243,221,175,.55); box-shadow: 0 0 2rem rgba(243,221,175,.38); }
+.noticePreview { position: absolute; z-index: 2; right: 10%; bottom: 8%; width: min(25rem, 80%); padding: 1.7rem 2rem; border: 1px solid rgba(243,221,175,.32); color: var(--cream); background: rgba(9,33,28,.82); box-shadow: 0 1.5rem 5rem rgba(0,0,0,.34); backdrop-filter: blur(14px); }
+.noticeFlame { display: grid; place-items: center; width: 2.3rem; height: 2.8rem; margin-bottom: 1rem; border: 1px solid rgba(217,149,81,.45); border-radius: 50% 50% 48% 48%; }
+.noticeFlame span { width: .55rem; height: 1.1rem; border-radius: 70% 20% 60% 40%; background: var(--ember); box-shadow: 0 0 .8rem var(--ember); transform: rotate(8deg); }
+.noticeType { color: var(--ember); font-size: .6rem; font-weight: 750; letter-spacing: .19em; text-transform: uppercase; }
+.noticeName { margin-top: .35rem; font-family: Georgia, serif; font-size: 1.65rem; }
+.noticePlace { display: flex; align-items: center; gap: .35rem; margin-top: .45rem; color: rgba(255,250,240,.5); font-size: .68rem; }
+.noticeLine { width: 3.5rem; height: 1px; margin: 1rem 0; background: rgba(217,149,81,.55); }
+.noticeMessage { color: rgba(255,250,240,.66); font-family: Georgia, serif; font-size: .85rem; font-style: italic; }
+.streetLabel { position: absolute; bottom: 4%; left: 7%; color: rgba(255,250,240,.28); font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; writing-mode: vertical-rl; }
+
+.introStrip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border-bottom: 1px solid #d4c9b4; background: #d4c9b4; }
+.introStrip p { display: flex; align-items: center; justify-content: center; gap: .65rem; min-height: 5.5rem; padding: 1rem; color: #4d5d55; background: var(--paper); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-align: center; text-transform: uppercase; }
+.introStrip svg { color: var(--ember); }
+.section { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(3rem, 8vw, 9rem); padding: clamp(5rem, 10vw, 9rem) clamp(1.5rem, 9vw, 10rem); }
+.sectionHeading { max-width: 34rem; }
+.sectionHeading h2, .condolencesCopy h2, .agencySection h2 { margin: 1rem 0 1.5rem; font-family: Georgia, serif; font-size: clamp(2.5rem, 5vw, 4.8rem); font-weight: 400; line-height: .98; letter-spacing: -.045em; }
+.sectionHeading > p:last-child, .condolencesCopy > p, .agencyCopy > p { color: #59655f; line-height: 1.75; }
+.reachMap { display: grid; align-self: center; border-top: 1px solid #c9bda7; }
+.reachLevel { display: grid; grid-template-columns: 2.5rem 1fr auto; align-items: center; gap: 1rem; min-height: 5.2rem; padding: .8rem 1rem; border-bottom: 1px solid #c9bda7; transition: padding 180ms ease, background 180ms ease; }
+.reachLevel:hover { padding-left: 1.4rem; background: rgba(255,255,255,.35); }
+.reachIndex { color: #a69b87; font-family: Georgia, serif; font-size: .72rem; }
+.reachLevel h3 { font-family: Georgia, serif; font-size: 1.35rem; font-weight: 400; }
+.reachLevel p { margin-top: .18rem; color: #778078; font-size: .7rem; }
+.reachFree { color: var(--cream); background: var(--forest); }
+.reachFree:hover { background: #1a4b3e; }
+.reachFree p, .reachFree .reachIndex { color: rgba(255,250,240,.54); }
+.freeTag { padding: .4rem .65rem; border-radius: 999px; color: var(--deep); background: var(--ember); font-size: .58rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+
+.ceremoniesSection { display: block; color: var(--cream); background: var(--forest); }
+.ceremoniesSection .sectionHeading { margin-bottom: 3.5rem; }
+.ceremoniesSection .sectionHeading > p:last-child { color: rgba(255,250,240,.58); }
+.ceremonyCards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,250,240,.16); }
+.ceremonyCard { position: relative; min-height: 24rem; padding: 2.2rem; background: var(--forest); transition: background 180ms ease; }
+.ceremonyCard:hover { background: #19493d; }
+.cardIcon { display: grid; place-items: center; width: 3rem; aspect-ratio: 1; margin-bottom: 3.5rem; border: 1px solid rgba(217,149,81,.45); border-radius: 50%; color: var(--ember); }
+.cardOverline { color: rgba(255,250,240,.4); font-size: .6rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.ceremonyCard h3 { margin-top: .7rem; font-family: Georgia, serif; font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 400; }
+.ceremonyCard > p:not(.cardOverline) { max-width: 24rem; margin-top: .8rem; color: rgba(255,250,240,.56); font-size: .85rem; line-height: 1.6; }
+.cardFree { position: absolute; bottom: 2rem; left: 2.2rem; color: var(--ember); font-size: .6rem; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
+
+.condolencesSection { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: clamp(4rem, 10vw, 10rem); padding: clamp(6rem, 11vw, 10rem) clamp(1.5rem, 9vw, 10rem); background: #e9e1d2; }
+.bookVisual { display: grid; grid-template-columns: 1fr 8px 1fr; min-height: 22rem; filter: drop-shadow(0 2rem 2.5rem rgba(28,37,32,.16)); transform: rotate(-2deg); }
+.bookPageLeft, .bookPageRight { position: relative; padding: 3rem; border: 1px solid #cfc1a8; color: #445049; background: #f9f3e8; }
+.bookPageLeft { display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 5px 0 0 10px; text-align: center; }
+.bookPageLeft svg { margin-bottom: 1.5rem; color: var(--ember); }
+.bookPageLeft span { font-size: .65rem; letter-spacing: .18em; text-transform: uppercase; }
+.bookPageLeft strong { margin-top: .35rem; font-family: Georgia, serif; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 400; }
+.bookSpine { z-index: 2; background: linear-gradient(90deg, #bcae95, #e5dac6 45%, #b9aa90); box-shadow: 0 0 10px rgba(0,0,0,.14); }
+.bookPageRight { display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; border-radius: 0 5px 10px 0; }
+.writtenLine, .writtenLineShort { display: block; width: 100%; height: 1px; background: #d7cbb7; }
+.writtenLineShort { width: 67%; }
+.signature { align-self: end; margin-top: 1rem; color: #8b806f; font-family: Georgia, serif; font-size: 1.05rem; font-style: italic; }
+.condolencesCopy { max-width: 35rem; }
+.condolencesCopy ul { display: grid; gap: 1rem; margin-top: 2rem; padding: 0; list-style: none; }
+.condolencesCopy li { display: flex; gap: .8rem; color: #5b655f; font-size: .85rem; line-height: 1.55; }
+.condolencesCopy li svg { flex: 0 0 auto; margin-top: .1rem; color: var(--ember); }
+.condolencesCopy li strong { color: #26342d; }
+
+.agencySection { display: grid; grid-template-columns: 1.1fr .9fr; align-items: end; gap: clamp(3rem, 9vw, 10rem); padding: clamp(6rem, 11vw, 10rem) clamp(1.5rem, 9vw, 10rem); color: var(--cream); background: #0d2923; }
+.agencySection h2 { margin-bottom: 0; }
+.agencyCopy { max-width: 31rem; padding-bottom: .5rem; }
+.agencyCopy > p { color: rgba(255,250,240,.58); }
+.developmentTag { display: inline-block; margin-top: 2rem; padding: .7rem .9rem; border: 1px solid rgba(217,149,81,.45); color: var(--ember); font-size: .6rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.footer { display: flex; align-items: center; justify-content: space-between; gap: 2rem; min-height: 8rem; padding: 2rem clamp(1.5rem, 5vw, 5rem); border-top: 1px solid rgba(255,250,240,.1); color: rgba(255,250,240,.42); background: #0d2923; font-size: .67rem; letter-spacing: .08em; text-transform: uppercase; }
+.footer > div { display: flex; align-items: center; gap: 1rem; }
+.footerBrand { color: var(--cream); font-family: Georgia, serif; font-size: 1rem; letter-spacing: 0; text-transform: none; }
+.footer p { display: flex; align-items: center; gap: .5rem; }
+.primaryAction:focus-visible, .secondaryAction:focus-visible, .back:focus-visible { outline: 2px solid var(--ember); outline-offset: 4px; }
+
+@media (max-width: 950px) {
+  .hero { grid-template-columns: 1fr; }
+  .heroCopy { min-height: 78svh; padding-right: clamp(1.5rem, 7vw, 5rem); }
+  .streetScene { min-height: 38rem; }
+  .section, .condolencesSection, .agencySection { grid-template-columns: 1fr; }
+  .reachMap { margin-top: 1rem; }
+  .ceremonyCards { grid-template-columns: 1fr; }
+  .ceremonyCard { min-height: 19rem; }
+  .cardIcon { margin-bottom: 2rem; }
+  .bookVisual { width: min(42rem, 100%); }
+}
+
+@media (max-width: 620px) {
+  .header { grid-template-columns: 1fr auto; padding-top: 1.15rem; }
+  .headerName { display: none; }
+  .back span { display: none; }
+  .heroCopy { min-height: 85svh; padding-top: 7rem; }
+  .heroCopy h1 span { margin-top: .3rem; margin-left: 0; white-space: normal; }
+  .heroActions { align-items: stretch; flex-direction: column; }
+  .streetScene { min-height: 34rem; }
+  .noticePreview { right: 7%; bottom: 9%; width: 86%; }
+  .streetLabel { display: none; }
+  .introStrip { grid-template-columns: 1fr; }
+  .introStrip p { justify-content: flex-start; min-height: 4rem; padding-left: 1.5rem; text-align: left; }
+  .section { padding-top: 5rem; padding-bottom: 5rem; }
+  .reachLevel { grid-template-columns: 2rem 1fr auto; padding-right: .5rem; }
+  .ceremonyCard { padding: 1.7rem; }
+  .cardFree { left: 1.7rem; }
+  .bookVisual { grid-template-columns: 1fr 5px 1fr; min-height: 15rem; }
+  .bookPageLeft, .bookPageRight { padding: 1.2rem; }
+  .bookPageLeft strong { font-size: 1.25rem; }
+  .footer, .footer > div { align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction, .reachLevel, .ceremonyCard { transition: none; }
+}

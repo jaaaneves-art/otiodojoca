@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import styles from "./countdown.module.css";
 
@@ -114,6 +115,15 @@ export function Countdown() {
         )}
 
         <p className={styles.note}>Guarda a data. Encontramo-nos aqui.</p>
+
+        <Link className={styles.entranceCard} href="/rua-da-saudade">
+          <span className={styles.entranceKicker}>Descobre</span>
+          <span className={styles.entranceTitle}>Rua da Saudade</span>
+          <span className={styles.entranceDescription}>
+            Anúncios, cerimónias e um lugar digno para recordar cada vida.
+          </span>
+          <span className={styles.entranceArrow} aria-hidden="true">→</span>
+        </Link>
       </section>
 
       <footer className={styles.footer}>

@@ -144,6 +144,72 @@
   font-style: italic;
 }
 
+.entranceCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.35rem 2rem;
+  width: min(32rem, 100%);
+  margin-top: 1.75rem;
+  padding: 1.25rem 4.5rem 1.25rem 1.4rem;
+  overflow: hidden;
+  border: 1px solid rgba(216, 168, 78, 0.38);
+  border-radius: 0.25rem;
+  color: var(--cream);
+  background: rgba(246, 237, 218, 0.035);
+  text-decoration: none;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.entranceCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(216, 168, 78, 0.75);
+  background: rgba(216, 168, 78, 0.08);
+}
+
+.entranceCard:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.entranceKicker {
+  grid-column: 1;
+  color: var(--gold);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.entranceTitle {
+  grid-column: 1;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1.1;
+}
+
+.entranceDescription {
+  grid-column: 1;
+  margin-top: 0.25rem;
+  color: rgba(246, 237, 218, 0.56);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.entranceArrow {
+  position: absolute;
+  top: 50%;
+  right: 1.5rem;
+  color: var(--gold);
+  font-size: 1.5rem;
+  transform: translateY(-50%);
+  transition: transform 180ms ease;
+}
+
+.entranceCard:hover .entranceArrow {
+  transform: translate(0.3rem, -50%);
+}
+
 .finished {
   margin-top: clamp(3.25rem, 8vh, 6rem);
   padding: 2rem 0;
@@ -180,6 +246,7 @@
   .separator { display: none; }
   .value { font-size: clamp(2.4rem, 13vw, 4rem); }
   .label { letter-spacing: 0.08em; }
+  .entranceCard { margin-top: 1.5rem; }
 }
 
 @media (max-width: 390px) {
