@@ -90,6 +90,12 @@ export default async function HomePage() {
             href="/forum"
           />
           <FeatureCard
+            icon={<Users className="w-8 h-8" />}
+            title="Rede Social"
+            description="Perfis, grupos, mensagens e comunidades locais num so lugar."
+            href="/comunidade"
+          />
+          <FeatureCard
             icon={<ShoppingBag className="w-8 h-8" />}
             title="Mercado da Terra"
             description="Compra, vende ou troca produtos locais."
