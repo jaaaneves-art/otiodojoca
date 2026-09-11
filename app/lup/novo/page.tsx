@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { LupAdForm } from "@/components/lup/lup-ad-form";
 import LupNavbar from "@/components/lup/lup-navbar";
+import { PlusCircle } from "lucide-react";
+import { LupBackLink, LupPageHeader, lupPageClass } from "@/components/lup/lup-ui";
 
 async function createLupAd(formData: FormData) {
   "use server";
@@ -121,18 +122,10 @@ export default async function NovoAnuncioLupPage() {
   return (
     <>
       <LupNavbar />
-      <div className="min-h-screen bg-lup-50">
-        <main className="max-w-2xl mx-auto p-6">
-          <div className="mb-6">
-            <Link href="/lup" className="text-lup-700 hover:text-lup-900">
-              ← Voltar ao Lup
-            </Link>
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-lup-900">Publicar no Lup</h1>
-            <p className="text-lup-700 mt-2">Doa, vende a preço simbólico ou pede excedentes — para pessoas, animais ou compostagem</p>
-          </div>
+      <div className={lupPageClass}>
+        <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-6 sm:py-10">
+          <LupBackLink href="/lup">Voltar ao LUP</LupBackLink>
+          <LupPageHeader eyebrow="Novo ciclo" title="Publicar no LUP" description="Doa, vende a preço simbólico ou pede excedentes. Leva apenas alguns minutos." icon={PlusCircle} />
 
           <LupAdForm
             categories={categories || []}

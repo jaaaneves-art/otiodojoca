@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import LupNavbar from "@/components/lup/lup-navbar";
 import { LupAdCard } from "@/components/lup/lup-ad-card";
+import { Heart } from "lucide-react";
+import { LupEmptyState, LupPageHeader, lupMainClass, lupPageClass } from "@/components/lup/lup-ui";
 
 export default async function FavoritosLupPage() {
   const supabase = await createClient();
@@ -46,25 +47,18 @@ export default async function FavoritosLupPage() {
   return (
     <>
       <LupNavbar />
-      <div className="min-h-screen bg-lup-50">
-        <main className="max-w-6xl mx-auto p-6">
-          <h1 className="text-3xl font-bold text-lup-900 mb-8">❤️ Favoritos</h1>
+      <div className={lupPageClass}>
+        <main className={lupMainClass}>
+          <LupPageHeader eyebrow="A tua seleção" title="Anúncios guardados" description="Tudo o que queres acompanhar, reunido num só lugar." icon={Heart} />
 
           {ads.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {ads.map((ad) => (
                 <LupAdCard key={ad.id} ad={ad} isFavorite={true} isLoggedIn={true} photo={photosMap[ad.id]} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-lg border border-lup-200">
-              <p className="text-lup-700 text-lg mb-4">Ainda não guardaste nenhum anúncio</p>
-              <Link href="/lup">
-                <button className="bg-lup-500 text-white font-medium py-2 px-6 rounded-lg hover:bg-lup-600">
-                  Explorar o Lup
-                </button>
-              </Link>
-            </div>
+            <LupEmptyState title="Ainda não guardaste nada" description="Quando encontrares algo interessante, toca no coração para o guardares aqui." href="/lup" actionLabel="Explorar o LUP" />
           )}
         </main>
       </div>

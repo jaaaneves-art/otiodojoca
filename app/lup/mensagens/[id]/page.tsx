@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { markAsRead } from "@/app/lup/mensagens/actions";
 import MessageForm from "@/components/lup/message-form";
+import { ArrowLeft, ChevronRight, FileText, MapPin, Recycle, UserRound } from "lucide-react";
 
 export default async function ConversationLupPage({
   params,
@@ -87,38 +88,39 @@ export default async function ConversationLupPage({
   const otherParty: any = isBuyer ? sellerProfile : buyerProfile;
 
   return (
-    <div className="min-h-screen bg-lup-50 flex flex-col">
-      <nav className="bg-white border-b border-lup-200 px-6 py-4 sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
-          <Link href="/lup/mensagens" className="text-lup-700 hover:text-lup-900">←</Link>
+    <div className="flex min-h-screen flex-col bg-[radial-gradient(circle_at_top_left,_rgba(184,245,207,0.5),_transparent_30rem),#f7fff9]">
+      <nav className="sticky top-0 z-10 border-b border-lup-200/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur-xl sm:px-6">
+        <div className="mx-auto flex max-w-3xl items-center gap-3">
+          <Link href="/lup/mensagens" aria-label="Voltar às mensagens" className="grid h-10 w-10 place-items-center rounded-xl border border-lup-200 text-lup-700 transition hover:bg-lup-50 hover:text-lup-950"><ArrowLeft className="h-5 w-5" /></Link>
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-lup-100 text-lup-700"><UserRound className="h-5 w-5" /></span>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-lup-900 truncate">{otherParty?.username || "Utilizador"}</p>
-            <p className="text-xs text-lup-500">{isBuyer ? "Anunciante" : "Interessado"}</p>
+            <p className="truncate font-extrabold text-lup-950">{otherParty?.username || "Utilizador"}</p>
+            <p className="text-xs font-medium text-lup-600">{isBuyer ? "Anunciante" : "Interessado"}</p>
           </div>
         </div>
       </nav>
 
-      <div className="bg-white border-b border-lup-200 px-6 py-3">
+      <div className="border-b border-lup-200 bg-white px-4 py-3 sm:px-6">
         <Link href={`/lup/${conv.ad_id}`}>
-          <div className="max-w-3xl mx-auto flex items-center gap-3 hover:bg-lup-50 -mx-2 px-2 py-1 rounded-lg cursor-pointer">
+          <div className="mx-auto flex max-w-3xl cursor-pointer items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-lup-50">
             {photo ? (
               <img src={photo.storage_path} alt={ad?.title} className="w-12 h-12 object-cover rounded-lg" />
             ) : (
-              <div className="w-12 h-12 bg-lup-50 rounded-lg flex items-center justify-center text-xl">♻️</div>
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-lup-100 text-lup-700"><Recycle className="h-5 w-5" /></div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-lup-900 truncate">{ad?.title || "Anúncio"}</p>
+              <p className="truncate text-sm font-extrabold text-lup-950">{ad?.title || "Anúncio"}</p>
               <p className="text-xs text-lup-600">
                 {ad?.price_type === "free" || ad?.price == null ? "Grátis" : "€" + ad?.price.toFixed(2)}
-                {ad?.location && " • 📍 " + ad.location}
+                {ad?.location && <><span className="mx-1">•</span><MapPin className="inline h-3 w-3" /> {ad.location}</>}
               </p>
             </div>
-            <div className="text-xs text-lup-500">Ver →</div>
+            <div className="flex items-center gap-1 text-xs font-bold text-lup-600">Ver <ChevronRight className="h-3.5 w-3.5" /></div>
           </div>
         </Link>
       </div>
 
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto px-4 py-7 sm:px-6">
         <div className="max-w-3xl mx-auto space-y-3">
           {messages && messages.length > 0 ? (
             messages.map((msg: any) => {
@@ -126,8 +128,8 @@ export default async function ConversationLupPage({
               const msgAttachments = attachmentsMap[msg.id] || [];
               return (
                 <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                    isMe ? "bg-lup-500 text-white rounded-br-sm" : "bg-white border border-lup-200 text-lup-900 rounded-bl-sm"
+                  <div className={`max-w-[88%] rounded-2xl px-4 py-3 shadow-sm sm:max-w-[75%] ${
+                    isMe ? "rounded-br-sm bg-lup-700 text-white" : "rounded-bl-sm border border-lup-200 bg-white text-lup-950"
                   }`}>
                     {msg.content && <p className="whitespace-pre-wrap break-words">{msg.content}</p>}
                     {msgAttachments.length > 0 && (
@@ -144,7 +146,7 @@ export default async function ConversationLupPage({
                           return (
                             <a key={att.id} href={att.storage_path} target="_blank" rel="noopener noreferrer"
                               className={`flex items-center gap-2 rounded-lg px-3 py-2 border ${isMe ? "bg-lup-400 border-lup-300 hover:bg-lup-300" : "bg-lup-50 border-lup-200 hover:bg-lup-100"}`}>
-                              <span className="text-xl">📄</span>
+                              <FileText className="h-5 w-5" />
                               <span className={`text-sm truncate max-w-[160px] ${isMe ? "text-white" : "text-lup-800"}`}>{att.file_name}</span>
                             </a>
                           );
@@ -164,7 +166,7 @@ export default async function ConversationLupPage({
         </div>
       </main>
 
-      <div className="bg-white border-t border-lup-200 p-4 sticky bottom-0">
+      <div className="sticky bottom-0 border-t border-lup-200 bg-white/95 p-3 shadow-[0_-8px_30px_rgba(15,74,44,0.06)] backdrop-blur-xl sm:p-4">
         <div className="max-w-3xl mx-auto">
           <MessageForm conversationId={conversationId} />
         </div>

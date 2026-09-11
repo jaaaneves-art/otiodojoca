@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { sendMessage } from "@/app/lup/mensagens/actions";
+import { LoaderCircle, Send } from "lucide-react";
 
 export default function MessageForm({ conversationId }: { conversationId: number }) {
   const [content, setContent] = useState("");
@@ -37,21 +38,24 @@ export default function MessageForm({ conversationId }: { conversationId: number
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex items-end gap-2">
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyDown}
         rows={1}
         placeholder="Escreve uma mensagem..."
-        className="flex-1 border border-lup-200 rounded-lg p-3 resize-none focus:outline-none focus:border-lup-500"
+        aria-label="Mensagem"
+        className="min-h-12 flex-1 resize-none rounded-xl border border-lup-200 bg-lup-50/50 p-3 text-lup-950 outline-none transition placeholder:text-lup-700/50 focus:border-lup-500 focus:bg-white focus:ring-4 focus:ring-lup-100"
       />
       <button
         type="submit"
         disabled={sending || !content.trim()}
-        className="bg-lup-500 text-white font-medium px-5 rounded-lg hover:bg-lup-600 disabled:opacity-50"
+        aria-label="Enviar mensagem"
+        className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-lup-700 text-white shadow-lg shadow-lup-800/15 transition hover:bg-lup-800 disabled:opacity-50 sm:flex sm:w-auto sm:px-5"
       >
-        Enviar
+        {sending ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+        <span className="hidden font-bold sm:inline">Enviar</span>
       </button>
     </form>
   );

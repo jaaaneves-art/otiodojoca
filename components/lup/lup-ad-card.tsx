@@ -1,6 +1,7 @@
 import Link from "next/link";
 import LupFavoriteButton from "@/components/lup/favorite-button";
 import { LUP_AD_TYPES, estimarCo2Evitado } from "@/lib/lup/ad-types";
+import { Clock3, Leaf, MapPin, Package2, PawPrint, Recycle, Salad, Sparkles } from "lucide-react";
 
 interface LupAd {
   id: number;
@@ -20,10 +21,10 @@ interface LupAd {
   category?: { name: string; slug: string } | null;
 }
 
-const CATEGORIA_ICON: Record<string, string> = {
-  "lup-humano": "🥗",
-  "lup-animal": "🐾",
-  "lup-compostagem": "🌱",
+const CATEGORIA_ICON: Record<string, typeof Leaf> = {
+  "lup-humano": Salad,
+  "lup-animal": PawPrint,
+  "lup-compostagem": Leaf,
 };
 
 const TYPE_BADGE_STYLE: Record<string, string> = {
@@ -54,61 +55,64 @@ export function LupAdCard({
   const badgeClass = TYPE_BADGE_STYLE[ad.type] || "bg-lup-600 text-white";
   const prazo = formatarPrazo(ad.details?.pickup_ends_at);
   const co2 = estimarCo2Evitado(ad.details?.kg_estimate ? parseFloat(ad.details.kg_estimate) : null);
+  const CategoryIcon = CATEGORIA_ICON[ad.category?.slug ?? ""] ?? Recycle;
 
   return (
-    <div className="relative">
+    <article className="group relative h-full">
       <LupFavoriteButton adId={ad.id} isFavorite={isFavorite} isLoggedIn={isLoggedIn} variant="card" />
       <Link href={`/lup/${ad.id}`}>
-        <div className="bg-white rounded-xl border border-lup-200 hover:shadow-lg transition overflow-hidden cursor-pointer h-full flex flex-col">
+        <div className="flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.4rem] border border-lup-200/90 bg-white shadow-[0_12px_35px_rgba(15,74,44,0.05)] transition duration-300 group-hover:-translate-y-1 group-hover:border-lup-300 group-hover:shadow-[0_20px_45px_rgba(15,74,44,0.12)]">
           {photo ? (
-            <div className="w-full h-40 bg-lup-50">
-              <img src={photo} alt={ad.title} className="w-full h-full object-cover" />
+            <div className="relative h-48 w-full overflow-hidden bg-lup-50">
+              <img src={photo} alt={ad.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]" />
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/25 to-transparent" />
             </div>
           ) : (
-            <div className="w-full h-40 bg-lup-50 flex items-center justify-center text-4xl">
-              {CATEGORIA_ICON[ad.category?.slug ?? ""] ?? "♻️"}
+            <div className="relative flex h-48 w-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top_right,#dcfce8,#f7fff9_65%)] text-lup-700">
+              <div className="absolute -right-7 -top-7 h-24 w-24 rounded-full border-[16px] border-lup-200/70" />
+              <CategoryIcon className="h-12 w-12" strokeWidth={1.6} />
             </div>
           )}
 
-          <div className="p-4 flex-1 flex flex-col justify-between">
+          <div className="flex flex-1 flex-col justify-between p-5">
             <div>
-              <div className="flex items-center gap-1 mb-2">
-                <span className={`inline-block text-xs font-bold px-2 py-1 rounded-full ${badgeClass}`}>
+              <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wide ${badgeClass}`}>
                   {typeInfo?.icon ?? "♻️"} {typeInfo?.label ?? ad.type}
                 </span>
                 {ad.category && (
-                  <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-lup-50 text-lup-700 border border-lup-200">
-                    {CATEGORIA_ICON[ad.category.slug] ?? "📦"} {ad.category.name}
+                  <span className="inline-flex items-center gap-1 rounded-full border border-lup-200 bg-lup-50 px-2.5 py-1 text-[11px] font-bold text-lup-800">
+                    <CategoryIcon className="h-3 w-3" /> {ad.category.name}
                   </span>
                 )}
               </div>
-              <h3 className="font-semibold text-lup-900 line-clamp-2 mb-2">{ad.title}</h3>
+              <h2 className="mb-3 line-clamp-2 text-lg font-extrabold leading-snug tracking-[-0.02em] text-lup-950">{ad.title}</h2>
 
               {ad.details?.quantity && (
-                <p className="text-sm text-lup-700 mb-1">
-                  📦 {ad.details.quantity} {ad.details.unit ?? ""}
+                <p className="mb-1 flex items-center gap-2 text-sm font-semibold text-lup-800">
+                  <Package2 className="h-4 w-4 text-lup-600" /> {ad.details.quantity} {ad.details.unit ?? ""}
                 </p>
               )}
             </div>
 
             <div>
               {ad.type === "venda" && (
-                <p className="text-lg font-bold text-lup-700 mb-1">
+                <p className="mb-2 text-xl font-black tracking-tight text-lup-800">
                   {ad.price == null ? "Grátis" : `${ad.price.toFixed(2)} €`}
                 </p>
               )}
               {ad.type === "oferta" && (
-                <p className="text-lg font-bold text-lup-700 mb-1">GRÁTIS</p>
+                <p className="mb-2 text-lg font-black tracking-wide text-lup-700">GRÁTIS</p>
               )}
               {co2 != null && (
-                <p className="text-xs text-lup-600 mb-1">🌍 ~{co2} kg CO₂ evitado (estimativa)</p>
+                <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-lup-600"><Sparkles className="h-3.5 w-3.5" /> ~{co2} kg CO₂ evitado</p>
               )}
-              {prazo && <p className="text-xs text-amber-700 mb-1">⏰ Recolher até {prazo}</p>}
-              {ad.location && <p className="text-xs text-lup-500">📍 {ad.location}</p>}
+              {prazo && <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-amber-700"><Clock3 className="h-3.5 w-3.5" /> Recolher até {prazo}</p>}
+              {ad.location && <p className="flex items-center gap-1.5 text-xs font-medium text-lup-600"><MapPin className="h-3.5 w-3.5" /> {ad.location}</p>}
             </div>
           </div>
         </div>
       </Link>
-    </div>
+    </article>
   );
 }

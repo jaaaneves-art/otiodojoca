@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import LupNavbar from "@/components/lup/lup-navbar";
 import LupFiltros from "@/components/lup/lup-filtros";
 import { LupAdCard } from "@/components/lup/lup-ad-card";
+import { LupEmptyState, lupMainClass, lupPageClass } from "@/components/lup/lup-ui";
+import { LayoutGrid } from "lucide-react";
 
 interface SearchParams {
   q?: string;
@@ -91,18 +93,20 @@ export default async function LupPage({
   return (
     <>
       <LupNavbar />
-      <div className="min-h-screen bg-lup-50">
-        <main className="max-w-6xl mx-auto px-6 py-8">
+      <div className={lupPageClass}>
+        <main className={lupMainClass}>
           <LupFiltros categories={categories || []} />
 
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-xl font-semibold text-lup-900">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-lup-950 sm:text-xl">
+              <LayoutGrid className="h-5 w-5 text-lup-600" />
               {hasFilters ? `Resultados (${ads.length})` : `Anúncios (${ads.length})`}
-            </h3>
+            </h2>
+            <p className="hidden text-xs font-semibold uppercase tracking-wider text-lup-600 sm:block">Da comunidade, para a comunidade</p>
           </div>
 
           {ads.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
               {ads.map((ad: any) => (
                 <LupAdCard
                   key={ad.id}
@@ -114,11 +118,12 @@ export default async function LupPage({
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-white rounded-lg border border-lup-200">
-              <p className="text-lup-700 text-lg">
-                {hasFilters ? "Nenhum anúncio encontrado com estes filtros" : "Ainda não há anúncios no Lup"}
-              </p>
-            </div>
+            <LupEmptyState
+              title={hasFilters ? "Não encontrámos correspondências" : "O primeiro ciclo começa aqui"}
+              description={hasFilters ? "Experimenta alterar a pesquisa ou limpar os filtros para veres mais anúncios." : "Publica o primeiro excedente e ajuda a pôr os recursos da tua comunidade novamente em circulação."}
+              href={hasFilters ? "/lup" : "/lup/novo"}
+              actionLabel={hasFilters ? "Limpar pesquisa" : "Publicar um anúncio"}
+            />
           )}
         </main>
       </div>

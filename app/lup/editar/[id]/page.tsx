@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import Link from "next/link";
 import { LupAdForm } from "@/components/lup/lup-ad-form";
 import LupNavbar from "@/components/lup/lup-navbar";
+import { PencilLine } from "lucide-react";
+import { LupBackLink, LupPageHeader, lupPageClass } from "@/components/lup/lup-ui";
 
 export default async function EditarAnuncioLupPage({
   params,
@@ -137,18 +138,10 @@ export default async function EditarAnuncioLupPage({
   return (
     <>
       <LupNavbar />
-      <div className="min-h-screen bg-lup-50">
-        <main className="max-w-2xl mx-auto p-6">
-          <div className="mb-6">
-            <Link href={`/lup/${ad.id}`} className="text-lup-700 hover:text-lup-900">
-              ← Voltar ao Anúncio
-            </Link>
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-lup-900">Editar Anúncio</h1>
-            <p className="text-lup-700 mt-2">{ad.title}</p>
-          </div>
+      <div className={lupPageClass}>
+        <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-6 sm:py-10">
+          <LupBackLink href={`/lup/${ad.id}`}>Voltar ao anúncio</LupBackLink>
+          <LupPageHeader eyebrow="Gestão do anúncio" title="Editar anúncio" description={ad.title} icon={PencilLine} />
 
           <LupAdForm
             categories={categories || []}

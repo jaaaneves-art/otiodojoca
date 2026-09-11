@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { LogIn } from "lucide-react";
+import LupNavLinks from "@/components/lup/lup-nav-links";
+import { LupBrandMark } from "@/components/lup/lup-ui";
 
 export default async function LupNavbar() {
   const supabase = await createClient();
@@ -39,49 +42,18 @@ export default async function LupNavbar() {
   }
 
   return (
-    <nav className="bg-lup-900 border-b border-lup-700 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/lup">
-          <h1 className="text-2xl font-bold text-white cursor-pointer">♻️ Lup</h1>
+    <nav className="sticky top-0 z-50 border-b border-white/10 bg-lup-950/95 shadow-[0_10px_35px_rgba(15,74,44,0.18)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/lup" aria-label="Página inicial do LUP" className="shrink-0">
+          <LupBrandMark />
         </Link>
 
-        <div className="flex gap-3 items-center">
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {user ? (
-            <>
-              <Link href="/lup/mensagens" className="relative">
-                <button className="border border-lup-600 text-lup-50 font-medium py-2 px-4 rounded-lg hover:bg-lup-800 flex items-center gap-2">
-                  💬 Mensagens
-                  {unreadTotal > 0 && (
-                    <span className="bg-lup-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {unreadTotal > 99 ? "99+" : unreadTotal}
-                    </span>
-                  )}
-                </button>
-              </Link>
-
-              <Link href="/lup/favoritos">
-                <button className="border border-lup-600 text-lup-50 font-medium py-2 px-4 rounded-lg hover:bg-lup-800">
-                  ❤️ Favoritos
-                </button>
-              </Link>
-
-              <Link href="/lup/meus-anuncios">
-                <button className="border border-lup-600 text-lup-50 font-medium py-2 px-4 rounded-lg hover:bg-lup-800">
-                  Meus Anúncios
-                </button>
-              </Link>
-
-              <Link href="/lup/novo">
-                <button className="bg-lup-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-lup-600">
-                  + Publicar
-                </button>
-              </Link>
-            </>
+            <LupNavLinks unreadTotal={unreadTotal} />
           ) : (
-            <Link href="/login">
-              <button className="bg-lup-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-lup-600">
-                Entrar
-              </button>
+            <Link href="/login" className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-lup-400 px-4 py-2 text-sm font-black text-lup-950 transition hover:bg-lup-300">
+              <LogIn className="h-4 w-4" /> Entrar
             </Link>
           )}
         </div>

@@ -50,6 +50,7 @@ const config: Config = {
           700: "#12723c",
           800: "#115a33",
           900: "#0f4a2c",
+          950: "#082f1d",
         },
         // Identidade própria de Viaturas (StandGo) — azul, seguindo os
         // requisitos de design do MVP StandGo original (#2563eb + slate),

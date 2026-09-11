@@ -4,6 +4,7 @@ import { useState } from "react";
 import ImageUpload from "@/components/mercado-da-terra/image-upload";
 import { MunicipioAutocomplete } from "@/components/mercado-da-terra/municipio-autocomplete";
 import { LUP_AD_TYPES, getLupAdType } from "@/lib/lup/ad-types";
+import { Clock3, Contact, FileText, ImagePlus, Layers3, LoaderCircle, Package2, Send, Sparkles, Tag } from "lucide-react";
 
 interface Categoria { id: number; name: string; }
 interface Municipio { nome: string; distrito_regiao: string; }
@@ -60,6 +61,7 @@ export function LupAdForm({
 }) {
   const [tipo, setTipo] = useState(inicial?.type ?? "oferta");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [submitting, setSubmitting] = useState(false);
   const config = getLupAdType(tipo);
   const mostra = (campo: string) => config.fields.includes(campo as any);
 
@@ -69,36 +71,45 @@ export function LupAdForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
+    try {
+      const formData = new FormData(e.currentTarget);
 
-    const inicioRaw = formData.get("pickupStartsAt") as string;
-    const fimRaw = formData.get("pickupEndsAt") as string;
-    formData.set("pickupStartsAt", inicioRaw ? datetimeLocalParaIso(inicioRaw) : "");
-    formData.set("pickupEndsAt", fimRaw ? datetimeLocalParaIso(fimRaw) : "");
+      const inicioRaw = formData.get("pickupStartsAt") as string;
+      const fimRaw = formData.get("pickupEndsAt") as string;
+      formData.set("pickupStartsAt", inicioRaw ? datetimeLocalParaIso(inicioRaw) : "");
+      formData.set("pickupEndsAt", fimRaw ? datetimeLocalParaIso(fimRaw) : "");
 
-    uploadedFiles.forEach((file, index) => {
-      formData.append(`image_${index}`, file);
-    });
-    formData.append("image_count", uploadedFiles.length.toString());
+      uploadedFiles.forEach((file, index) => {
+        formData.append(`image_${index}`, file);
+      });
+      formData.append("image_count", uploadedFiles.length.toString());
 
-    await action(formData);
+      await action(formData);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  const fieldClass = "mt-2 min-h-12 w-full rounded-xl border border-lup-200 bg-lup-50/40 px-3.5 text-lup-950 outline-none transition placeholder:text-lup-700/45 focus:border-lup-500 focus:bg-white focus:ring-4 focus:ring-lup-100";
+  const labelClass = "flex items-center gap-2 text-sm font-extrabold text-lup-950";
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl border border-lup-200 space-y-4">
-      <div>
-        <label className="text-sm font-medium">O que queres fazer? *</label>
-        <div className="grid grid-cols-3 gap-2 mt-1">
+    <form onSubmit={handleSubmit} className="space-y-5 rounded-[2rem] border border-lup-200/90 bg-white p-5 shadow-[0_20px_55px_rgba(15,74,44,0.08)] sm:p-8">
+      <section className="rounded-2xl border border-lup-200 bg-lup-50/60 p-4 sm:p-5">
+        <label className={labelClass}><Layers3 className="h-4 w-4 text-lup-600" /> O que queres fazer? *</label>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {Object.values(LUP_AD_TYPES).map((type) => (
             <button
               key={type.id}
               type="button"
               onClick={() => setTipo(type.id)}
-              className={`py-2 px-3 rounded-lg border font-medium text-sm transition ${
+              className={`min-h-12 rounded-xl border px-3 py-2 text-sm font-extrabold transition ${
                 tipo === type.id
-                  ? "bg-lup-500 border-lup-500 text-white"
-                  : "border-lup-200 text-lup-800 hover:bg-lup-50"
+                  ? "border-lup-700 bg-lup-700 text-white shadow-md shadow-lup-800/10"
+                  : "border-lup-200 bg-white text-lup-800 hover:border-lup-400 hover:bg-lup-50"
               }`}
             >
               {type.icon} {type.label}
@@ -106,38 +117,38 @@ export function LupAdForm({
           ))}
         </div>
         <input type="hidden" name="type" value={tipo} />
-      </div>
+      </section>
 
       <div>
-        <label className="text-sm font-medium">Título *</label>
+        <label className={labelClass}><Tag className="h-4 w-4 text-lup-600" /> Título *</label>
         <input
           name="title"
           defaultValue={inicial?.title ?? ""}
           placeholder="Ex: Caixa surpresa de padaria"
           required
-          className="w-full border rounded-lg p-2 mt-1"
+          className={fieldClass}
         />
       </div>
 
       <div>
-        <label className="text-sm font-medium">Descrição *</label>
+        <label className={labelClass}><FileText className="h-4 w-4 text-lup-600" /> Descrição *</label>
         <textarea
           name="description"
           rows={4}
           defaultValue={inicial?.description ?? ""}
           placeholder="Descreve o que estás a oferecer, vender ou procurar..."
           required
-          className="w-full border rounded-lg p-2 mt-1"
+          className={`${fieldClass} min-h-32 py-3`}
         />
       </div>
 
       <div>
-        <label className="text-sm font-medium">Ciclo *</label>
+        <label className={labelClass}><Sparkles className="h-4 w-4 text-lup-600" /> Ciclo *</label>
         <select
           name="categoryId"
           defaultValue={inicial?.category_id ?? ""}
           required
-          className="w-full border rounded-lg p-2 mt-1"
+          className={fieldClass}
         >
           <option value="">Seleciona um ciclo</option>
           {categories.map((cat) => (
@@ -148,7 +159,7 @@ export function LupAdForm({
 
       {mostra("price") && (
         <div>
-          <label className="text-sm font-medium">Preço simbólico (EUR) *</label>
+          <label className={labelClass}>Preço simbólico (EUR) *</label>
           <input
             name="price"
             type="number"
@@ -157,15 +168,15 @@ export function LupAdForm({
             defaultValue={inicial?.price ?? ""}
             placeholder="0.00"
             required
-            className="w-full border rounded-lg p-2 mt-1"
+            className={fieldClass}
           />
         </div>
       )}
 
       {mostra("quantity") && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium">Quantidade *</label>
+            <label className={labelClass}><Package2 className="h-4 w-4 text-lup-600" /> Quantidade *</label>
             <input
               name="quantity"
               type="number"
@@ -174,17 +185,17 @@ export function LupAdForm({
               defaultValue={inicial?.quantity ?? ""}
               placeholder="Ex: 5"
               required
-              className="w-full border rounded-lg p-2 mt-1"
+              className={fieldClass}
             />
           </div>
           <div>
-            <label className="text-sm font-medium">Unidade *</label>
+            <label className={labelClass}>Unidade *</label>
             <input
               name="unit"
               defaultValue={inicial?.unit ?? ""}
               placeholder="Ex: caixas, kg, sacos"
               required
-              className="w-full border rounded-lg p-2 mt-1"
+              className={fieldClass}
             />
           </div>
         </div>
@@ -192,7 +203,7 @@ export function LupAdForm({
 
       {mostra("kgEstimate") && (
         <div>
-          <label className="text-sm font-medium">Peso aproximado (kg)</label>
+          <label className={labelClass}>Peso aproximado (kg)</label>
           <input
             name="kgEstimate"
             type="number"
@@ -200,51 +211,54 @@ export function LupAdForm({
             min="0"
             defaultValue={inicial?.kg_estimate ?? ""}
             placeholder="Opcional — usado só para estimar o impacto"
-            className="w-full border rounded-lg p-2 mt-1"
+            className={fieldClass}
           />
           <p className="text-xs text-lup-600 mt-1">Ajuda a mostrar quanto CO₂ este anúncio ajuda a evitar (estimativa)</p>
         </div>
       )}
 
       {mostra("pickupStartsAt") && (
-        <div className="bg-lup-50 border border-lup-200 rounded-lg p-4 space-y-4">
-          <p className="text-sm font-semibold text-lup-900">⏰ Janela de recolha</p>
-          <div className="grid grid-cols-2 gap-4">
+        <section className="space-y-4 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:p-5">
+          <p className="flex items-center gap-2 text-sm font-extrabold text-amber-950"><Clock3 className="h-4 w-4" /> Janela de recolha</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-sm font-medium">Disponível a partir de</label>
+              <label className="text-sm font-bold text-amber-950">Disponível a partir de</label>
               <input
                 name="pickupStartsAt"
                 type="datetime-local"
                 defaultValue={isoParaDatetimeLocal(inicial?.pickup_starts_at)}
-                className="w-full border rounded-lg p-2 mt-1"
+                className={fieldClass}
               />
               <p className="text-xs text-lup-600 mt-1">Deixa em branco para já estar disponível</p>
             </div>
             <div>
-              <label className="text-sm font-medium">Recolher até *</label>
+              <label className="text-sm font-bold text-amber-950">Recolher até *</label>
               <input
                 name="pickupEndsAt"
                 type="datetime-local"
                 defaultValue={isoParaDatetimeLocal(inicial?.pickup_ends_at)}
                 required
-                className="w-full border rounded-lg p-2 mt-1"
+                className={fieldClass}
               />
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       <MunicipioAutocomplete municipios={municipios} valorInicial={inicial?.location ?? ""} />
 
-      <ImageUpload onFilesSelected={handleFilesSelected} maxFiles={5} maxSizeMB={5} />
+      <section className="rounded-2xl border border-dashed border-lup-300 bg-lup-50/40 p-4 sm:p-5">
+        <p className="mb-3 flex items-center gap-2 text-sm font-extrabold text-lup-950"><ImagePlus className="h-4 w-4 text-lup-600" /> Fotografias</p>
+        <ImageUpload onFilesSelected={handleFilesSelected} maxFiles={5} maxSizeMB={5} />
+      </section>
 
       <div>
-        <label className="text-sm font-medium">Contacto *</label>
+        <label className={labelClass}><Contact className="h-4 w-4 text-lup-600" /> Contacto *</label>
         <select
           name="contactMethod"
           defaultValue={inicial?.contact_method ?? "message"}
           required
-          className="w-full border rounded-lg p-2 mt-1"
+          className={fieldClass}
         >
           <option value="message">Mensagem</option>
           <option value="phone">Telefone</option>
@@ -254,9 +268,10 @@ export function LupAdForm({
 
       <button
         type="submit"
-        className="w-full bg-lup-500 text-white font-medium py-3 px-4 rounded-lg hover:bg-lup-600"
+        disabled={submitting}
+        className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-lup-700 px-5 py-3 text-base font-black text-white shadow-xl shadow-lup-800/15 transition hover:-translate-y-0.5 hover:bg-lup-800 disabled:cursor-wait disabled:opacity-65"
       >
-        {submitLabel}
+        {submitting ? <><LoaderCircle className="h-5 w-5 animate-spin" /> A guardar…</> : <><Send className="h-5 w-5" /> {submitLabel}</>}
       </button>
     </form>
   );

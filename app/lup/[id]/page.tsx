@@ -5,6 +5,8 @@ import ContactSellerForm from "@/components/lup/contact-seller-form";
 import LupFavoriteButton from "@/components/lup/favorite-button";
 import LupNavbar from "@/components/lup/lup-navbar";
 import { LUP_AD_TYPES, estimarCo2Evitado } from "@/lib/lup/ad-types";
+import { CalendarDays, Clock3, Leaf, Mail, MapPin, MessageCircle, Package2, PawPrint, Recycle, Salad, Sparkles, UserRound } from "lucide-react";
+import { LupBackLink, lupPageClass } from "@/components/lup/lup-ui";
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Rascunho",
@@ -18,10 +20,10 @@ const STATUS_LABEL: Record<string, string> = {
   inactive: "Indisponível",
 };
 
-const CATEGORIA_ICON: Record<string, string> = {
-  "lup-humano": "🥗",
-  "lup-animal": "🐾",
-  "lup-compostagem": "🌱",
+const CATEGORIA_ICON: Record<string, typeof Leaf> = {
+  "lup-humano": Salad,
+  "lup-animal": PawPrint,
+  "lup-compostagem": Leaf,
 };
 
 function formatarDataHora(iso?: string) {
@@ -74,34 +76,32 @@ export default async function LupAdPage({
   const co2 = estimarCo2Evitado(details.kg_estimate ? parseFloat(details.kg_estimate) : null);
   const inicio = formatarDataHora(details.pickup_starts_at);
   const fim = formatarDataHora(details.pickup_ends_at);
+  const CategoryIcon = CATEGORIA_ICON[ad.category?.slug ?? ""] ?? Recycle;
 
   return (
     <>
       <LupNavbar />
-      <div className="min-h-screen bg-lup-50">
-        <main className="max-w-4xl mx-auto p-6">
-          <div className="mb-4">
-            <Link href="/lup" className="text-lup-700 hover:text-lup-900">
-              ← Voltar ao Lup
-            </Link>
-          </div>
+      <div className={lupPageClass}>
+        <main className="mx-auto w-full max-w-5xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
+          <LupBackLink href="/lup">Voltar ao LUP</LupBackLink>
 
-          <div className="bg-white rounded-xl border border-lup-200 p-8">
-            <div className="flex items-start justify-between mb-6">
+          <article className="overflow-hidden rounded-[2rem] border border-lup-200/90 bg-white shadow-[0_24px_65px_rgba(15,74,44,0.1)]">
+            <div className="p-5 sm:p-8 lg:p-10">
+            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-block text-xs font-bold px-2 py-1 rounded-full bg-lup-600 text-white">
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center rounded-full bg-lup-700 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
                     {typeInfo?.icon} {typeInfo?.label ?? ad.type}
                   </span>
                   {ad.category && (
-                    <span className="inline-block text-xs font-medium px-2 py-1 rounded-full bg-lup-50 text-lup-700 border border-lup-200">
-                      {CATEGORIA_ICON[ad.category.slug] ?? "📦"} {ad.category.name}
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-lup-200 bg-lup-50 px-3 py-1.5 text-xs font-bold text-lup-800">
+                      <CategoryIcon className="h-3.5 w-3.5" /> {ad.category.name}
                     </span>
                   )}
                 </div>
-                <h1 className="text-3xl font-bold text-lup-900">{ad.title}</h1>
+                <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-[-0.04em] text-lup-950 sm:text-4xl">{ad.title}</h1>
               </div>
-              <span className={`px-4 py-2 rounded-full font-semibold ${
+              <span className={`w-fit shrink-0 rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide ${
                 ad.status === "active" ? "bg-green-100 text-green-700" :
                 ["sold", "traded", "given"].includes(ad.status) ? "bg-gray-100 text-gray-600" :
                 "bg-lup-100 text-lup-700"
@@ -111,14 +111,14 @@ export default async function LupAdPage({
             </div>
 
             {photos && photos.length > 0 && (
-              <div className="mb-6">
-                <div className="mb-3">
-                  <img src={photos[0].storage_path} alt={ad.title} className="w-full h-96 object-cover rounded-lg border border-lup-200" />
+              <div className="mb-8">
+                <div className="mb-3 overflow-hidden rounded-2xl bg-lup-50">
+                  <img src={photos[0].storage_path} alt={ad.title} className="h-[20rem] w-full object-cover sm:h-[28rem]" />
                 </div>
                 {photos.length > 1 && (
                   <div className="grid grid-cols-5 gap-2">
-                    {photos.map((photo: any) => (
-                      <img key={photo.id} src={photo.storage_path} alt="" className="w-full h-20 object-cover rounded-lg border border-lup-200 cursor-pointer hover:border-lup-500" />
+                    {photos.map((photo: any, index: number) => (
+                      <img key={photo.id} src={photo.storage_path} alt={`${ad.title} — fotografia ${index + 1}`} className="h-20 w-full cursor-pointer rounded-xl border border-lup-200 object-cover transition hover:border-lup-500 hover:opacity-90" />
                     ))}
                   </div>
                 )}
@@ -126,77 +126,77 @@ export default async function LupAdPage({
             )}
 
             {ad.type === "procura" ? (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-                <p className="text-sm text-purple-600 font-semibold">🙋 Este anúncio é um pedido de recolha</p>
+              <div className="mb-7 rounded-2xl border border-purple-200 bg-purple-50 p-4">
+                <p className="text-sm font-bold text-purple-700">Este anúncio é um pedido de recolha</p>
               </div>
             ) : (
-              <div className="text-2xl font-bold text-lup-700 mb-6">
+              <div className="mb-7 text-3xl font-black tracking-tight text-lup-700">
                 {ad.type === "oferta" || ad.price == null ? "GRÁTIS" : `${ad.price.toFixed(2)} €`}
               </div>
             )}
 
             {(details.quantity || co2 != null || inicio || fim) && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 pb-8 border-b border-lup-200">
+              <div className="mb-9 grid grid-cols-1 gap-3 border-b border-lup-200 pb-9 sm:grid-cols-2 lg:grid-cols-4">
                 {details.quantity && (
-                  <div>
+                  <div className="rounded-2xl bg-lup-50 p-4">
                     <p className="text-sm text-lup-600">Quantidade</p>
-                    <p className="font-semibold text-lup-900">📦 {details.quantity} {details.unit ?? ""}</p>
+                    <p className="mt-1 flex items-center gap-2 font-extrabold text-lup-950"><Package2 className="h-4 w-4 text-lup-600" /> {details.quantity} {details.unit ?? ""}</p>
                   </div>
                 )}
                 {co2 != null && (
-                  <div>
+                  <div className="rounded-2xl bg-lup-50 p-4">
                     <p className="text-sm text-lup-600">Impacto (estimativa)</p>
-                    <p className="font-semibold text-lup-900">🌍 ~{co2} kg CO₂ evitado</p>
+                    <p className="mt-1 flex items-center gap-2 font-extrabold text-lup-950"><Sparkles className="h-4 w-4 text-lup-600" /> ~{co2} kg CO₂ evitado</p>
                   </div>
                 )}
                 {inicio && (
-                  <div>
+                  <div className="rounded-2xl bg-lup-50 p-4">
                     <p className="text-sm text-lup-600">Disponível a partir de</p>
-                    <p className="font-semibold text-lup-900">{inicio}</p>
+                    <p className="mt-1 flex items-center gap-2 font-extrabold text-lup-950"><CalendarDays className="h-4 w-4 text-lup-600" /> {inicio}</p>
                   </div>
                 )}
                 {fim && (
-                  <div>
+                  <div className="rounded-2xl bg-amber-50 p-4">
                     <p className="text-sm text-amber-700">Recolher até</p>
-                    <p className="font-semibold text-amber-800">⏰ {fim}</p>
+                    <p className="mt-1 flex items-center gap-2 font-extrabold text-amber-900"><Clock3 className="h-4 w-4" /> {fim}</p>
                   </div>
                 )}
               </div>
             )}
 
-            <div className="mb-8 pb-8 border-b border-lup-200">
-              <h2 className="text-lg font-semibold text-lup-900 mb-3">Descrição</h2>
-              <p className="text-lup-800 whitespace-pre-wrap">{ad.description}</p>
+            <div className="mb-9 border-b border-lup-200 pb-9">
+              <h2 className="mb-3 text-xl font-extrabold text-lup-950">Sobre este anúncio</h2>
+              <p className="whitespace-pre-wrap leading-7 text-lup-800">{ad.description}</p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8 pb-8 border-b border-lup-200">
+            <div className="mb-9 grid grid-cols-1 gap-5 border-b border-lup-200 pb-9 sm:grid-cols-3">
               <div>
                 <p className="text-sm text-lup-600">Localização</p>
-                <p className="font-semibold text-lup-900">📍 {ad.location}</p>
+                <p className="mt-1 flex items-center gap-2 font-extrabold text-lup-950"><MapPin className="h-4 w-4 text-lup-600" /> {ad.location}</p>
               </div>
               <div>
                 <p className="text-sm text-lup-600">Publicado em</p>
-                <p className="font-semibold text-lup-900">{new Date(ad.created_at).toLocaleDateString("pt-PT")}</p>
+                <p className="mt-1 flex items-center gap-2 font-extrabold text-lup-950"><CalendarDays className="h-4 w-4 text-lup-600" /> {new Date(ad.created_at).toLocaleDateString("pt-PT")}</p>
               </div>
               <div>
                 <p className="text-sm text-lup-600">Contacto</p>
-                <p className="font-semibold text-lup-900">
-                  {ad.contact_method === "message" ? "💬 Mensagem" :
-                   ad.contact_method === "phone" ? "📞 Telefone" : "📧 Email"}
+                <p className="mt-1 flex items-center gap-2 font-extrabold text-lup-950">
+                  {ad.contact_method === "message" ? <><MessageCircle className="h-4 w-4 text-lup-600" /> Mensagem</> :
+                   ad.contact_method === "phone" ? "Telefone" : <><Mail className="h-4 w-4 text-lup-600" /> Email</>}
                 </p>
               </div>
             </div>
 
-            <div className="bg-lup-50 p-6 rounded-lg mb-6">
-              <h2 className="text-lg font-semibold text-lup-900 mb-4">Anunciante</h2>
+            <div className="mb-7 rounded-2xl border border-lup-100 bg-lup-50 p-5 sm:p-6">
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-extrabold text-lup-950"><UserRound className="h-5 w-5 text-lup-600" /> Anunciante</h2>
               {ad.author ? (
                 <div className="flex items-center gap-4">
                   {ad.author.avatar_url && (
-                    <img src={ad.author.avatar_url} alt={ad.author.username} className="w-16 h-16 rounded-full" />
+                    <img src={ad.author.avatar_url} alt={ad.author.username} className="h-14 w-14 rounded-2xl object-cover" />
                   )}
                   <div>
-                    <p className="font-semibold text-lup-900">{ad.author.username}</p>
-                    <Link href={`/perfil/${ad.author.id}`} className="text-lup-700 hover:text-lup-900">
+                    <p className="font-extrabold text-lup-950">{ad.author.username}</p>
+                    <Link href={`/perfil/${ad.author.id}`} className="text-sm font-bold text-lup-700 hover:text-lup-950">
                       Ver Perfil →
                     </Link>
                   </div>
@@ -206,16 +206,17 @@ export default async function LupAdPage({
               )}
             </div>
 
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="flex flex-col gap-3 md:flex-row">
               <ContactSellerForm adId={ad.id} sellerId={ad.author_id} currentUserId={user?.id} />
               <LupFavoriteButton adId={ad.id} isFavorite={isFavorite} isLoggedIn={!!user} variant="detail" />
               <Link href="/lup" className="flex-1">
-                <button className="w-full border border-lup-200 text-lup-700 font-medium py-3 px-4 rounded-lg hover:bg-lup-50">
+                <span className="flex min-h-12 w-full items-center justify-center rounded-xl border border-lup-200 px-4 py-3 font-bold text-lup-700 transition hover:bg-lup-50">
                   Voltar à Lista
-                </button>
+                </span>
               </Link>
             </div>
-          </div>
+            </div>
+          </article>
         </main>
       </div>
     </>
