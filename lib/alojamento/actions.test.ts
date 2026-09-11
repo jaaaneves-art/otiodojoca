@@ -32,28 +32,28 @@ const DADOS_VALIDOS = {
   num_pessoas: 2,
   num_quartos: 1,
   tipo_refeicao: 'sem_refeicoes' as const,
-  preco_total: 120,
 };
 
 /**
- * Mock mínimo do cliente Supabase — só a cadeia de métodos que
- * criarReservaAlojamento() efetivamente usa (auth.getUser + from().insert().select().single()).
+ * Mock mínimo do cliente Supabase para criarReservaAlojamento() —
+ * REESCRITO: a função já não faz nenhuma validação em JS (sessão, datas,
+ * disponibilidade, preço) nem insere diretamente em reservas_alojamento.
+ * Passa tudo, tal e qual, para a RPC criar_reserva_alojamento(), que corre
+ * no Postgres como SECURITY DEFINER e resolve o utilizador com auth.uid()
+ * — por isso a assinatura da função nem aceita um id de utilizador vindo
+ * do cliente. Ver
+ * supabase/migrations/20260911153000_reserva_alojamento_rpc_transacional.sql
+ * e os testes pgTAP em
+ * supabase/tests/database/20260911153001_testes_reserva_alojamento_rpc.test.sql
+ * (esses sim correm contra Postgres a sério; estes aqui só verificam que
+ * o wrapper em JS chama a RPC certa e propaga o resultado/erro).
  */
-function mockSupabase({
-  user = { id: 'user-123' } as { id: string } | null,
-  insertData = { id: 1, status: 'pendente' } as unknown,
-  insertError = null as { message: string } | null,
+function mockSupabaseRpc({
+  rpcData = { id: 1, status: 'pendente' } as unknown,
+  rpcError = null as { message: string } | null,
 } = {}) {
-  const single = vi.fn().mockResolvedValue({ data: insertData, error: insertError });
-  const select = vi.fn().mockReturnValue({ single });
-  const insert = vi.fn().mockReturnValue({ select });
-  const from = vi.fn().mockReturnValue({ insert });
-
-  return {
-    auth: { getUser: vi.fn().mockResolvedValue({ data: { user } }) },
-    from,
-    _insert: insert, // exposto para os testes verificarem os argumentos do insert
-  };
+  const rpc = vi.fn().mockResolvedValue({ data: rpcData, error: rpcError });
+  return { rpc };
 }
 
 describe('criarReservaAlojamento', () => {
@@ -61,18 +61,23 @@ describe('criarReservaAlojamento', () => {
     vi.mocked(createClient).mockReset();
   });
 
-  it('rejeita se não houver sessão iniciada', async () => {
-    const supabase = mockSupabase({ user: null });
+  it('rejeita se não houver sessão iniciada (erro devolvido pela RPC)', async () => {
+    const supabase = mockSupabaseRpc({
+      rpcData: null,
+      rpcError: { message: 'É preciso iniciar sessão para fazer uma reserva.' },
+    });
     vi.mocked(createClient).mockResolvedValue(supabase as any);
 
     await expect(criarReservaAlojamento(DADOS_VALIDOS)).rejects.toThrow(
       'É preciso iniciar sessão para fazer uma reserva.'
     );
-    expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it('rejeita se a data de saída não for depois da data de entrada', async () => {
-    const supabase = mockSupabase();
+  it('rejeita se a data de saída não for depois da data de entrada (erro devolvido pela RPC)', async () => {
+    const supabase = mockSupabaseRpc({
+      rpcData: null,
+      rpcError: { message: 'Data de saída deve ser após data de entrada' },
+    });
     vi.mocked(createClient).mockResolvedValue(supabase as any);
 
     await expect(
@@ -82,35 +87,52 @@ describe('criarReservaAlojamento', () => {
         data_saida: '2026-09-10',
       })
     ).rejects.toThrow('Data de saída deve ser após data de entrada');
-    expect(supabase.from).not.toHaveBeenCalled();
   });
 
-  it('liga a reserva ao utilizador autenticado, nunca a um user_id vindo do cliente', async () => {
-    const supabase = mockSupabase({ user: { id: 'user-abc' } });
+  it('chama a RPC certa, sem nenhum campo de identidade vindo do cliente', async () => {
+    const supabase = mockSupabaseRpc();
     vi.mocked(createClient).mockResolvedValue(supabase as any);
 
     await criarReservaAlojamento(DADOS_VALIDOS);
 
-    expect(supabase._insert).toHaveBeenCalledWith([
-      expect.objectContaining({ user_id: 'user-abc', status: 'pendente' }),
-    ]);
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'criar_reserva_alojamento',
+      expect.objectContaining({
+        p_alojamento_id: DADOS_VALIDOS.alojamento_id,
+        p_nome_hospede: DADOS_VALIDOS.nome_hospede,
+        p_email_hospede: DADOS_VALIDOS.email_hospede,
+        p_data_entrada: DADOS_VALIDOS.data_entrada,
+        p_data_saida: DADOS_VALIDOS.data_saida,
+        p_num_pessoas: DADOS_VALIDOS.num_pessoas,
+        p_num_quartos: DADOS_VALIDOS.num_quartos,
+        p_tipo_refeicao: DADOS_VALIDOS.tipo_refeicao,
+      })
+    );
+
+    // O utilizador é sempre resolvido dentro da RPC via auth.uid() — a
+    // assinatura de criarReservaAlojamento() nem tem onde receber um id
+    // vindo do cliente, mas isto protege também contra um futuro refactor
+    // que volte a acrescentar esse campo.
+    const argumentosRpc = supabase.rpc.mock.calls[0][1] as Record<string, unknown>;
+    expect(argumentosRpc).not.toHaveProperty('user_id');
+    expect(argumentosRpc).not.toHaveProperty('p_user_id');
   });
 
-  it('propaga o erro do Supabase (ex: RLS a bloquear o insert)', async () => {
-    const supabase = mockSupabase({
-      insertData: null,
-      insertError: { message: 'new row violates row-level security policy' },
+  it('propaga o erro devolvido pela RPC (ex: RLS/validação a bloquear a reserva)', async () => {
+    const supabase = mockSupabaseRpc({
+      rpcData: null,
+      rpcError: { message: 'Sem disponibilidade para as datas escolhidas.' },
     });
     vi.mocked(createClient).mockResolvedValue(supabase as any);
 
     await expect(criarReservaAlojamento(DADOS_VALIDOS)).rejects.toThrow(
-      'Erro ao criar reserva: new row violates row-level security policy'
+      'Sem disponibilidade para as datas escolhidas.'
     );
   });
 
   it('devolve a reserva criada quando tudo corre bem', async () => {
     const reservaCriada = { id: 42, status: 'pendente' };
-    const supabase = mockSupabase({ insertData: reservaCriada });
+    const supabase = mockSupabaseRpc({ rpcData: reservaCriada });
     vi.mocked(createClient).mockResolvedValue(supabase as any);
 
     const resultado = await criarReservaAlojamento(DADOS_VALIDOS);

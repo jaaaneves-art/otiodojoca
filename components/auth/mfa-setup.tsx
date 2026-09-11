@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { dispensarConfiguracaoMfa } from "@/lib/auth/actions";
+import { safeNext } from "@/lib/auth/safe-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,7 +118,7 @@ export function MfaSetup({ opcional = false }: MfaSetupProps) {
       return;
     }
 
-    const next = searchParams.get("next") || "/";
+    const next = safeNext(searchParams.get("next"));
     router.push(next);
     router.refresh();
   }
@@ -134,7 +135,7 @@ export function MfaSetup({ opcional = false }: MfaSetupProps) {
       return;
     }
 
-    const next = searchParams.get("next") || "/";
+    const next = safeNext(searchParams.get("next"));
     router.push(next);
     router.refresh();
   }

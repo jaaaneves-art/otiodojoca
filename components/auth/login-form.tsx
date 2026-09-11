@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { safeNext } from "@/lib/auth/safe-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,7 +46,7 @@ export function LoginForm() {
     // todos os logins seguintes, mesmo depois de o utilizador já ter dito
     // que não queria configurar. Navegar sempre para o destino e deixar o
     // middleware redirecionar se for mesmo preciso.
-    const next = searchParams.get("next") || "/";
+    const next = safeNext(searchParams.get("next"));
     router.push(next);
     router.refresh();
   }

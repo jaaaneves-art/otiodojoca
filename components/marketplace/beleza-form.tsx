@@ -117,7 +117,7 @@ export function BelezaForm({ userId, modo, categoriaPadrao = 'cabelo', servicoEx
       };
 
       const resultado =
-        modo === 'criar' ? await criarBeleza(dados, userId) : await atualizarBeleza(servicoExistente!.id, dados, userId);
+        modo === 'criar' ? await criarBeleza(dados) : await atualizarBeleza(servicoExistente!.id, dados);
 
       if (resultado.sucesso) {
         router.push('/beleza/' + categoria + '/' + resultado.id);

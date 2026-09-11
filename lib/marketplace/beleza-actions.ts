@@ -3,6 +3,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { extensaoParaImagem, validarImagem } from '@/lib/uploads/validar-imagem';
 import { revalidatePath } from 'next/cache';
 import { BelezaFormSchema, BelezaFormData, CATEGORIA_NOMES, CATEGORIA_SLUGS } from './beleza-types';
 
@@ -31,7 +32,16 @@ async function uploadFotos(
   const urls: string[] = [];
   for (let i = 0; i < fotos.length; i++) {
     const file = fotos[i];
-    const filePath = `${adId}/${adId}-${i}-${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+
+    const erro = await validarImagem(file);
+    if (erro) {
+      console.error(`[beleza] Imagem ${i + 1} rejeitada:`, erro);
+      continue;
+    }
+
+    // Nome sempre gerado pelo servidor -- file.name nunca entra no
+    // caminho gravado no Storage (só o tipo real, já confirmado acima).
+    const filePath = `${adId}/${adId}-${i}-${Date.now()}-${Math.random().toString(36).slice(2)}.${extensaoParaImagem(file.type)}`;
     const { error: uploadError } = await supabase.storage
       .from('marketplace-images')
       .upload(filePath, file, { cacheControl: '3600', upsert: false });
@@ -74,16 +84,25 @@ function buildDetails(validado: BelezaFormData) {
   };
 }
 
-export async function criarBeleza(data: BelezaFormData, userId: string) {
+export async function criarBeleza(data: BelezaFormData) {
   try {
     const validado = BelezaFormSchema.parse(data);
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
+
     const categoryId = await resolverCategoriaId(supabase, CATEGORIA_SLUGS[validado.categoria]);
 
     const { data: ad, error: adError } = await supabase
       .from('marketplace_ads')
       .insert({
-        author_id: userId,
+        author_id: user.id,
         title: validado.nome,
         description: validado.descricao,
         category_id: categoryId,
@@ -115,10 +134,19 @@ export async function criarBeleza(data: BelezaFormData, userId: string) {
   }
 }
 
-export async function atualizarBeleza(adId: number, data: BelezaFormData, userId: string) {
+export async function atualizarBeleza(adId: number, data: BelezaFormData) {
   try {
     const validado = BelezaFormSchema.parse(data);
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
+
     const categoryId = await resolverCategoriaId(supabase, CATEGORIA_SLUGS[validado.categoria]);
 
     const { data: atualizado, error: updateError } = await supabase
@@ -131,7 +159,7 @@ export async function atualizarBeleza(adId: number, data: BelezaFormData, userId
         details: buildDetails(validado),
       })
       .eq('id', adId)
-      .eq('author_id', userId)
+      .eq('author_id', user.id)
       .select()
       .single();
 
@@ -159,9 +187,17 @@ export async function atualizarBeleza(adId: number, data: BelezaFormData, userId
   }
 }
 
-export async function apagarBeleza(adId: number, userId: string) {
+export async function apagarBeleza(adId: number) {
   try {
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
 
     const { data: fotos } = await supabase.from('marketplace_photos').select('storage_path').eq('ad_id', adId);
     if (fotos && fotos.length > 0) {
@@ -176,7 +212,7 @@ export async function apagarBeleza(adId: number, userId: string) {
       }
     }
 
-    const { error: deleteError } = await supabase.from('marketplace_ads').delete().eq('id', adId).eq('author_id', userId);
+    const { error: deleteError } = await supabase.from('marketplace_ads').delete().eq('id', adId).eq('author_id', user.id);
     if (deleteError) throw deleteError;
 
     revalidatePath('/beleza');

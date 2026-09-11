@@ -3,6 +3,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { AdForm } from "@/components/mercado-da-terra/ad-form";
 import MarketplaceNavbar from "@/components/mercado-da-terra/marketplace-navbar";
+import {
+  IMAGEM_MAX_FICHEIROS,
+  extensaoParaImagem,
+  validarImagem,
+} from "@/lib/uploads/validar-imagem";
 
 async function createAd(formData: FormData) {
   "use server";
@@ -27,7 +32,25 @@ async function createAd(formData: FormData) {
   // Campo próprio da Troca -- não confundir com "seeking" da Procura
   // (ver lib/mercado-da-terra/ad-types.ts).
   const wantsToReceive = formData.get("wantsToReceive") as string | null;
-  const imageCount = parseInt(formData.get("image_count") as string) || 0;
+  // "image_count" continua a vir do cliente, mas é só um limite superior
+  // do ciclo abaixo -- nunca é gravado nem confiado sem mais. Cada
+  // ficheiro é lido e validado individualmente antes de qualquer upload.
+  const imageCountBruto = parseInt(formData.get("image_count") as string) || 0;
+  const imageCount = Math.min(Math.max(imageCountBruto, 0), IMAGEM_MAX_FICHEIROS);
+
+  // Valida TODAS as imagens antes de criar o anúncio -- se alguma for
+  // inválida, falha cedo e não deixa um anúncio sem fotos (ou com fotos a
+  // meio) para trás.
+  const ficheiros: File[] = [];
+  for (let i = 0; i < imageCount; i++) {
+    const file = formData.get(`image_${i}`) as File | null;
+    if (!file) continue;
+    const erro = await validarImagem(file);
+    if (erro) {
+      throw new Error(`Imagem ${i + 1}: ${erro}`);
+    }
+    ficheiros.push(file);
+  }
 
   const details: Record<string, string> = {};
   if (seeking) details.seeking = seeking;
@@ -58,14 +81,16 @@ async function createAd(formData: FormData) {
 
   console.log(`✅ Anúncio ${ad.id} criado`);
 
-  for (let i = 0; i < imageCount; i++) {
-    const file = formData.get(`image_${i}`) as File;
-    if (!file) continue;
+  for (let i = 0; i < ficheiros.length; i++) {
+    const file = ficheiros[i];
 
-    console.log(`📤 Upload imagem ${i + 1}/${imageCount}: ${file.name}`);
+    console.log(`📤 Upload imagem ${i + 1}/${ficheiros.length}: ${file.name}`);
 
-    const fileName = `${ad.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-    
+    // Nome sempre gerado pelo servidor (nunca a partir de file.name) e
+    // com a extensão a corresponder ao MIME real, já confirmado por
+    // validarImagem() acima -- não força mais ".jpg" para tudo.
+    const fileName = `${ad.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${extensaoParaImagem(file.type)}`;
+
     const { error: uploadError } = await supabase.storage
       .from("marketplace-photos")
       .upload(fileName, file);

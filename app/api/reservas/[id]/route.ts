@@ -38,6 +38,9 @@ export async function POST(
       return NextResponse.json({ error: 'Campos obrigatórios faltando' }, { status: 400 });
     }
 
+    // preco_total deixou de ser aceite aqui -- é calculado dentro da RPC
+    // criar_reserva_alojamento() a partir de alojamentos.preco_noite e das
+    // refeições selecionadas, nunca a partir do que o cliente envia.
     const reserva = await criarReservaAlojamento({
       alojamento_id: alojamentoId,
       nome_hospede: body.nome_hospede,
@@ -48,7 +51,6 @@ export async function POST(
       num_pessoas: body.num_pessoas,
       num_quartos: body.num_quartos,
       tipo_refeicao: body.tipo_refeicao,
-      preco_total: body.preco_total,
       observacoes: body.observacoes || undefined,
     });
 

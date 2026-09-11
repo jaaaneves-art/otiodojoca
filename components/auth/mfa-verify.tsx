@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { safeNext } from "@/lib/auth/safe-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -81,7 +82,7 @@ export function MfaVerify() {
       return;
     }
 
-    const next = searchParams.get("next") || "/";
+    const next = safeNext(searchParams.get("next"));
     router.push(next);
     router.refresh();
   }

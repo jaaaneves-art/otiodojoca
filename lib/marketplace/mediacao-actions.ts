@@ -3,6 +3,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { extensaoParaImagem, validarImagem } from '@/lib/uploads/validar-imagem';
 import { revalidatePath } from 'next/cache';
 import { MediacaoFormSchema, MediacaoFormData, CATEGORIA_NOMES, CATEGORIA_SLUGS } from './mediacao-tipos';
 
@@ -31,7 +32,16 @@ async function uploadFotos(
   const urls: string[] = [];
   for (let i = 0; i < fotos.length; i++) {
     const file = fotos[i];
-    const filePath = `${adId}/${adId}-${i}-${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+
+    const erro = await validarImagem(file);
+    if (erro) {
+      console.error(`[mediacao] Imagem ${i + 1} rejeitada:`, erro);
+      continue;
+    }
+
+    // Nome sempre gerado pelo servidor -- file.name nunca entra no
+    // caminho gravado no Storage (só o tipo real, já confirmado acima).
+    const filePath = `${adId}/${adId}-${i}-${Date.now()}-${Math.random().toString(36).slice(2)}.${extensaoParaImagem(file.type)}`;
     const { error: uploadError } = await supabase.storage
       .from('marketplace-images')
       .upload(filePath, file, { cacheControl: '3600', upsert: false });
@@ -76,16 +86,25 @@ function buildDetails(validado: MediacaoFormData) {
   };
 }
 
-export async function criarMediacao(data: MediacaoFormData, userId: string) {
+export async function criarMediacao(data: MediacaoFormData) {
   try {
     const validado = MediacaoFormSchema.parse(data);
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
+
     const categoryId = await resolverCategoriaId(supabase, CATEGORIA_SLUGS[validado.categoria]);
 
     const { data: ad, error: adError } = await supabase
       .from('marketplace_ads')
       .insert({
-        author_id: userId,
+        author_id: user.id,
         title: validado.nome,
         description: validado.descricao,
         category_id: categoryId,
@@ -117,10 +136,19 @@ export async function criarMediacao(data: MediacaoFormData, userId: string) {
   }
 }
 
-export async function atualizarMediacao(adId: number, data: MediacaoFormData, userId: string) {
+export async function atualizarMediacao(adId: number, data: MediacaoFormData) {
   try {
     const validado = MediacaoFormSchema.parse(data);
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
+
     const categoryId = await resolverCategoriaId(supabase, CATEGORIA_SLUGS[validado.categoria]);
 
     const { data: atualizado, error: updateError } = await supabase
@@ -133,7 +161,7 @@ export async function atualizarMediacao(adId: number, data: MediacaoFormData, us
         details: buildDetails(validado),
       })
       .eq('id', adId)
-      .eq('author_id', userId)
+      .eq('author_id', user.id)
       .select()
       .single();
 
@@ -161,9 +189,17 @@ export async function atualizarMediacao(adId: number, data: MediacaoFormData, us
   }
 }
 
-export async function apagarMediacao(adId: number, userId: string) {
+export async function apagarMediacao(adId: number) {
   try {
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
 
     const { data: fotos } = await supabase.from('marketplace_photos').select('storage_path').eq('ad_id', adId);
     if (fotos && fotos.length > 0) {
@@ -178,7 +214,7 @@ export async function apagarMediacao(adId: number, userId: string) {
       }
     }
 
-    const { error: deleteError } = await supabase.from('marketplace_ads').delete().eq('id', adId).eq('author_id', userId);
+    const { error: deleteError } = await supabase.from('marketplace_ads').delete().eq('id', adId).eq('author_id', user.id);
     if (deleteError) throw deleteError;
 
     revalidatePath('/mediacao');

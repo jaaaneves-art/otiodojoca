@@ -115,7 +115,7 @@ export function MediacaoForm({ userId, modo, categoriaPadrao = 'mediacao_seguros
       };
 
       const resultado =
-        modo === 'criar' ? await criarMediacao(dados, userId) : await atualizarMediacao(perfilExistente!.id, dados, userId);
+        modo === 'criar' ? await criarMediacao(dados) : await atualizarMediacao(perfilExistente!.id, dados);
 
       if (resultado.sucesso) {
         router.push('/mediacao/' + categoria + '/' + resultado.id);

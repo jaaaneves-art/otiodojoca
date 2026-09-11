@@ -9,6 +9,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { extensaoParaImagem, validarImagem } from '@/lib/uploads/validar-imagem';
 import {
   RetailingFormSchema,
   RetailingFormData,
@@ -42,7 +43,16 @@ async function uploadFotos(
   const urls: string[] = [];
   for (let i = 0; i < fotos.length; i++) {
     const file = fotos[i];
-    const fileName = `${adId}-${i}-${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+
+    const erro = await validarImagem(file);
+    if (erro) {
+      console.error(`[retailing] Imagem ${i + 1} rejeitada:`, erro);
+      continue;
+    }
+
+    // Nome sempre gerado pelo servidor -- file.name nunca entra no
+    // caminho gravado no Storage (só o tipo real, já confirmado acima).
+    const fileName = `${adId}-${i}-${Date.now()}-${Math.random().toString(36).slice(2)}.${extensaoParaImagem(file.type)}`;
     const filePath = `${adId}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
@@ -99,17 +109,28 @@ function buildDetails(validado: RetailingFormData) {
   };
 }
 
-export async function criarRetailing(data: RetailingFormData, userId: string) {
+export async function criarRetailing(data: RetailingFormData) {
   try {
     const validado = RetailingFormSchema.parse(data);
     const supabase = await createClient();
+
+    // O autor vem SEMPRE da sessão do servidor, nunca de um argumento do
+    // cliente -- uma Server Action é um endpoint invocável diretamente,
+    // não só a partir do formulário que a chama à vista.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
 
     const categoryId = await resolverCategoriaId(supabase, CATEGORIA_SLUGS[validado.categoria]);
 
     const { data: ad, error: adError } = await supabase
       .from('marketplace_ads')
       .insert({
-        author_id: userId,
+        author_id: user.id,
         title: validado.nome,
         description: validado.descricao,
         category_id: categoryId,
@@ -145,10 +166,18 @@ export async function criarRetailing(data: RetailingFormData, userId: string) {
   }
 }
 
-export async function atualizarRetailing(adId: number, data: RetailingFormData, userId: string) {
+export async function atualizarRetailing(adId: number, data: RetailingFormData) {
   try {
     const validado = RetailingFormSchema.parse(data);
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
 
     const categoryId = await resolverCategoriaId(supabase, CATEGORIA_SLUGS[validado.categoria]);
 
@@ -162,7 +191,7 @@ export async function atualizarRetailing(adId: number, data: RetailingFormData, 
         details: buildDetails(validado),
       })
       .eq('id', adId)
-      .eq('author_id', userId)
+      .eq('author_id', user.id)
       .select()
       .single();
 
@@ -191,9 +220,17 @@ export async function atualizarRetailing(adId: number, data: RetailingFormData, 
   }
 }
 
-export async function apagarRetailing(adId: number, userId: string) {
+export async function apagarRetailing(adId: number) {
   try {
     const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { sucesso: false, erro: 'É preciso iniciar sessão.' };
+    }
 
     const { data: fotos } = await supabase
       .from('marketplace_photos')
@@ -217,7 +254,7 @@ export async function apagarRetailing(adId: number, userId: string) {
       .from('marketplace_ads')
       .delete()
       .eq('id', adId)
-      .eq('author_id', userId);
+      .eq('author_id', user.id);
 
     if (deleteError) throw deleteError;
 

@@ -85,8 +85,8 @@ export function ConsultorioForm({ userId, modo, consultorioExistente }: Consulto
 
       const resultado =
         modo === 'criar'
-          ? await criarConsultorio(dados, userId)
-          : await atualizarConsultorio(consultorioExistente!.id, dados, userId);
+          ? await criarConsultorio(dados)
+          : await atualizarConsultorio(consultorioExistente!.id, dados);
 
       if (resultado.sucesso) {
         router.push('/consultorios/' + resultado.id);

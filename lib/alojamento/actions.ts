@@ -197,6 +197,14 @@ export async function obterRefeicoesAlojamento(alojamentoId: number) {
 
 /**
  * Criar nova reserva de alojamento
+ *
+ * CORRIGIDO — deixou de aceitar `preco_total` do cliente e de fazer
+ * INSERT direto. Preço, disponibilidade (capacidade de quartos) e datas
+ * são agora validados dentro de criar_reserva_alojamento(), uma RPC
+ * SECURITY DEFINER que bloqueia o alojamento durante o cálculo (ver
+ * supabase/migrations/20260911153000_reserva_alojamento_rpc_transacional.sql).
+ * A policy de INSERT direto em reservas_alojamento foi removida na mesma
+ * migration -- só é possível reservar através desta função.
  */
 export async function criarReservaAlojamento(dados: {
   alojamento_id: number;
@@ -208,57 +216,27 @@ export async function criarReservaAlojamento(dados: {
   num_pessoas: number;
   num_quartos: number;
   tipo_refeicao: TipoRefeicao;
-  preco_total: number;
   observacoes?: string;
 }) {
   const supabase = await createClient();
 
-  // RISCO-02 (docs/pendentes/RELATORIO-BACKEND-API-BLOCO6-20260823.md):
-  // a reserva fica ligada ao utilizador autenticado que a cria. A RLS de
-  // reservas_alojamento agora exige auth.uid() = user_id no INSERT, por
-  // isso esta verificação aqui é só para dar um erro claro em vez de
-  // deixar a RLS falhar com uma mensagem genérica do Postgres.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error('É preciso iniciar sessão para fazer uma reserva.');
-  }
-
-  // Validar datas
-  const entrada = new Date(dados.data_entrada);
-  const saida = new Date(dados.data_saida);
-
-  if (saida <= entrada) {
-    throw new Error('Data de saída deve ser após data de entrada');
-  }
-
-  // Criar reserva
-  const { data: reserva, error } = await supabase
-    .from('reservas_alojamento')
-    .insert([
-      {
-        alojamento_id: dados.alojamento_id,
-        user_id: user.id,
-        nome_hospede: dados.nome_hospede,
-        email_hospede: dados.email_hospede,
-        telefone_hospede: dados.telefone_hospede || null,
-        data_entrada: dados.data_entrada,
-        data_saida: dados.data_saida,
-        num_pessoas: dados.num_pessoas,
-        num_quartos: dados.num_quartos,
-        tipo_refeicao: dados.tipo_refeicao,
-        preco_total: dados.preco_total,
-        status: 'pendente',
-        observacoes: dados.observacoes || null,
-      },
-    ])
-    .select()
-    .single();
+  const { data: reserva, error } = await supabase.rpc('criar_reserva_alojamento', {
+    p_alojamento_id: dados.alojamento_id,
+    p_nome_hospede: dados.nome_hospede,
+    p_email_hospede: dados.email_hospede,
+    p_telefone_hospede: dados.telefone_hospede || null,
+    p_data_entrada: dados.data_entrada,
+    p_data_saida: dados.data_saida,
+    p_num_pessoas: dados.num_pessoas,
+    p_num_quartos: dados.num_quartos,
+    p_tipo_refeicao: dados.tipo_refeicao,
+    p_observacoes: dados.observacoes || null,
+  });
 
   if (error) {
-    throw new Error(`Erro ao criar reserva: ${error.message}`);
+    // A RPC devolve mensagens já em português, seguras para mostrar
+    // diretamente (sessão em falta, datas inválidas, sem disponibilidade).
+    throw new Error(error.message || 'Erro ao criar reserva.');
   }
 
   return reserva as ReservaAlojamento;

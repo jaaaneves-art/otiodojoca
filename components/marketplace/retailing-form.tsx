@@ -162,8 +162,8 @@ export function RetailingForm({
 
       const resultado =
         modo === 'criar'
-          ? await criarRetailing(dados, userId)
-          : await atualizarRetailing(estabelecimentoExistente!.id, dados, userId);
+          ? await criarRetailing(dados)
+          : await atualizarRetailing(estabelecimentoExistente!.id, dados);
 
       if (resultado.sucesso) {
         router.push('/retailing/' + categoria + '/' + resultado.id);

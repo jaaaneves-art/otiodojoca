@@ -109,8 +109,10 @@ export default function ReservaForm({
         num_pessoas: Number(formData.num_pessoas),
         num_quartos: Number(formData.num_quartos),
         tipo_refeicao: formData.tipo_refeicao as TipoRefeicao,
-        preco_total: precoTotal,
         observacoes: formData.observacoes || undefined,
+        // O preço final é calculado e validado no servidor, dentro da RPC
+        // criar_reserva_alojamento() — "precoTotal" aqui é só a estimativa
+        // mostrada ao utilizador antes de submeter (ver bloco mais abaixo).
       });
 
       setSuccess('Reserva criada com sucesso! Vai receber confirmação em breve.');
