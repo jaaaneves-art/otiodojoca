@@ -6,7 +6,7 @@ const FEED_PATH = '/comunidade/feed';
 
 export async function createPost(content: string) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Não autenticado' };
     const { error } = await supabase.rpc('social_create_post', { p_content: content });
@@ -18,7 +18,7 @@ export async function createPost(content: string) {
 
 export async function createComment(postId: string, content: string) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Não autenticado' };
     const { error } = await supabase.rpc('social_create_comment', { p_post: postId, p_content: content });
@@ -30,7 +30,7 @@ export async function createComment(postId: string, content: string) {
 
 export async function toggleReaction(postId: string, reactionType: string) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Não autenticado' };
     const { error } = await supabase.rpc('social_toggle_reaction', { p_post_id: postId, p_reaction_type: reactionType });
