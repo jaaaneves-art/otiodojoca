@@ -22,6 +22,8 @@ const PUBLIC_PATH_PREFIXES = [
   "/freguesia",
   "/freguesias",
   "/privacidade",
+  "/termos",
+  "/eliminar-dados",
 ];
 
 // Módulos tipo "montra" (mercados/leilões): ver anúncios e detalhes é
