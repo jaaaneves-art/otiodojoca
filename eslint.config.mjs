@@ -2,17 +2,20 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
 
   {
-    // O registo do plugin "react" feito por eslint-config-next/core-web-vitals
-    // nao chega a este bloco em flat config (ESLint 9 + Next 16) -- sem isto,
-    // "react/no-unescaped-entities" falha com "could not find plugin react".
+    // O registo dos plugins "react" e "react-hooks" feito por
+    // eslint-config-next/core-web-vitals nao chega a este bloco em flat
+    // config (ESLint 9 + Next 16) -- sem isto, as regras destes plugins
+    // falham com "could not find plugin ...".
     plugins: {
       react: reactPlugin,
+      "react-hooks": reactHooksPlugin,
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
@@ -25,6 +28,7 @@ export default defineConfig([
 
   globalIgnores([
     ".next/**",
+    ".next-e2e/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
