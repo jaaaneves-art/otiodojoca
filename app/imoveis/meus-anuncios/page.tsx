@@ -42,8 +42,11 @@ export default async function MeusAnunciosImoveisPage() {
   }
 
   const renderCard = (ad: any, faded?: boolean) => (
-    <Link key={ad.id} href={`/imoveis/${ad.id}`}>
-      <div className={`bg-white rounded-lg border border-imoveis-200 hover:shadow-md transition cursor-pointer h-full overflow-hidden ${faded ? "opacity-60" : ""}`}>
+    <div
+      key={ad.id}
+      className={`bg-white rounded-lg border border-imoveis-200 hover:shadow-md transition h-full overflow-hidden flex flex-col ${faded ? "opacity-60" : ""}`}
+    >
+      <Link href={`/imoveis/${ad.id}`} className="block">
         {photosMap[ad.id] ? (
           <div className="w-full h-40 bg-imoveis-50">
             <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
@@ -69,8 +72,23 @@ export default async function MeusAnunciosImoveisPage() {
           )}
           <p className="text-sm text-imoveis-500">📍 {ad.location}</p>
         </div>
+      </Link>
+
+      <div className="mt-auto flex border-t border-imoveis-100">
+        <Link
+          href={`/imoveis/editar/${ad.id}`}
+          className="flex-1 text-center text-sm font-medium text-imoveis-700 py-3 hover:bg-imoveis-50 transition"
+        >
+          ✏️ Editar
+        </Link>
+        <Link
+          href={`/imoveis/${ad.id}`}
+          className="flex-1 text-center text-sm font-medium text-imoveis-600 py-3 border-l border-imoveis-100 hover:bg-imoveis-50 transition"
+        >
+          Ver anúncio
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 
   return (

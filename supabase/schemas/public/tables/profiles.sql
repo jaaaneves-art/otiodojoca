@@ -59,7 +59,16 @@ grant delete, insert, maintain, references, select, trigger, truncate, update on
 
 revoke all on table "public"."profiles" from "anon";
 
-grant delete, insert, maintain, references, select, trigger, truncate on table "public"."profiles" to "anon";
+grant delete, insert, maintain, references, trigger, truncate on table "public"."profiles" to "anon";
+
+-- 20260906090000_seguranca_proteger_email_perfis.sql: SELECT de tabela
+-- inteira expunha "email" (e outras colunas internas) a qualquer
+-- visitante através da chave publicável. Substituído por SELECT
+-- coluna-a-coluna nas colunas seguras para uso publico.
+grant select ("id", "username", "display_name", "bio", "location",
+              "avatar_url", "reputation", "role", "created_at",
+              "updated_at", "deleted_at")
+  on table "public"."profiles" to "anon";
 
 revoke all ("avatar_url") on table "public"."profiles" from "authenticated";
 
@@ -87,4 +96,14 @@ grant update ("mfa_setup_dismissed_at") on table "public"."profiles" to "authent
 
 revoke all on table "public"."profiles" from "authenticated";
 
-grant delete, insert, maintain, references, select, trigger, truncate on table "public"."profiles" to "authenticated";
+grant delete, insert, maintain, references, trigger, truncate on table "public"."profiles" to "authenticated";
+
+-- Mesma correção de 20260906090000, aplicada também a "authenticated".
+-- Inclui "mfa_setup_dismissed_at" (20260908200000_fix_mfa_setup_dismissed_at_grant.sql):
+-- essa coluna e lida pelo middleware (lib/supabase/middleware.ts) para
+-- saber se o utilizador ja dispensou a sugestao de MFA; sem este grant
+-- a query falha e cria um loop de redirecionamento para /mfa/setup.
+grant select ("id", "username", "display_name", "bio", "location",
+              "avatar_url", "reputation", "role", "created_at",
+              "updated_at", "deleted_at", "mfa_setup_dismissed_at")
+  on table "public"."profiles" to "authenticated";

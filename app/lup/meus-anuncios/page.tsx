@@ -42,8 +42,11 @@ export default async function MeusAnunciosLupPage() {
   }
 
   const renderCard = (ad: any, faded?: boolean) => (
-    <Link key={ad.id} href={`/lup/${ad.id}`}>
-      <div className={`bg-white rounded-lg border border-lup-200 hover:shadow-md transition cursor-pointer h-full overflow-hidden ${faded ? "opacity-60" : ""}`}>
+    <div
+      key={ad.id}
+      className={`bg-white rounded-lg border border-lup-200 hover:shadow-md transition h-full overflow-hidden flex flex-col ${faded ? "opacity-60" : ""}`}
+    >
+      <Link href={`/lup/${ad.id}`} className="block">
         {photosMap[ad.id] ? (
           <div className="w-full h-40 bg-lup-50">
             <img src={photosMap[ad.id]} alt={ad.title} className="w-full h-full object-cover" />
@@ -64,8 +67,23 @@ export default async function MeusAnunciosLupPage() {
           )}
           <p className="text-sm text-lup-500">📍 {ad.location}</p>
         </div>
+      </Link>
+
+      <div className="mt-auto flex border-t border-lup-100">
+        <Link
+          href={`/lup/editar/${ad.id}`}
+          className="flex-1 text-center text-sm font-medium text-lup-700 py-3 hover:bg-lup-50 transition"
+        >
+          ✏️ Editar
+        </Link>
+        <Link
+          href={`/lup/${ad.id}`}
+          className="flex-1 text-center text-sm font-medium text-lup-600 py-3 border-l border-lup-100 hover:bg-lup-50 transition"
+        >
+          Ver anúncio
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 
   return (
