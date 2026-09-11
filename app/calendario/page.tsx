@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import LocalizacaoCalendario from "@/components/calendario/localizacao-calendario";
 import type { Localizacao } from "@/components/entidades/localizacao";
 import { infoLua, estaCrescente } from "@/lib/calendario/lua";
@@ -115,7 +116,7 @@ export default function CalendarioPage() {
         </div>
 
         <div className="relative max-w-4xl mx-auto px-4 pt-6 pb-12">
-          <a href="/" className="text-slate-300 hover:text-white text-sm">← Início</a>
+          <Link href="/" className="text-slate-300 hover:text-white text-sm">← Início</Link>
           <div className="flex flex-col items-center text-center mt-6">
             {deDia ? (
               <div

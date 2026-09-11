@@ -96,11 +96,10 @@ const loaderInstance = new AlmanaqueDiarioLoader(almanaque as AlmanaqueDiarioTyp
  */
 export function useAlmanaque(data?: Date | string) {
   return useMemo(() => {
-    if (!data) {
-      // Se sem data, retornar hoje
-      data = new Date();
-    }
-    return loaderInstance.obterPorData(data);
+    // Se sem data, usar hoje -- variável local, sem reatribuir o
+    // parâmetro (useMemo() não pode ter efeitos colaterais no callback).
+    const dataEfetiva = data ?? new Date();
+    return loaderInstance.obterPorData(dataEfetiva);
   }, [data]);
 }
 

@@ -32,5 +32,10 @@ export default defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Gerado localmente pelo `supabase start` (bundle do Edge Runtime) --
+    // nao e codigo do projeto, so aparece na maquina de quem corre o
+    // Supabase local, e minificado (uma linha gigante) faz disparar
+    // centenas de falsos positivos (prefer-const, no-unused-vars, etc.).
+    "supabase/.temp/**",
   ]),
 ]);

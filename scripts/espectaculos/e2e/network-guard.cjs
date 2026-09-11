@@ -1,4 +1,5 @@
 // Test process only: forbid outbound network even if a fixture misses a service call.
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- script CommonJS (.cjs) de propósito, corre fora do bundle Next.
 const net=require('node:net');
 const original=net.Socket.prototype.connect;
 net.Socket.prototype.connect=function(...args){

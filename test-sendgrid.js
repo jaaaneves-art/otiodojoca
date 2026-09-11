@@ -1,4 +1,5 @@
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- script Node solto (fora do build Next), corrido manualmente com `node test-sendgrid.js`.
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
