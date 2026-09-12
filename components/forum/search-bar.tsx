@@ -22,7 +22,7 @@ export function SearchBar() {
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Pesquisar no forum..."
+        placeholder="Pesquisar no Fórum Agrícola..."
         className="pl-10"
       />
     </form>

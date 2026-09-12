@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function LoginPage() {
   return (
     <div className="space-y-6">

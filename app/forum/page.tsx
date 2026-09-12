@@ -3,6 +3,12 @@ import { CategoryCard } from "@/components/forum/category-card";
 import { SearchBar } from "@/components/forum/search-bar";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Fórum Agrícola | O Tio do Joca",
+  description: "Pergunta, responde e partilha conhecimento agrícola com a comunidade.",
+};
 
 export default async function ForumPage() {
   const supabase = await createClient();
@@ -28,9 +34,9 @@ export default async function ForumPage() {
       <nav className="bg-white border-b border-terra-200 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="text-xl font-bold text-terra-800">Almanaque</Link>
+            <Link href="/" className="text-xl font-bold text-terra-800">O Tio do Joca</Link>
             <span className="text-terra-300">/</span>
-            <span className="text-terra-600">Forum</span>
+            <span className="text-terra-600">Fórum Agrícola</span>
           </div>
           <div className="flex items-center gap-3">
             <SearchBar />
@@ -42,7 +48,7 @@ export default async function ForumPage() {
       </nav>
 
       <main className="max-w-5xl mx-auto p-6">
-        <h1 className="text-3xl font-bold text-terra-900 mb-2">Forum</h1>
+        <h1 className="text-3xl font-bold text-terra-900 mb-2">Fórum Agrícola</h1>
         <p className="text-terra-600 mb-8">Partilha conhecimento, faz perguntas e aprende com a comunidade.</p>
 
         {categoriesWithCount?.map((category: any) => (

@@ -1,0 +1,194 @@
+npm notice run almanaque-comunidade@0.1.0 prebuild
+npm notice run npm run gerar:almanaque
+npm notice run almanaque-comunidade@0.1.0 gerar:almanaque
+npm notice run node scripts/gerar-almanaque.mjs
+almanaque.json gerado: 366 dias (esperado: 366, incluindo 29 de Fevereiro).
+Avisos (13):
+  - 01-15: bloco truncado em "### Resumo da primeira quinzena de Janeiro" (ruído editorial)
+  - 01-20: bloco truncado em "### Estado do Capítulo Janeiro" (ruído editorial)
+  - 02-07: bloco truncado em "### Concluído" (ruído editorial)
+  - 02-21: bloco truncado em "### Estado de Fevereiro" (ruído editorial)
+  - 03-07: bloco truncado em "### Concluído" (ruído editorial)
+  - 04-07: bloco truncado em "### Concluído" (ruído editorial)
+  - 04-14: bloco truncado em "### Próximo bloco: 15 a 21 de Abril" (ruído editorial)
+  - 05-07: bloco truncado em "### Concluído" (ruído editorial)
+  - 05-14: bloco truncado em "### RESUMO DA SEGUNDA SEMANA DE MAIO" (ruído editorial)
+  - 06-07: bloco truncado em "### Concluído" (ruído editorial)
+  - 07-07: bloco truncado em "### Concluído" (ruído editorial)
+  - 08-07: bloco truncado em "### Concluído" (ruído editorial)
+  - 09-07: bloco truncado em "### Concluído" (ruído editorial)
+npm notice run almanaque-comunidade@0.1.0 build
+npm notice run next build
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.js took 16ms
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 463ms
+  Running TypeScript ...
+  Finished TypeScript in 3.1s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/94) ...
+  Generating static pages using 3 workers (23/94) 
+  Generating static pages using 3 workers (46/94) 
+  Generating static pages using 3 workers (70/94) 
+✓ Generating static pages using 3 workers (94/94) in 638ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin/empregos
+├ ƒ /admin/entidades
+├ ƒ /admin/pets
+├ ƒ /agenda-agricola
+├ ƒ /agenda-agricola/nova
+├ ƒ /agenda-agricola/plantacao/[id]
+├ ○ /almanaque
+├ ƒ /almanaque/culturas
+├ ƒ /almanaque/culturas/[id]
+├ ƒ /almanaque/dashboard
+├ ƒ /alojamento
+├ ƒ /alojamento/[id]
+├ ƒ /api/cron/job-alerts
+├ ƒ /api/espectaculos/maintenance
+├ ƒ /api/espectaculos/payments/webhook
+├ ƒ /api/geocode
+├ ƒ /api/reservas/[id]
+├ ƒ /api/seed
+├ ƒ /api/seed-stands-teste
+├ ƒ /api/viaturas/catalogo
+├ ƒ /auth/callback
+├ ƒ /beleza/novo
+├ ○ /brevemente
+├ ○ /calendario
+├ ƒ /comer
+├ ƒ /comer/[id]
+├ ƒ /comunidade
+├ ƒ /comunidade/feed
+├ ƒ /comunidade/feed/[id]
+├ ƒ /comunidade/feed/imagens/[id]
+├ ƒ /consultorios/novo
+├ ○ /diaspora
+├ ○ /eliminar-dados
+├ ƒ /empregos
+├ ƒ /empregos/[id]
+├ ƒ /empregos/alertas
+├ ƒ /empregos/alertas/novo
+├ ƒ /empregos/candidaturas
+├ ƒ /empregos/empresa
+├ ƒ /empregos/empresa/vagas/[id]/candidaturas
+├ ƒ /empregos/empresa/vagas/[id]/editar
+├ ƒ /empregos/empresa/vagas/nova
+├ ƒ /entidades/[slug]
+├ ƒ /espectaculos
+├ ƒ /espectaculos/bilhetes/[ticketId]
+├ ƒ /espectaculos/checkout/[orderId]
+├ ƒ /espectaculos/encomendas
+├ ƒ /espectaculos/encomendas/[orderId]
+├ ƒ /espectaculos/eventos/[id]
+├ ƒ /espectaculos/organizador
+├ ƒ /espectaculos/organizador/eventos/[id]
+├ ƒ /espectaculos/organizador/eventos/[id]/encomendas
+├ ƒ /espectaculos/organizador/eventos/[id]/encomendas/[orderId]
+├ ƒ /espectaculos/organizador/eventos/[id]/operacao
+├ ƒ /espectaculos/organizador/eventos/[id]/sessoes/[sessaoId]
+├ ƒ /espectaculos/organizador/eventos/[id]/sessoes/[sessaoId]/checkin
+├ ƒ /espectaculos/organizador/eventos/[id]/sessoes/nova
+├ ƒ /espectaculos/organizador/eventos/novo
+├ ƒ /forgot-password
+├ ƒ /forum
+├ ƒ /forum/[slug]
+├ ƒ /forum/pesquisa
+├ ƒ /forum/topico/[id]
+├ ƒ /freguesia/[slug]
+├ ƒ /freguesias
+├ ƒ /gran-bazar
+├ ƒ /gran-bazar/[id]
+├ ƒ /gran-bazar/editar/[id]
+├ ƒ /gran-bazar/favoritos
+├ ƒ /gran-bazar/leiloes
+├ ƒ /gran-bazar/mensagens
+├ ƒ /gran-bazar/mensagens/[id]
+├ ƒ /gran-bazar/meus-anuncios
+├ ƒ /gran-bazar/novo
+├ ƒ /grupos
+├ ƒ /grupos/[id]
+├ ƒ /imoveis
+├ ƒ /imoveis/[id]
+├ ƒ /imoveis/editar/[id]
+├ ƒ /imoveis/favoritos
+├ ƒ /imoveis/leiloes
+├ ƒ /imoveis/mensagens
+├ ƒ /imoveis/mensagens/[id]
+├ ƒ /imoveis/meus-anuncios
+├ ƒ /imoveis/novo
+├ ƒ /login
+├ ƒ /lup
+├ ƒ /lup/[id]
+├ ƒ /lup/editar/[id]
+├ ƒ /lup/favoritos
+├ ƒ /lup/mensagens
+├ ƒ /lup/mensagens/[id]
+├ ƒ /lup/meus-anuncios
+├ ƒ /lup/novo
+├ ○ /manifest.webmanifest
+├ ƒ /mediacao/novo
+├ ƒ /mensagens
+├ ƒ /mensagens/[id]
+├ ƒ /mensagens/anexos/[id]
+├ ƒ /mercado-da-terra
+├ ƒ /mercado-da-terra/[id]
+├ ƒ /mercado-da-terra/editar/[id]
+├ ƒ /mercado-da-terra/messages
+├ ƒ /mercado-da-terra/messages/[id]
+├ ƒ /mercado-da-terra/meus-anuncios
+├ ƒ /mercado-da-terra/novo
+├ ƒ /mfa/setup
+├ ○ /mfa/verify
+├ ƒ /mundo-dos-patudos
+├ ƒ /mundo-dos-patudos/[id]
+├ ƒ /mundo-dos-patudos/[id]/editar
+├ ƒ /mundo-dos-patudos/casos
+├ ƒ /mundo-dos-patudos/meus-anuncios
+├ ƒ /mundo-dos-patudos/publicar
+├ ƒ /parceiros
+├ ƒ /parceiros/pedido
+├ ƒ /parceiros/pedido/empregador
+├ ○ /parceiros/pedido/freguesia
+├ ○ /parceiros/pedido/municipio
+├ ƒ /parceiros/pedido/organismo-publico
+├ ƒ /parceiros/pedido/stand-automovel
+├ ○ /participar
+├ ƒ /participar/freguesia
+├ ƒ /participar/municipio
+├ ƒ /perfil
+├ ƒ /perfil-v2
+├ ƒ /perfil/[id]
+├ ƒ /perfil/candidato
+├ ƒ /perfil/editar
+├ ○ /privacidade
+├ ƒ /registo
+├ ƒ /reset-password
+├ ƒ /retailing/novo
+├ ○ /rua-da-saudade
+├ ○ /termos
+├ ƒ /viaturas
+├ ƒ /viaturas/[id]
+├ ƒ /viaturas/editar/[id]
+├ ƒ /viaturas/favoritos
+├ ƒ /viaturas/leiloes
+├ ƒ /viaturas/mensagens
+├ ƒ /viaturas/mensagens/[id]
+├ ƒ /viaturas/meus-anuncios
+├ ƒ /viaturas/novo
+└ ƒ /viaturas/stands
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

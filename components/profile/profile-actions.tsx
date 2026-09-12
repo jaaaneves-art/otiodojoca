@@ -22,7 +22,7 @@ export function ProfileActions() {
 
         <Button asChild variant="outline" className="w-full">
           <Link href="/forum">
-            Fórum
+            Fórum Agrícola
           </Link>
         </Button>
 

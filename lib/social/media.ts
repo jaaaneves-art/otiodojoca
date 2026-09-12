@@ -1,6 +1,7 @@
 export const MEDIA_BUCKET = "social-message-media";
 export const MAX_MEDIA_BYTES = 5 * 1024 * 1024;
 export const MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf", "video/mp4"];
+export const POST_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 // Basic signature validation, not a full decoder or malware scanner.
 // Downloads are forced attachments and never rendered as HTML by the application.
@@ -20,4 +21,11 @@ export async function validateMessageFile(file: File): Promise<string | null> {
       return false;
     });
   return matches ? null : "O conteúdo do ficheiro não corresponde ao formato indicado.";
+}
+
+export async function validatePostImage(file: File): Promise<string | null> {
+  if (!POST_IMAGE_TYPES.includes(file.type)) {
+    return "A imagem tem de estar em formato JPG, PNG ou WebP.";
+  }
+  return validateMessageFile(file);
 }
