@@ -11,6 +11,7 @@ import path from 'node:path';
 export default defineConfig({
   test: {
     environment: 'node',
+    setupFiles: ['./tests/setup-env.ts'],
     include: ['**/*.test.ts'],
     exclude: ['node_modules', '.next', 'backups'],
   },
