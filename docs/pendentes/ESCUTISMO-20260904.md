@@ -4,6 +4,31 @@
 **Base:** `escutismo-schema-v5.sql` (verificado) e `escutismo-tipos-v5.ts`
 **Documento de contexto:** `REVISAO-ESCUTISMO-v5.md`
 
+> **NOTA — 13/09/2026:** este documento descreve a versão "v5" do schema,
+> que **não é** a que está em produção. O que foi realmente aplicado é a
+> versão "v1" (migration `20260906160000_escutismo_schema_v1.sql`,
+> reconciliada com a tabela genérica `tutorias` em 12/09) — usa
+> `escutismo_membros`, `escutismo_pedidos_adesao`,
+> `escutismo_pedido_aprovacoes`, não as tabelas de convite/confirmação
+> descritas abaixo (`escutismo_tutor_convites`,
+> `escutismo_confirmacoes_pendentes`). D1 (limiar de idade) já está
+> decidido e aplicado como **18 anos** para tudo (não 16). Ver
+> `docs/planos/20260913T0945-plano-sessao.md`, secção "P2 — Escutismo Fase
+> 2", para o levantamento completo do schema real e o que já foi escrito
+> (`lib/escutismo/tipos.ts` + `actions.ts`, âmbito: inscrição + pedido de
+> adesão + decisão do responsável).
+>
+> **Decisão nova em aberto, por resolver antes de continuar a Fase 2/3:** o
+> projeto já tem um sistema genérico de tutoria confirmada (tabela
+> `tutorias` + `e_tutor_confirmado_de()`, usado por `adesao_aprovar_tutor()`
+> no módulo de Adesões). `escutismo_membros` também tem os seus próprios
+> campos de consentimento (`consentimento_token`/`consentimento_dado`). Por
+> decidir: o Escutismo reutiliza o sistema genérico (mais consistente, evita
+> duplicar verificação de tutor — exige que o tutor já tenha uma `tutoria`
+> confirmada com o perfil do menor) ou mantém um fluxo próprio de token por
+> email (mais isolado, mas duplica lógica e depende do SendGrid, hoje
+> pausado)?
+
 Lista de trabalho por fazer. Ordenada por dependência: cada bloco
 pressupõe o anterior. Os tempos são estimativas para sessões focadas.
 

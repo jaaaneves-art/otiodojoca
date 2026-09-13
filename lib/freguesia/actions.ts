@@ -105,6 +105,12 @@ export async function getEntidadesByFreguesia(
 export async function getEntidadeBySlug(slug: string) {
   const supabase = await createClient();
 
+  // Fase F: restaurantes/alojamentos/comercios apontam para entidades via
+  // entity_id (não o contrário), mas o PostgREST resolve a FK nos dois
+  // sentidos — por isso dá para embutir aqui, mesmo sem uma FK "para a
+  // frente" em entidades. Cada vertical tem um índice único parcial em
+  // entity_id (ver migration 20260913140000), por isso é seguro tratar
+  // como 1:1 tal como as outras relações desta função.
   const { data: entidade, error } = await supabase
     .from('entidades')
     .select(`
@@ -113,7 +119,10 @@ export async function getEntidadeBySlug(slug: string) {
       horarios(*),
       horarios_excecoes(*),
       eventos(*),
-      freguesias(cod_ine, nome)
+      freguesias(cod_ine, nome),
+      restaurantes(id, especialidade, preco_medio, rating),
+      alojamentos(id, tipo, preco_noite, num_quartos, num_camas, rating),
+      comercios(id, tipo_comercio, horario_abertura, horario_fecho)
     `)
     .eq('slug', slug)
     .eq('estado', 'publicado')
@@ -136,6 +145,9 @@ export async function getEntidadeBySlug(slug: string) {
     ...entidade,
     categorias_entidade: paraObjeto(entidade.categorias_entidade),
     freguesias: paraObjeto(entidade.freguesias),
+    restaurante: paraObjeto(entidade.restaurantes),
+    alojamento: paraObjeto(entidade.alojamentos),
+    comercio: paraObjeto(entidade.comercios),
   };
 }
 

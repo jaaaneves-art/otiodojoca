@@ -47,10 +47,17 @@ const nextConfig = {
       `object-src 'none'`,
       `frame-ancestors 'self'`,
       // Next.js precisa de 'unsafe-inline' para os scripts de hidratação
-      // que injeta inline; 'unsafe-eval' NÃO está incluído -- se o build
-      // de produção falhar por causa disto, investigar a origem em vez
-      // de reintroduzir 'unsafe-eval' às cegas.
-      `script-src 'self' 'unsafe-inline' https://js.stripe.com`,
+      // que injeta inline; 'unsafe-eval' NÃO está incluído em produção --
+      // se o build de produção falhar por causa disto, investigar a
+      // origem em vez de reintroduzir 'unsafe-eval' às cegas.
+      //
+      // Em desenvolvimento (`next dev`), o Fast Refresh do Next.js/React
+      // usa eval() para reconstruir stack traces e recarregar módulos --
+      // sem 'unsafe-eval' aqui o `next dev` fica com a consola cheia de
+      // "eval() is not supported in this environment" (13 Set 2026,
+      // achado ao testar a Fase F). Isto só relaxa a CSP na tua máquina
+      // em modo dev; o build de produção continua sem 'unsafe-eval'.
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""} https://js.stripe.com`,
       // Tailwind/estilos inline -- 'unsafe-inline' aqui é um risco muito
       // menor do que em script-src.
       `style-src 'self' 'unsafe-inline'`,

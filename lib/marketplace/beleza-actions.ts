@@ -146,21 +146,21 @@ export async function atualizarBeleza(adId: number, data: BelezaFormData) {
 
     const categoryId = await resolverCategoriaId(supabase, CATEGORIA_SLUGS[validado.categoria]);
 
-    const { data: atualizado, error: updateError } = await supabase
-      .from('marketplace_ads')
-      .update({
-        title: validado.nome,
-        description: validado.descricao,
-        category_id: categoryId,
-        location: validado.endereco,
-        details: buildDetails(validado),
-      })
-      .eq('id', adId)
-      .eq('author_id', user.id)
-      .select()
-      .single();
+    // CORRIGIDO 13/09/2026 — deixou de fazer UPDATE direto em
+    // marketplace_ads (a policy antiga que permitia isto foi apagada,
+    // ver 20260913160000/20260913170000) e passou a chamar a RPC
+    // marketplace_ad_editar(), alargada nesse mesmo dia para aceitar
+    // category_id/location/details.
+    const { data: sucessoUpdate, error: updateError } = await supabase.rpc('marketplace_ad_editar', {
+      p_ad_id: adId,
+      p_title: validado.nome,
+      p_description: validado.descricao,
+      p_category_id: categoryId,
+      p_location: validado.endereco,
+      p_details: buildDetails(validado),
+    });
 
-    if (updateError || !atualizado) {
+    if (updateError || !sucessoUpdate) {
       return { sucesso: false, erro: 'Não foi possível atualizar (ou não tens permissão para editar este serviço)' };
     }
 
@@ -209,8 +209,15 @@ export async function apagarBeleza(adId: number) {
       }
     }
 
-    const { error: deleteError } = await supabase.from('marketplace_ads').delete().eq('id', adId).eq('author_id', user.id);
+    // CORRIGIDO 13/09/2026 — deixou de fazer DELETE direto em
+    // marketplace_ads, passou a chamar marketplace_ad_apagar().
+    const { data: sucessoDelete, error: deleteError } = await supabase.rpc('marketplace_ad_apagar', {
+      p_ad_id: adId,
+    });
     if (deleteError) throw deleteError;
+    if (!sucessoDelete) {
+      return { sucesso: false, erro: 'Não foi possível apagar (ou não tens permissão para este serviço)' };
+    }
 
     revalidatePath('/beleza');
     return { sucesso: true, mensagem: 'Serviço apagado com sucesso!' };

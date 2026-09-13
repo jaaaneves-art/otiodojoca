@@ -5,6 +5,26 @@
 **Estado:** correcções escritas, **nada validado em execução**
 **Máquina:** Linux Mint · `~/Nextcloud/Projectos/otiodojoca/` · branch a criar: `feature/educacao-universidades`
 
+> **NOTA — 13/09/2026:** confirmado que os ficheiros que este documento
+> descreve (`OTJ-SQL-EDUCACAO-V002.1.sql`, `OTJ-SQL-EDUCACAO-V002.2-PATCH.sql`,
+> `OTJ-SQL-UNIVERSIDADES-V003.0.sql`, `OTJ-SQL-UNIVERSIDADES-V003.1-PATCH.sql`,
+> `lib_educacao_*`, `lib_universidades_*`, os componentes React) **não
+> existem em lado nenhum deste repositório nem dos documentos do projeto** —
+> nem as tabelas que criariam (`escolas`, `faculdades`, `pessoas_educacao`,
+> `pessoas_universitarias`, `matriculas_educacao`, `matriculas_universitarias`,
+> etc.) existem na base de dados de produção. Foram escritos numa máquina/
+> sessão diferente ("Linux Mint", não `berze-optiplex-5050`) e nunca
+> chegaram a este repositório — só ficou esta descrição.
+>
+> **Consequência prática: isto não é "aplicar SQL já pronto", é escrever o
+> módulo inteiro do zero** (schema + RLS + TypeScript + componentes +
+> páginas), usando este documento como especificação/lições aprendidas, não
+> como código a copiar. Estimativa original de 14-19h mantém-se como ordem
+> de grandeza para o esforço de escrita, não de aplicação. Fica para uma
+> sessão dedicada a começar pela Fase 0/1 (schema + RLS) do zero — e D3
+> (RGPD, dados de saúde de menores) continua a ter de fechar antes de
+> qualquer dado real de criança entrar na base.
+
 Este documento existe porque nada do que foi produzido nesta sessão pôde ser executado. A ordem abaixo é deliberada: cada fase só faz sentido depois da anterior fechar.
 
 ---

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getEntidadeBySlug } from '@/lib/freguesia/actions';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Phone, Mail, Globe, MapPin, ArrowLeft, Calendar } from 'lucide-react';
+import { Phone, Mail, Globe, MapPin, ArrowLeft, Calendar, UtensilsCrossed, BedDouble, Store } from 'lucide-react';
 
 interface EntidadePageProps {
   params: Promise<{
@@ -64,6 +64,9 @@ export default async function EntidadePage({ params }: EntidadePageProps) {
 
   const categoria = entidade.categorias_entidade;
   const freguesia = entidade.freguesias;
+  const restaurante = entidade.restaurante;
+  const alojamento = entidade.alojamento;
+  const comercio = entidade.comercio;
   const horarios = [...(entidade.horarios || [])].sort(
     (a, b) => a.dia_semana - b.dia_semana
   );
@@ -99,6 +102,85 @@ export default async function EntidadePage({ params }: EntidadePageProps) {
           <p className="text-gray-700 mt-4">{entidade.descricao}</p>
         )}
       </div>
+
+      {/* Fase F — dado do vertical associado (restaurante/alojamento/comércio), quando existir */}
+      {restaurante && (
+        <Card className="mb-6">
+          <CardContent className="pt-6 space-y-2">
+            <h3 className="font-semibold flex items-center gap-2">
+              <UtensilsCrossed className="w-4 h-4 text-blue-600" />
+              Restaurante
+            </h3>
+            {restaurante.especialidade && (
+              <p className="text-sm text-gray-700">Especialidade: {restaurante.especialidade}</p>
+            )}
+            {restaurante.preco_medio != null && (
+              <p className="text-sm text-gray-700">Preço médio: {restaurante.preco_medio}€</p>
+            )}
+            {restaurante.rating != null && (
+              <p className="text-sm text-gray-700">Avaliação: {restaurante.rating}/5</p>
+            )}
+            <Link
+              href={`/comer/${restaurante.id}`}
+              className="inline-block text-sm text-blue-600 hover:underline"
+            >
+              Ver ficha completa e reservar →
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {alojamento && (
+        <Card className="mb-6">
+          <CardContent className="pt-6 space-y-2">
+            <h3 className="font-semibold flex items-center gap-2">
+              <BedDouble className="w-4 h-4 text-blue-600" />
+              Alojamento
+            </h3>
+            {alojamento.tipo && (
+              <p className="text-sm text-gray-700">Tipo: {alojamento.tipo}</p>
+            )}
+            {alojamento.preco_noite != null && (
+              <p className="text-sm text-gray-700">Preço/noite: {alojamento.preco_noite}€</p>
+            )}
+            {(alojamento.num_quartos != null || alojamento.num_camas != null) && (
+              <p className="text-sm text-gray-700">
+                {alojamento.num_quartos != null ? `${alojamento.num_quartos} quarto(s)` : ''}
+                {alojamento.num_quartos != null && alojamento.num_camas != null ? ' · ' : ''}
+                {alojamento.num_camas != null ? `${alojamento.num_camas} cama(s)` : ''}
+              </p>
+            )}
+            {alojamento.rating != null && (
+              <p className="text-sm text-gray-700">Avaliação: {alojamento.rating}/5</p>
+            )}
+            <Link
+              href={`/alojamento/${alojamento.id}`}
+              className="inline-block text-sm text-blue-600 hover:underline"
+            >
+              Ver ficha completa e reservar →
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {comercio && (
+        <Card className="mb-6">
+          <CardContent className="pt-6 space-y-2">
+            <h3 className="font-semibold flex items-center gap-2">
+              <Store className="w-4 h-4 text-blue-600" />
+              Comércio
+            </h3>
+            {comercio.tipo_comercio && (
+              <p className="text-sm text-gray-700">Tipo: {comercio.tipo_comercio}</p>
+            )}
+            {(comercio.horario_abertura || comercio.horario_fecho) && (
+              <p className="text-sm text-gray-700">
+                Horário: {formatarHora(comercio.horario_abertura) ?? '?'} – {formatarHora(comercio.horario_fecho) ?? '?'}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Contactos e localização */}
       {(entidade.telefone || entidade.email || entidade.website || entidade.lugar) && (
