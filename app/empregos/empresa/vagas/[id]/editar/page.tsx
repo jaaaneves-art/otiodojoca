@@ -114,27 +114,28 @@ export default async function EditarVagaPage({
       novasSkills = [];
     }
 
-    // RLS ("Empresa gere as suas vagas") já garante que só o dono da
-    // empresa consegue atualizar — mesmo assim o .select().single() a
-    // seguir transforma um bloqueio silencioso em erro explícito, mesma
-    // disciplina de app/admin/entidades/actions.ts e vagas/actions.ts.
-    const { data: updated, error: updateError } = await supabase
-      .from("jobs")
-      .update({
-        titulo,
-        descricao,
-        categoria,
-        modalidade,
-        tipo_contrato: tipoContrato,
-        nivel_experiencia: nivelExperiencia,
-        nivel_formacao_minimo: nivelFormacaoMinimo,
-        salario_min: salarioMinRaw ? parseFloat(salarioMinRaw) : null,
-        salario_max: salarioMaxRaw ? parseFloat(salarioMaxRaw) : null,
-        municipio_id: parseInt(municipioIdRaw, 10),
-      })
-      .eq("id", id)
-      .select("id")
-      .single();
+    // Até 13 Set isto fazia .from("jobs").update(...) direto, confiando
+    // na policy ALL "Empresa gere as suas vagas" — substituída nesse
+    // mesmo dia por uma versão SELECT-only (jobs_select_empresa,
+    // migration 20260913160000_fechar_bypass_rpc_only.sql) a fechar o
+    // bypass de RPC-only geral. Partiu esta página sem se dar por isso
+    // (achado ao auditar escrita directa remanescente, pendentes item
+    // 5) — job_editar() já existia mas só cobria 4 dos 10 campos deste
+    // formulário; alargada para cobrir todos (migration
+    // alargar_job_editar_rpc, 13 Set) em vez de criar uma segunda RPC.
+    const { data: updated, error: updateError } = await supabase.rpc("job_editar", {
+      p_job_id: Number(id),
+      p_titulo: titulo,
+      p_descricao: descricao,
+      p_salario_min: salarioMinRaw ? parseFloat(salarioMinRaw) : null,
+      p_salario_max: salarioMaxRaw ? parseFloat(salarioMaxRaw) : null,
+      p_categoria: categoria,
+      p_modalidade: modalidade,
+      p_tipo_contrato: tipoContrato,
+      p_nivel_experiencia: nivelExperiencia,
+      p_nivel_formacao_minimo: nivelFormacaoMinimo,
+      p_municipio_id: parseInt(municipioIdRaw, 10),
+    });
 
     if (updateError || !updated) {
       throw new Error(

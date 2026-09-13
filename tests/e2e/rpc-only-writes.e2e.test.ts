@@ -48,7 +48,7 @@ describe('E2E Segurança — RPC-only writes (jobs, marketplace, reservas)', () 
     // Adulto verificado, para não bater na minors policy do marketplace.
     const { error: pErr } = await admin
       .from('profiles')
-      .upsert({ id: userId, username: `test_rpc_${Date.now()}`, data_nascimento: '1990-01-01', age_verified: true });
+      .upsert({ id: userId, username: `test_rpc_${Date.now()}`, data_nascimento: '1990-01-01' });
     if (pErr) throw new Error(`profiles upsert: ${pErr.message}`);
 
     // Empresa aprovada, para poder chamar job_criar (setup via admin, ignora RLS).

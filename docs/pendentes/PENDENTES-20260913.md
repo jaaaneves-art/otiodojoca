@@ -7,16 +7,16 @@ mais bloqueadores herdados de sessões anteriores.
 
 ## P0 — Segurança, fazer primeiro
 
-### 1. Rodar `SUPABASE_SECRET_KEY`
+### 1. Rodar `SUPABASE_SECRET_KEY` — RESOLVIDO, 13 Set
 A chave `sb_secret_...` foi impressa no terminal e no chat durante o
 debug do `.env.local` a 12 Set. Ignora RLS, acesso total à BD.
 
-- Dashboard → Project Settings → API Keys → criar nova / rotate
-- Actualizar `.env.local`
-- Actualizar env vars no Vercel (projeto `jj`) **e fazer redeploy**
-- Revogar a antiga só depois de confirmar que a app funciona
-- `grep -rl "sb_secret_" --exclude-dir=node_modules --exclude-dir=.git .`
-  para garantir que não ficou noutros sítios
+Chave nova criada e a app atualizada (`lib/supabase/admin.ts`,
+`scripts/sync-vehicle-catalog.mjs`); `grep` confirmou nenhum valor real
+em ficheiro versionado (só o nome da variável em 3 sítios cosméticos,
+sem risco); `npm run build`/`npm test` confirmaram a app a funcionar
+com a chave nova. **Chave antiga revogada pelo Yos no dashboard, 13
+Set** — item fechado por completo.
 
 Segundo incidente do género — ver
 `claude_INCIDENTE-SEGREDO-GITHUB-PUSH-PROTECTION-20260909.md`.
@@ -121,14 +121,61 @@ WHERE pronamespace = 'public'::regnamespace
   AND prosrc LIKE '%interval%';
 ```
 
-### 5. Frontend ainda usa INSERT directo
-As policies agora bloqueiam escrita directa em `social_posts`,
-`social_post_comments`, `social_post_reactions`, `marketplace_ads`,
-`jobs`, `restaurante_reservas`, `reservas_alojamento`. O código da app
-não foi migrado para as RPC — há ecrãs que vão falhar em runtime.
+### 5. Frontend ainda usa INSERT/UPDATE directo — RESOLVIDO 13 Set
 
-Auditar `app/` e `lib/` à procura de `.from('<tabela>').insert(`.
-**Não apanhado pelo build nem pelo tsc.**
+Auditado `app/` e `lib/` à procura de `.from('<tabela>').insert(/.update(`
+contra as 7 tabelas fechadas hoje (`social_posts`, `social_post_comments`,
+`social_post_reactions`, `marketplace_ads`, `jobs`, `restaurante_reservas`,
+`reservas_alojamento`). **Não apanhado pelo build nem pelo tsc** —
+confirmado o motivo de ser preciso `Grep` manual em vez de confiar nesses
+dois.
+
+- `social_posts`/`_comments`/`_reactions` — já 100% via RPC
+  (`social_create_post`, `social_delete_post`, `social_create_comment`,
+  `social_delete_comment`, `social_toggle_reaction`). Nada a corrigir.
+- `restaurante_reservas`, `marketplace_ads` — já corrigidos mais cedo
+  hoje (P0 NOVO, item 1b acima).
+- `reservas_alojamento` — `atualizarStatusReserva()`/`cancelarReserva()`
+  em `lib/alojamento/actions.ts` fazem `.update()` direto, mas
+  **confirmado código morto** (já tinha sido verificado ao aplicar a
+  migration de hoje que fechou o bypass — nenhuma página/componente as
+  chama). Não corrigido de propósito — ver "Decisão em aberto" abaixo.
+- **2 bugs novos encontrados, ambos causados pela própria migration de
+  hoje `20260913160000_fechar_bypass_rpc_only.sql`** (que assumiu,
+  incorretamente, que não havia escrita directa a `jobs` em lado
+  nenhum — havia, só não nos ficheiros óbvios de `empregos/empresa/vagas/`):
+  - `app/admin/empregos/actions.ts` (`rejeitarVagaAdmin`,
+    `reativarVagaAdmin`, `rejeitarVagaEResolverDenuncia`) fazia
+    `.from('jobs').update({estado: ...})` direto, confiando na policy
+    `ALL` de admin que foi substituída por `SELECT`-only — moderação de
+    vagas por admin ficou partida. Corrigido com RPC nova
+    `job_admin_definir_estado()` (mesmo molde de
+    `job_publicar/_pausar/_reabrir/_fechar`, `SECURITY DEFINER`, usa
+    `e_admin()`) — migration `job_admin_definir_estado_rpc`.
+  - `app/empregos/empresa/vagas/[id]/editar/page.tsx` (`atualizarVaga()`,
+    a própria página de editar vaga da empresa) fazia
+    `.from('jobs').update({...10 campos...})` direto, confiando na
+    policy `ALL` "Empresa gere as suas vagas" (também substituída por
+    `SELECT`-only) — editar uma vaga já publicada ficou partido.
+    `job_editar()` já existia mas só cobria 4 dos 10 campos do
+    formulário — alargada para cobrir todos (migration
+    `alargar_job_editar_rpc`), overload antiga com 5 parâmetros
+    removida (nunca foi chamada por ninguém — RPC órfã confirmada mais
+    cedo hoje). Página migrada para chamar a RPC.
+  - Ambos testados empiricamente (transação com `ROLLBACK`, perfil e
+    vaga descartáveis, zero dados reais tocados): a RPC de admin
+    funciona para um perfil promovido a admin e é bloqueada para um
+    perfil comum; `job_editar()` alargada grava os 10 campos
+    corretamente.
+
+**Nota para sessões futuras:** os dois bugs acima confirmam que uma
+migration de RLS que "fecha bypass" pode partir ecrãs que ninguém
+verificou explicitamente — o `Grep` que confirmava "nenhuma escrita
+directa" só olhou para os ficheiros óbvios do módulo (criar/mudar
+estado), não para o admin nem para o editar. Da próxima vez que se
+fechar uma policy `ALL`/`USING(false)`, `Grep` **todo** o `app/` e
+`lib/` por `.from('<tabela>')` (não só `.insert(`) antes de aplicar,
+não depois.
 
 ---
 
@@ -138,7 +185,7 @@ Auditar `app/` e `lib/` à procura de `.from('<tabela>').insert(`.
 |---|---|
 | Escutismo Fase 2 — 1ª parte escrita 13 Set (inscrição+adesão), decisão de tutoria em aberto | `ESCUTISMO-20260904.md`, `docs/planos/20260913T0945-plano-sessao.md` |
 | Educação/Universidades — **por escrever do zero**, não "por aplicar" (ver nota 13 Set no próprio ficheiro) | `EDUCACAO-UNIVERSIDADES-20260905.md` |
-| Módulo Freguesia Fase F — **RESOLVIDO 13 Set**: backfill das 16 linhas feito (afinal são todas mock/demo, não reais — confirmado com o Yos) e página `/entidades/[slug]` já mostra os dados do vertical associado. Falta só: fluxo de criação de restaurante/alojamento/comércio na app (não existe ainda, por isso não há `entity_id` a preencher no código); validar com `npm run build` + visita manual a `/entidades/casa-rural-ronfe` | `docs/planos/20260913T0945-plano-sessao.md` |
+| Módulo Freguesia Fase F — **RESOLVIDO 13 Set**: backfill das 16 linhas feito (afinal são todas mock/demo, não reais — confirmado com o Yos) e página `/entidades/[slug]` já mostra os dados do vertical associado. Confirmado visualmente pelo Yos no browser (`/entidades/casa-rural-ronfe`), 13 Set — fechado por completo. Falta só, para outra sessão: fluxo de criação de restaurante/alojamento/comércio na app (não existe ainda, por isso não há `entity_id` a preencher no código) | `docs/planos/20260913T0945-plano-sessao.md` |
 | OAuth social login | `OAUTH-SOCIAL-LOGIN-20260828.md` |
 | StandGo / Autonex renomeação | `STANDGO-REFORCO-AUTONEX-RENOME-20260829.md` |
 | DB diff declarativo não configurado | `DB-DIFF-DECLARATIVO-NAO-CONFIGURADO-20260829.md` |
@@ -171,7 +218,19 @@ qualquer registo como dado de produção real.
 
 ## Decisões em aberto
 
-*(nenhuma no momento — a última, naming das policies, foi resolvida a
+### `atualizarStatusReserva()`/`cancelarReserva()` em `lib/alojamento/actions.ts` — o que fazer com o código morto
+
+Confirmado (de novo) 13 Set, ao auditar o item 5: nenhuma página/
+componente chama estas duas funções — quem gere uma reserva de
+alojamento hoje só o faz através de `criar_reserva_alojamento` (criar)
+e não há UI de editar/cancelar. Não corrigidas de propósito, porque
+corrigir código morto sem ligar a nada não traz benefício imediato.
+Por decidir, sem urgência: apagar as duas funções (ficam só a confundir
+uma auditoria futura) ou construir a UI de gerir reserva que as ligue
+(nesse caso, usar as RPC `alojamento_reserva_editar`/`_cancelar` já
+exercitadas hoje, não reescrever `.update()` direto).
+
+*(a única outra decisão em aberto, naming das policies, foi resolvida a
 13 Set, ver abaixo)*
 
 ### Naming das policies — RESOLVIDO, 13 Set
@@ -201,6 +260,13 @@ estão ligadas a nenhum menu do site. Ver comentário em
 
 Resolver só no final de tudo o resto — construir hub + listagem + card
 + página de detalhe para os quatro, ligar ao menu principal.
+
+**Nota do Yos, 13 Set:** testado até agora só com um único utilizador
+mock (criar anúncio nos 4 módulos) — falta testar com mais do que um
+utilizador (ex.: dono vs. outro utilizador a tentar editar/apagar,
+visibilidade entre contas). Fica para resolver junto com o item acima,
+quando o hub/listagem/detalhe forem construídos — não isoladamente
+antes disso.
 
 ### Regras para utilizadores entre os 16 e os 18 anos
 `idade_adulto_adesoes = 18` foi gravado em `config_plataforma` como

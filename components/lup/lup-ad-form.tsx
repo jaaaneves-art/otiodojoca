@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ImageUpload from "@/components/mercado-da-terra/image-upload";
 import { MunicipioAutocomplete } from "@/components/mercado-da-terra/municipio-autocomplete";
-import { LUP_AD_TYPES, getLupAdType } from "@/lib/lup/ad-types";
+import { LUP_AD_TYPES, getLupAdType, type FieldName } from "@/lib/lup/ad-types";
 import { Clock3, Contact, FileText, ImagePlus, Layers3, LoaderCircle, Package2, Send, Sparkles, Tag } from "lucide-react";
 
 interface Categoria { id: number; name: string; }
@@ -55,15 +55,18 @@ export function LupAdForm({
 }: {
   categories: Categoria[];
   municipios: Municipio[];
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => void | { error: string } | Promise<void | { error: string }>;
   inicial?: AdInicial;
   submitLabel?: string;
 }) {
   const [tipo, setTipo] = useState(inicial?.type ?? "oferta");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const inFlight = useRef(false);
+  const requestId = useRef<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const config = getLupAdType(tipo);
-  const mostra = (campo: string) => config.fields.includes(campo as any);
+  const mostra = (campo: FieldName) => config.fields.includes(campo);
 
   const handleFilesSelected = (files: File[]) => {
     setUploadedFiles(files);
@@ -71,11 +74,15 @@ export function LupAdForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (submitting) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setError(null);
     setSubmitting(true);
 
     try {
       const formData = new FormData(e.currentTarget);
+      requestId.current ??= crypto.randomUUID();
+      formData.set('request_id', requestId.current);
 
       const inicioRaw = formData.get("pickupStartsAt") as string;
       const fimRaw = formData.get("pickupEndsAt") as string;
@@ -87,8 +94,10 @@ export function LupAdForm({
       });
       formData.append("image_count", uploadedFiles.length.toString());
 
-      await action(formData);
+      const result = await action(formData);
+      if (result?.error) setError(result.error);
     } finally {
+      inFlight.current = false;
       setSubmitting(false);
     }
   };
@@ -266,6 +275,7 @@ export function LupAdForm({
         </select>
       </div>
 
+      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       <button
         type="submit"
         disabled={submitting}

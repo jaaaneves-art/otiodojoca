@@ -146,3 +146,11 @@ Bazar já usam).
   tornar um problema.
 - Sem cálculo real de emissões evitadas — só a estimativa simples
   descrita acima, claramente rotulada como tal.
+
+## Atualização — 13/09/2026: criação/edição RPC-only
+
+Criar e editar anúncios LUP foram migrados para `lup_ad_guardar`, com chave
+idempotente de criação e validação prévia de imagens. A migration aditiva foi
+validada apenas em bases locais isoladas; **a aplicação remota e o E2E completo
+continuam pendentes**. Contrato, diferenças face às RPC genéricas, limites de
+Storage e evidências em [relatório da correção](20260913T1940-correcao-rpc-only.md).

@@ -3,13 +3,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
-// Mesma disciplina defensiva de app/admin/entidades/actions.ts e
-// app/empregos/empresa/vagas/actions.ts: a RLS ("Administradores gerem
-// todas as vagas" / "...todas as denuncias", profiles.role = 'admin',
-// ver migration 20260830203000_empregos_module_fase8.sql) é quem decide
-// de facto se a escrita passa -- o .select().single() a seguir
-// transforma um bloqueio silencioso (0 linhas afetadas, sem erro) num
-// erro explícito, em vez da UI achar que resolveu sem nada ter mudado.
+// Até 13 Set isto fazia .from('jobs').update(...) direto, confiando na
+// policy ALL "Administradores gerem todas as vagas" (profiles.role =
+// 'admin', migration 20260830203000_empregos_module_fase8.sql). Essa
+// policy foi substituída nesse mesmo dia por uma versão SELECT-only
+// (jobs_select_admin, migration 20260913160000_fechar_bypass_rpc_only.sql)
+// a fechar o bypass de RPC-only geral -- partiu esta função sem se dar
+// por isso (achado ao auditar escrita directa remanescente, pendentes
+// item 5). Corrigido com uma RPC dedicada no mesmo molde de
+// job_publicar/_pausar/_reabrir/_fechar (SECURITY DEFINER, verificação
+// interna via e_admin() em vez de depender de RLS de escrita) -- ver
+// migration job_admin_definir_estado_rpc, 13 Set.
 //
 // Sem filtro por estado atual (ao contrário de vagas/actions.ts, que
 // só deixa a empresa publicar a partir de rascunho/pausada, etc.):
@@ -19,12 +23,10 @@ import { revalidatePath } from 'next/cache';
 async function definirEstadoVagaAdmin(jobId: number, novoEstado: 'rejeitada' | 'pausada') {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('jobs')
-    .update({ estado: novoEstado })
-    .eq('id', jobId)
-    .select('id')
-    .single();
+  const { data, error } = await supabase.rpc('job_admin_definir_estado', {
+    p_job_id: jobId,
+    p_novo_estado: novoEstado,
+  });
 
   if (error || !data) {
     throw new Error(
