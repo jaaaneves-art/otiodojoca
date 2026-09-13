@@ -61,35 +61,35 @@ async function criarVaga(formData: FormData) {
 
   const estadoFinal = estadoEscolhido === "publicada" ? "publicada" : "rascunho";
 
-  const { data: job, error: jobError } = await supabase
-    .from("jobs")
-    .insert({
-      empresa_id: empresa.id,
-      titulo,
-      descricao,
-      categoria,
-      modalidade,
-      tipo_contrato: tipoContrato,
-      nivel_experiencia: nivelExperiencia,
-      nivel_formacao_minimo: nivelFormacaoMinimo,
-      salario_min: salarioMinRaw ? parseFloat(salarioMinRaw) : null,
-      salario_max: salarioMaxRaw ? parseFloat(salarioMaxRaw) : null,
-      salario_fonte: "empresa",
-      municipio_id: parseInt(municipioIdRaw, 10),
-      estado: estadoFinal,
-      data_publicacao: estadoFinal === "publicada" ? new Date().toISOString() : null,
-    })
-    .select("id")
-    .single();
+  // CORRIGIDO 13/09/2026 — deixou de fazer INSERT direto em jobs
+  // (bloqueado por RLS desde 20260913040000_rls_refactor_jobs_rpc.sql) e
+  // passou a chamar a RPC job_criar(), alargada em 20260913133544 com
+  // nivel_formacao_minimo, municipio_id e escolha de estado — a versão
+  // original da RPC não tinha estes parâmetros e fixava salario_fonte a
+  // 'fornecido' (devia ser 'empresa', como este formulário sempre usou).
+  const { data: jobId, error: jobError } = await supabase.rpc("job_criar", {
+    p_empresa_id: empresa.id,
+    p_titulo: titulo,
+    p_descricao: descricao,
+    p_categoria: categoria,
+    p_modalidade: modalidade,
+    p_tipo_contrato: tipoContrato,
+    p_nivel_experiencia: nivelExperiencia,
+    p_municipio_id: parseInt(municipioIdRaw, 10),
+    p_nivel_formacao_minimo: nivelFormacaoMinimo,
+    p_salario_min: salarioMinRaw ? parseFloat(salarioMinRaw) : null,
+    p_salario_max: salarioMaxRaw ? parseFloat(salarioMaxRaw) : null,
+    p_estado: estadoFinal,
+  });
 
-  if (jobError || !job) {
+  if (jobError || !jobId) {
     throw new Error("Erro ao criar vaga: " + jobError?.message);
   }
 
   if (jobSkills.length > 0) {
     const { error: skillsError } = await supabase.from("job_skills").insert(
       jobSkills.map((s) => ({
-        job_id: job.id,
+        job_id: jobId,
         skill_id: s.skill_id,
         obrigatoria: s.obrigatoria,
       }))

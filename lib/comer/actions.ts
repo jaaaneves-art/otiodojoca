@@ -62,21 +62,22 @@ export async function criarReserva(params: CriarReservaParams) {
       return { sucesso: false, erro: erroData };
     }
 
-    const { data, error } = await supabase
-      .from('restaurante_reservas')
-      .insert([
-        {
-          user_id: user.id,
-          restaurante_id: params.restaurante_id,
-          nome_cliente: params.nome_cliente,
-          email_cliente: user.email || params.email_cliente,
-          telefone: params.telefone,
-          data_reserva: params.data_reserva,
-          hora_reserva: params.hora_reserva,
-          numero_pessoas: params.numero_pessoas,
-          observacoes: params.observacoes,
-        },
-      ])
+    // CORRIGIDO 13/09/2026 — deixou de fazer INSERT direto em
+    // restaurante_reservas (bloqueado por RLS desde
+    // 20260913030000_rls_refactor_reservas_rpc.sql) e passou a chamar a
+    // RPC restaurante_reserva_criar(). p_telefone e p_observacoes foram
+    // acrescentados à RPC em 20260913132355 porque este formulário
+    // sempre recolheu os dois.
+    const { error } = await supabase.rpc('restaurante_reserva_criar', {
+      p_restaurante_id: params.restaurante_id,
+      p_nome_cliente: params.nome_cliente,
+      p_email_cliente: user.email || params.email_cliente,
+      p_data_reserva: params.data_reserva,
+      p_hora_reserva: params.hora_reserva,
+      p_numero_pessoas: params.numero_pessoas,
+      p_telefone: params.telefone,
+      p_observacoes: params.observacoes,
+    });
 
     if (error) {
       return { sucesso: false, erro: error.message };

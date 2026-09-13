@@ -94,34 +94,31 @@ export async function criarConsultorio(data: ConsultorioFormData) {
 
     const categoryId = await resolverCategoriaId(supabase);
 
-    const { data: ad, error: adError } = await supabase
-      .from('marketplace_ads')
-      .insert({
-        author_id: user.id,
-        title: validado.nome,
-        description: validado.descricao,
-        category_id: categoryId,
-        price: null,
-        price_type: null,
-        location: validado.endereco,
-        contact_method: null,
-        type: 'servico',
-        status: 'active',
-        details: buildDetails(validado),
-      })
-      .select()
-      .single();
+    // CORRIGIDO 13/09/2026 — deixou de fazer INSERT direto em
+    // marketplace_ads (bloqueado por RLS desde 20260913020000) e passou a
+    // chamar a RPC marketplace_ad_criar(). p_location foi acrescentado à
+    // RPC em 20260913132355 porque este formulário sempre preencheu esse
+    // campo. price/price_type/contact_method continuam sempre null aqui,
+    // por isso não fazem falta na RPC.
+    const { data: adId, error: adError } = await supabase.rpc('marketplace_ad_criar', {
+      p_title: validado.nome,
+      p_description: validado.descricao,
+      p_type: 'servico',
+      p_details: buildDetails(validado),
+      p_location: validado.endereco,
+      p_category_id: categoryId,
+    });
 
     if (adError) throw adError;
 
     if (validado.fotos && validado.fotos.length > 0) {
-      const urls = await uploadFotos(supabase, validado.fotos, ad.id);
-      await gravarFotos(supabase, ad.id, urls);
+      const urls = await uploadFotos(supabase, validado.fotos, adId);
+      await gravarFotos(supabase, adId, urls);
     }
 
     revalidatePath('/consultorios');
 
-    return { sucesso: true, id: ad.id, mensagem: 'Consultório criado com sucesso!' };
+    return { sucesso: true, id: adId, mensagem: 'Consultório criado com sucesso!' };
   } catch (erro) {
     console.error('Erro ao criar consultório:', erro);
     return { sucesso: false, erro: erro instanceof Error ? erro.message : 'Erro desconhecido' };

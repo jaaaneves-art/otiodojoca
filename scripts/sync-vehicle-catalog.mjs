@@ -21,7 +21,7 @@
  *
  * Variáveis:
  *   NEXT_PUBLIC_SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY
+ *   SUPABASE_SECRET_KEY
  *
  * Uso:
  *   node scripts/sync-vehicle-catalog.mjs
@@ -30,11 +30,11 @@
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const key = process.env.SUPABASE_SECRET_KEY;
 
 if (!url || !key) {
   throw new Error(
-    "Definir NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY antes de executar.",
+    "Definir NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY antes de executar.",
   );
 }
 

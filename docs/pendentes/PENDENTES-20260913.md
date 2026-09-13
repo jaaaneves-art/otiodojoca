@@ -104,3 +104,19 @@ Auditar `app/` e `lib/` à procura de `.from('<tabela>').insert(`.
   `pet_is_admin()`, `diaspora_is_admin()` e verificações inline de
   `profiles.role`. Convergir para `e_admin()`.
 - Naming das policies mistura PT/EN, com e sem acentos.
+
+---
+
+## P-final — só resolver depois de tudo o resto (não é para hoje nem para esta semana)
+
+### Marketplace de serviços (retailing/beleza/mediação/consultório) sem hub nem navegação
+As páginas de criar anúncio (`/retailing/novo`, `/beleza/novo`,
+`/mediacao/novo`, `/consultorios/novo`) existem e funcionam (corrigidas
+a 13 Set — deixaram de fazer INSERT direto, passaram a chamar
+`marketplace_ad_criar`), mas são só páginas de teste diretas por URL —
+não têm hub, listagem, card nem página de detalhe públicos, e não
+estão ligadas a nenhum menu do site. Ver comentário em
+`app/retailing/novo/page.tsx`: "não é a Fase 2/3 do plano original".
+
+Resolver só no final de tudo o resto — construir hub + listagem + card
++ página de detalhe para os quatro, ligar ao menu principal.
