@@ -34,6 +34,7 @@ const PUBLIC_PATH_PREFIXES = [
 // ficam de fora do acesso público (todo o resto -- a listagem, "/leiloes",
 // e a página de detalhe "/[id]" -- é público).
 const PUBLIC_VIEW_MODULES: Record<string, string[]> = {
+  "/eventos-festas": ["aderir", "painel", "administracao"],
   "/gran-bazar": ["novo", "editar", "mensagens", "meus-anuncios", "favoritos"],
   "/imoveis": ["novo", "editar", "mensagens", "meus-anuncios", "favoritos"],
   "/lup": ["novo", "editar", "mensagens", "meus-anuncios", "favoritos"],

@@ -32,6 +32,7 @@ const modules: Array<{ title: string; description: string; href: string; icon: L
   { title: "StandGo", description: "Compra, vende, aluga ou cede viaturas.", href: "/viaturas", icon: Car },
   { title: "Imóveis", description: "Compra, venda, arrendamento e permuta de imóveis.", href: "/imoveis", icon: Landmark },
   { title: "Empregos", description: "Vagas, candidaturas e empresas da tua região.", href: "/empregos", icon: BriefcaseBusiness },
+  { title: "Eventos & Festas", description: "Espaços e profissionais para casamentos, festas e eventos.", href: "/eventos-festas", icon: Flower2 },
   { title: "Espetáculos", description: "Eventos, sessões, bilhetes e experiências ao vivo.", href: "/espectaculos", icon: Ticket },
   { title: "Comer", description: "Descobre restaurantes e sabores da região.", href: "/comer", icon: UtensilsCrossed },
   { title: "Alojamento", description: "Casas rurais, pousadas e sítios para pernoitar.", href: "/alojamento", icon: BedDouble },
