@@ -68,26 +68,26 @@ async function createBazarAd(formData: FormData) {
   }
   // "procura" não tem preço nem campos extra — o título/descrição já dizem o que se procura.
 
-  const { data: ad, error: adError } = await supabase
-    .from("marketplace_ads")
-    .insert({
-      author_id: user.id,
-      module: "gran-bazar",
-      title,
-      description,
-      type,
-      category_id: parseInt(categoryId),
-      location,
-      contact_method: contactMethod,
-      price_type: priceType,
-      price,
-      status: "active",
-      details,
-    })
-    .select("id")
-    .single();
+  // RPC-only: 20260913180000 revogou INSERT direto em marketplace_ads;
+  // 20260913232000 criou esta função dedicada (ver
+  // docs/pendentes/20260913T2119-correcao-marketplace-4-modulos.md).
+  const { data: adId, error: adError } = await supabase.rpc(
+    "marketplace_ad_criar_completo",
+    {
+      p_module: "gran-bazar",
+      p_title: title,
+      p_description: description,
+      p_type: type,
+      p_details: details,
+      p_location: location,
+      p_category_id: parseInt(categoryId),
+      p_contact_method: contactMethod,
+      p_price: price,
+      p_price_type: priceType,
+    }
+  );
 
-  if (adError || !ad) {
+  if (adError || !adId) {
     throw new Error("Erro ao criar anúncio: " + adError?.message);
   }
 
@@ -105,7 +105,7 @@ async function createBazarAd(formData: FormData) {
   for (let i = 0; i < ficheiros.length; i++) {
     const file = ficheiros[i];
 
-    const fileName = `${ad.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${extensaoParaImagem(file.type)}`;
+    const fileName = `${adId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${extensaoParaImagem(file.type)}`;
 
     const { error: uploadError } = await supabase.storage
       .from("marketplace-photos")
@@ -121,13 +121,13 @@ async function createBazarAd(formData: FormData) {
       .getPublicUrl(fileName);
 
     await supabase.from("marketplace_photos").insert({
-      ad_id: ad.id,
+      ad_id: adId,
       storage_path: photoUrl.publicUrl,
       sort_order: i,
     });
   }
 
-  redirect(`/gran-bazar/${ad.id}`);
+  redirect(`/gran-bazar/${adId}`);
 }
 
 export default async function NovoAnuncioBazarPage() {

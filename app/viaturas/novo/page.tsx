@@ -62,7 +62,8 @@ async function createViaturaAd(formData: FormData) {
 
   let price: number | null = null;
   let priceType: string | null = null;
-  let details: Record<string, string> = veiculoDetails;
+  // string[] para campos como servicos_motorista (lista guardada em jsonb).
+  let details: Record<string, string | string[]> = veiculoDetails;
 
   if (type === "venda") {
     priceType = (formData.get("priceType") as string) || "fixed";
@@ -133,32 +134,63 @@ async function createViaturaAd(formData: FormData) {
       ...(caucao ? { caucao } : {}),
       seguro,
     };
+  } else if (type === "com_motorista") {
+    const precoHora = formData.get("precoHora") as string;
+    const precoMeioDia = formData.get("precoMeioDia") as string;
+    const precoDia = formData.get("precoDia") as string;
+    const capacidadePassageiros = formData.get("capacidadePassageiros") as string;
+    const areaServico = formData.get("areaServico") as string;
+    // Checkboxes repetidas com o mesmo nome — getAll junta os valores
+    // escolhidos no FormData (mesmo padrão de selections() no eventos-festas).
+    const servicosMotorista = formData
+      .getAll("servicosMotorista")
+      .map((v) => String(v))
+      .filter(Boolean);
+
+    if (!capacidadePassageiros || !areaServico) {
+      throw new Error("Com motorista: capacidade de passageiros e área de serviço são obrigatórias");
+    }
+
+    // "fixed" — ver a mesma nota do branch "alugar" (CHECK de price_type).
+    // O preço principal é o preço por dia, quando indicado; sem ele, o
+    // anúncio fica sem preço (a tabela de preços vive em details).
+    priceType = "fixed";
+    price = precoDia ? parseFloat(precoDia) : null;
+    details = {
+      ...veiculoDetails,
+      ...(precoHora ? { preco_hora: precoHora } : {}),
+      ...(precoMeioDia ? { preco_meio_dia: precoMeioDia } : {}),
+      ...(precoDia ? { preco_dia: precoDia } : {}),
+      capacidade_passageiros: capacidadePassageiros,
+      area_servico: areaServico,
+      ...(servicosMotorista.length > 0 ? { servicos_motorista: servicosMotorista } : {}),
+    };
   }
 
-  const { data: ad, error: adError } = await supabase
-    .from("marketplace_ads")
-    .insert({
-      author_id: user.id,
-      module: "viaturas",
-      title,
-      description,
-      type,
-      category_id: parseInt(categoryId),
-      location,
-      contact_method: contactMethod,
-      price_type: priceType,
-      price,
-      status: "active",
-      details,
-      vehicle_make_id: vehicleMakeId,
-      vehicle_model_id: vehicleModelId,
-      vehicle_generation_id: vehicleGenerationId,
-      vehicle_variant_id: vehicleVariantId,
-    })
-    .select("id")
-    .single();
+  // RPC-only: 20260913180000 revogou INSERT direto em marketplace_ads;
+  // 20260913232000 criou esta função dedicada (ver
+  // docs/pendentes/20260913T2119-correcao-marketplace-4-modulos.md).
+  const { data: adId, error: adError } = await supabase.rpc(
+    "marketplace_ad_criar_completo",
+    {
+      p_module: "viaturas",
+      p_title: title,
+      p_description: description,
+      p_type: type,
+      p_details: details,
+      p_location: location,
+      p_category_id: parseInt(categoryId),
+      p_contact_method: contactMethod,
+      p_price: price,
+      p_price_type: priceType,
+      p_vehicle_make_id: vehicleMakeId,
+      p_vehicle_model_id: vehicleModelId,
+      p_vehicle_generation_id: vehicleGenerationId,
+      p_vehicle_variant_id: vehicleVariantId,
+    }
+  );
 
-  if (adError || !ad) {
+  if (adError || !adId) {
     throw new Error("Erro ao criar anúncio: " + adError?.message);
   }
 
@@ -176,7 +208,7 @@ async function createViaturaAd(formData: FormData) {
   for (let i = 0; i < ficheiros.length; i++) {
     const file = ficheiros[i];
 
-    const fileName = `${ad.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${extensaoParaImagem(file.type)}`;
+    const fileName = `${adId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${extensaoParaImagem(file.type)}`;
 
     const { error: uploadError } = await supabase.storage
       .from("marketplace-photos")
@@ -192,13 +224,13 @@ async function createViaturaAd(formData: FormData) {
       .getPublicUrl(fileName);
 
     await supabase.from("marketplace_photos").insert({
-      ad_id: ad.id,
+      ad_id: adId,
       storage_path: photoUrl.publicUrl,
       sort_order: i,
     });
   }
 
-  redirect(`/viaturas/${ad.id}`);
+  redirect(`/viaturas/${adId}`);
 }
 
 export default async function NovoAnuncioViaturaPage() {

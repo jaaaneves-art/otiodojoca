@@ -12,6 +12,7 @@ import {
   CONDICAO_OPCOES,
   TIPO_VENDEDOR_OPCOES,
   SEGURO_OPCOES,
+  SERVICOS_MOTORISTA_OPCOES,
 } from "@/lib/viaturas/ad-types";
 
 interface Categoria { id: number; name: string; }
@@ -53,6 +54,28 @@ interface AdInicial {
   preco_mes?: string | number | null;
   caucao?: string | number | null;
   seguro?: string | null;
+  preco_hora?: string | number | null;
+  preco_meio_dia?: string | number | null;
+  capacidade_passageiros?: string | number | null;
+  area_servico?: string | null;
+  servicos_motorista?: string[] | string | null;
+}
+
+// details é jsonb — a lista de serviços pode vir como array (valor gravado
+// pelo server action) ou, em registos antigos/legados, como string. Aceitar
+// as duas formas para marcar as opções corretas no formulário de edição.
+function normalizarListaServicos(valor: string[] | string | null | undefined): string[] {
+  if (Array.isArray(valor)) return valor.filter((v) => typeof v === "string");
+  if (typeof valor === "string" && valor.trim()) {
+    try {
+      const parsed = JSON.parse(valor);
+      if (Array.isArray(parsed)) return parsed.filter((v) => typeof v === "string");
+    } catch {
+      // Não é JSON — tratar como um único valor.
+    }
+    return [valor];
+  }
+  return [];
 }
 
 // <input type="datetime-local"> não sabe nada de fusos-horários — a mesma
@@ -105,6 +128,9 @@ export function ViaturaAdForm({
       : ""
   );
   const [tracao, setTracao] = useState(inicial?.tracao ?? "");
+  // Serviços de motorista já escolhidos (edição) — as checkboxes são
+  // não controladas e leem o valor inicial aqui.
+  const servicosMotoristaIniciais = normalizarListaServicos(inicial?.servicos_motorista);
   const config = getViaturaAdType(tipo);
   const mostra = (campo: string) => config.fields.includes(campo as any);
   const obrigatorio = (campo: string) => config.required.includes(campo as any);
@@ -529,7 +555,10 @@ export function ViaturaAdForm({
         </div>
       )}
 
-      {mostra("precoDia") && (
+      {/* O com_motorista também lista "precoDia" — esse tipo tem bloco próprio
+          abaixo (mostra("precoHora")), por isso o aluguer exclui-o aqui para
+          não duplicar o campo precoDia no FormData. */}
+      {mostra("precoDia") && !mostra("precoHora") && (
         <div className="bg-viaturas-50 border border-viaturas-200 rounded-lg p-4 space-y-4">
           <p className="text-sm font-semibold text-viaturas-900">🔑 Preços do aluguer</p>
           <p className="text-xs text-viaturas-600">
@@ -630,6 +659,108 @@ export function ViaturaAdForm({
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
+          </div>
+        </div>
+      )}
+
+      {mostra("precoHora") && (
+        <div className="bg-viaturas-50 border border-viaturas-200 rounded-lg p-4 space-y-4">
+          <p className="text-sm font-semibold text-viaturas-900">🚘 Serviço com motorista</p>
+          <p className="text-xs text-viaturas-600">
+            Indica os teus preços por período e a zona onde operas. Capacidade e área de
+            serviço são obrigatórias para quem procura o serviço certo.
+          </p>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label className="text-sm font-medium">Preço por hora (EUR)</label>
+              <input
+                name="precoHora"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_hora ?? ""}
+                placeholder="15.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Preço meio dia (EUR)</label>
+              <input
+                name="precoMeioDia"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_meio_dia ?? ""}
+                placeholder="60.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Preço por dia (EUR)</label>
+              <input
+                name="precoDia"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={inicial?.preco_dia ?? ""}
+                placeholder="110.00"
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-sm font-medium">
+                Capacidade de passageiros{obrigatorio("capacidadePassageiros") && " *"}
+              </label>
+              <input
+                name="capacidadePassageiros"
+                type="number"
+                min="1"
+                max="100"
+                defaultValue={inicial?.capacidade_passageiros ?? ""}
+                placeholder="4"
+                required={obrigatorio("capacidadePassageiros")}
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">
+                Área de serviço{obrigatorio("areaServico") && " *"}
+              </label>
+              <input
+                name="areaServico"
+                type="text"
+                defaultValue={inicial?.area_servico ?? ""}
+                placeholder="Aveiro, Porto, Lisboa"
+                required={obrigatorio("areaServico")}
+                className="w-full border rounded-lg p-2 mt-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium">Serviços de motorista</p>
+            <p className="text-xs text-viaturas-600 mt-1">Escolhe os serviços que prestas (podes escolher vários).</p>
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {SERVICOS_MOTORISTA_OPCOES.map((servico) => (
+                <label
+                  key={servico}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-viaturas-200 bg-white px-3 py-2 text-sm text-viaturas-800 transition hover:border-viaturas-400"
+                >
+                  <input
+                    type="checkbox"
+                    name="servicosMotorista"
+                    value={servico}
+                    defaultChecked={servicosMotoristaIniciais.includes(servico)}
+                    className="h-4 w-4 rounded border-viaturas-300 accent-viaturas-600"
+                  />
+                  {servico}
+                </label>
+              ))}
+            </div>
           </div>
         </div>
       )}

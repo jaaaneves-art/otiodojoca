@@ -57,29 +57,30 @@ async function createAd(formData: FormData) {
   if (seekingDescription) details.seeking_description = seekingDescription;
   if (wantsToReceive) details.wants_to_receive = wantsToReceive;
 
-  const { data: ad, error: adError } = await supabase
-    .from("marketplace_ads")
-    .insert({
-      author_id: user.id,
-      title,
-      description,
-      type,
-      category_id: parseInt(categoryId),
-      location,
-      contact_method: contactMethod,
-      price_type: priceType,
-      price,
-      status: "active",
-      details: details,
-    })
-    .select("id")
-    .single();
+  // RPC-only: 20260913180000 revogou INSERT direto em marketplace_ads;
+  // 20260913232000 criou esta função dedicada (ver
+  // docs/pendentes/20260913T2119-correcao-marketplace-4-modulos.md).
+  const { data: adId, error: adError } = await supabase.rpc(
+    "marketplace_ad_criar_completo",
+    {
+      p_module: "mercado-da-terra",
+      p_title: title,
+      p_description: description,
+      p_type: type,
+      p_details: details,
+      p_location: location,
+      p_category_id: parseInt(categoryId),
+      p_contact_method: contactMethod,
+      p_price: price,
+      p_price_type: priceType,
+    }
+  );
 
-  if (adError || !ad) {
+  if (adError || !adId) {
     throw new Error("Erro ao criar anúncio: " + adError?.message);
   }
 
-  console.log(`✅ Anúncio ${ad.id} criado`);
+  console.log(`✅ Anúncio ${adId} criado`);
 
   for (let i = 0; i < ficheiros.length; i++) {
     const file = ficheiros[i];
@@ -89,7 +90,7 @@ async function createAd(formData: FormData) {
     // Nome sempre gerado pelo servidor (nunca a partir de file.name) e
     // com a extensão a corresponder ao MIME real, já confirmado por
     // validarImagem() acima -- não força mais ".jpg" para tudo.
-    const fileName = `${ad.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${extensaoParaImagem(file.type)}`;
+    const fileName = `${adId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${extensaoParaImagem(file.type)}`;
 
     const { error: uploadError } = await supabase.storage
       .from("marketplace-photos")
@@ -107,7 +108,7 @@ async function createAd(formData: FormData) {
     await supabase
       .from("marketplace_photos")
       .insert({
-        ad_id: ad.id,
+        ad_id: adId,
         storage_path: photoUrl.publicUrl,
         sort_order: i,
       });
@@ -115,7 +116,7 @@ async function createAd(formData: FormData) {
     console.log(`✅ Foto ${i + 1} OK`);
   }
 
-  redirect(`/mercado-da-terra/${ad.id}`);
+  redirect(`/mercado-da-terra/${adId}`);
 }
 
 export default async function NovoAnuncioPage() {
