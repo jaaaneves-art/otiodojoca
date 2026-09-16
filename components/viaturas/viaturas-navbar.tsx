@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Heart, House, LayoutDashboard, LogIn, MessageCircle, Plus, Users } from "lucide-react";
+import { Heart, House, LayoutDashboard, LogIn, MessageCircle, Plus, Store, Users } from "lucide-react";
 import { StandGoBrand } from "@/components/viaturas/standgo-brand";
 
 export default async function ViaturasNavbar() {
@@ -67,6 +67,10 @@ export default async function ViaturasNavbar() {
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
+            <Link href="/viaturas/stands/diretorio" className="hidden rounded-xl border border-white/15 px-3.5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 sm:inline-flex">
+              <Store size={17} aria-hidden="true" />
+              <span className="ml-2">Stands</span>
+            </Link>
             <Link href="/viaturas/novo" className="inline-flex items-center gap-2 rounded-xl bg-[#b7f34a] px-3.5 py-2.5 text-sm font-extrabold text-slate-950 transition hover:bg-[#c8ff65] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:px-4">
               <Plus size={17} strokeWidth={2.5} aria-hidden="true" />
               <span className="hidden sm:inline">Publicar anúncio</span>

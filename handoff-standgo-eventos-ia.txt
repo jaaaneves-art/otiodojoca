@@ -1,0 +1,139 @@
+HANDOFF COMPLETO — STANDGO E EVENTOS & FESTAS
+
+Repositorio: /home/berze/Nextcloud/Projectos/otiodojoca
+
+ESTADO GIT
+
+Branch: feature/standgo-eventos-clean-20260915
+Commit enviado: c81e63d feat: adiciona ecossistema StandGo e Eventos & Festas
+Remoto: origin/feature/standgo-eventos-clean-20260915
+Não foi feito merge para main.
+Não foram aplicadas migrations à base de dados.
+
+O QUE FOI IMPLEMENTADO
+
+STANDGO
+
+Foi criada arquitetura empresarial transversal baseada em entidades:
+
+- entidade_empresas
+- entidade_atividades
+- entidade_responsaveis
+- autorização de responsáveis
+- RLS
+- catálogo standgo_atividades
+- relação N:N standgo_empresa_atividades
+- ligação de anúncios a entidade_id
+- autorização de publicação por entidade responsável
+- preservação de anúncios legacy
+
+Foram adicionados tipos/configuração para Rent-a-Car e aluguer com motorista, incluindo preço por hora, meio-dia e dia, capacidade, área de serviço e serviços de motorista.
+
+Documentação: docs/standgo/20260915-ecossistema-profissional.md
+
+EVENTOS & FESTAS
+
+Foi criado o módulo /eventos-festas sem substituir eventos concretos ou calendário.
+
+Inclui:
+
+- presença profissional ligada a entidades
+- 24 categorias
+- 274 serviços
+- 59 tipos/subtipos de evento
+- relações N:N empresa-serviços, empresa-tipos e serviço-categoria
+- diretório e perfis públicos
+- pesquisa por serviço, categoria, tipo, localização, país e capacidade
+- adesão de empresa existente
+- proteção contra entidades duplicadas
+- gestão por proprietário, administrador ou gestor
+- pedidos de acesso e moderação
+- estado de verificação
+- proteção de dados privados
+- suporte a empresas estrangeiras/Diáspora
+- ligação à mesma entidade usada por StandGo, restauração e alojamento
+- páginas mobile-first
+
+Rotas principais:
+
+- /eventos-festas
+- /eventos-festas/empresas
+- /eventos-festas/empresas/[slug]
+- /eventos-festas/[tipo]
+- /eventos-festas/servicos
+- /eventos-festas/servicos/[slug]
+- /eventos-festas/categorias/[slug]
+- /eventos-festas/aderir
+- /eventos-festas/painel
+- /eventos-festas/painel/[id]
+- /eventos-festas/administracao
+
+Documentação: docs/eventos-festas/V1-ECOSSISTEMA-PROFISSIONAL.md
+
+MIGRATIONS CRIADAS
+
+1. 20260915190000_entidades_empresas_transversal_v1.sql
+2. 20260915193000_standgo_empresas_v1.sql
+3. 20260915200000_entidades_diaspora_privacidade_v1.sql
+4. 20260915203000_eventos_festas_profissionais_v1.sql
+
+Estão no commit, mas não foram aplicadas à base principal nem remotamente.
+
+TESTES PASSADOS
+
+- python3 scripts/eventos-festas/verify-local.py
+- python3 /tmp/test-standgo.py
+- npm run test -- lib/eventos-festas/validation.test.ts
+- Playwright Eventos & Festas: 5/5
+- Playwright gestão: 1/1
+- npx tsc --noEmit
+- ESLint direcionado: 0 erros e 0 avisos
+- git diff --check
+- verificação SQL read-only do histórico de migrations
+
+WARNINGS
+
+O lint global tem 321 warnings e 0 erros. São preexistentes e fora deste âmbito. Não corrigir agora.
+
+BLOQUEIOS REAIS
+
+1. A UI profissional StandGo ainda não está completa. Faltam diretório, pesquisa, perfil público e integração total dos campos com_motorista nos formulários app/viaturas/novo e app/viaturas/editar.
+
+2. O build Next falha no prerender porque existem duas páginas para a rota /: app/page.tsx e app/(comer)/page.tsx. O grupo (comer) não altera o URL. Esta correção deve ser tratada separadamente, preservando /comer.
+
+3. A migration marketplace 20260913232000_marketplace_ad_completo_rpc.sql não pertence a este commit. O histórico e as funções locais precisam de reconciliação antes de aplicar migrations de marketplace.
+
+FICHEIROS FORA DO COMMIT
+
+Não alterar sem revisão própria:
+
+- REGISTO-SESSOES-IA.md
+- páginas marketplace de Gran Bazar, Imóveis, Mercado da Terra e Viaturas
+- docs/pendentes/
+- docs/planos/
+- outputs/
+- tests/standgo/
+- migration 20260913232000_marketplace_ad_completo_rpc.sql
+- ficheiro tatus --short
+
+RELATÓRIO
+
+Relatório final: /home/berze/Transferências/OTJ/codex-standgo-eventos-final.txt
+
+ANTES DE APLICAR MIGRATIONS
+
+- fazer replay completo em staging
+- confirmar ordem e dependências
+- validar FKs, RLS, grants e triggers
+- verificar consumidores de entidades.freguesia_id NOT NULL
+- rever selects integrais de entidade_empresas
+- definir backfill de entidades existentes
+- confirmar moderação e verificação
+- aplicar apenas depois em staging
+- não aplicar diretamente em produção
+
+PERGUNTA PARA A IA QUE CONTINUA
+
+Confirma se este estado corresponde ao teu âmbito, se compreendeste que o commit c81e63d já foi enviado, se vais manter marketplace/REGISTO fora do âmbito, se vais tratar a UI StandGo e a rota / duplicada separadamente e se não vais aplicar migrations sem validação em staging.
+
+Depois indica o próximo passo técnico concreto.

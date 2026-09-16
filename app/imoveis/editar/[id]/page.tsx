@@ -128,21 +128,25 @@ export default async function EditarImovelPage({
       categoryIdValue = categoryId ? parseInt(categoryId) : null;
     }
 
-    const { error: updateError } = await supabase
-      .from("marketplace_ads")
-      .update({
-        title,
-        description,
-        type,
-        category_id: categoryIdValue,
-        location,
-        contact_method: contactMethod,
-        price_type: priceType,
-        price,
-        details,
-      })
-      .eq("id", ad.id)
-      .eq("module", "imoveis");
+    // RPC-only: 20260913180000 revogou UPDATE direto em marketplace_ads;
+    // 20260913232000 criou esta função dedicada (ver
+    // docs/pendentes/20260913T2119-correcao-marketplace-4-modulos.md).
+    const { error: updateError } = await supabase.rpc(
+      "marketplace_ad_editar_completo",
+      {
+        p_ad_id: ad.id,
+        p_module: "imoveis",
+        p_title: title,
+        p_description: description,
+        p_type: type,
+        p_details: details,
+        p_location: location,
+        p_category_id: categoryIdValue,
+        p_contact_method: contactMethod,
+        p_price: price,
+        p_price_type: priceType,
+      }
+    );
 
     if (updateError) {
       throw new Error("Erro ao atualizar: " + updateError.message);

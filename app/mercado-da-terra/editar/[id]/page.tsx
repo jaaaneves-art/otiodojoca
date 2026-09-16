@@ -77,21 +77,25 @@ export default async function EditarAnuncioPage({ params }: { params: Promise<{ 
     if (seekingDescription) details.seeking_description = seekingDescription;
     if (wantsToReceive) details.wants_to_receive = wantsToReceive;
 
-    // Atualizar anúncio
-    const { error: updateError } = await supabase
-      .from("marketplace_ads")
-      .update({
-        title,
-        description,
-        type,
-        category_id: parseInt(categoryId),
-        location,
-        contact_method: contactMethod,
-        price_type: priceType,
-        price,
-        details,
-      })
-      .eq("id", ad.id);
+    // Atualizar anúncio — RPC-only: 20260913180000 revogou UPDATE direto
+    // em marketplace_ads; 20260913232000 criou esta função dedicada (ver
+    // docs/pendentes/20260913T2119-correcao-marketplace-4-modulos.md).
+    const { error: updateError } = await supabase.rpc(
+      "marketplace_ad_editar_completo",
+      {
+        p_ad_id: ad.id,
+        p_module: "mercado-da-terra",
+        p_title: title,
+        p_description: description,
+        p_type: type,
+        p_details: details,
+        p_location: location,
+        p_category_id: parseInt(categoryId),
+        p_contact_method: contactMethod,
+        p_price: price,
+        p_price_type: priceType,
+      }
+    );
 
     if (updateError) {
       throw new Error("Erro ao atualizar: " + updateError.message);

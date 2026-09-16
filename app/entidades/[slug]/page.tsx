@@ -2,9 +2,10 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getEntidadeBySlug } from '@/lib/freguesia/actions';
+import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Phone, Mail, Globe, MapPin, ArrowLeft, Calendar, UtensilsCrossed, BedDouble, Store } from 'lucide-react';
+import { Phone, Mail, Globe, MapPin, ArrowLeft, Calendar, UtensilsCrossed, BedDouble, Store, Car, BadgeCheck } from 'lucide-react';
 
 interface EntidadePageProps {
   params: Promise<{
@@ -74,6 +75,86 @@ export default async function EntidadePage({ params }: EntidadePageProps) {
   const eventosPublicados = [...(entidade.eventos || [])].sort(
     (a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime()
   );
+
+  // StandGo — dados consultados em separado de propósito: getEntidadeBySlug é
+  // partilhada por várias páginas e esta extensão vertical só interessa aqui.
+  // Seleção explícita de campos públicos (ver
+  // docs/standgo/20260915-ecossistema-profissional.md): nunca responsáveis,
+  // IDs de perfis, identificação fiscal nem nome legal.
+  const supabase = await createClient();
+
+  const [{ data: standgoEmpresa }, { data: entidadeEmpresa }] = await Promise.all([
+    supabase
+      .from('standgo_empresas')
+      .select('entidade_id')
+      .eq('entidade_id', entidade.id)
+      .eq('estado', 'ativo')
+      .maybeSingle(),
+    supabase
+      .from('entidade_empresas')
+      .select('verificada')
+      .eq('entidade_id', entidade.id)
+      .maybeSingle(),
+  ]);
+
+  const standgoAtivo = Boolean(standgoEmpresa);
+  const standgoVerificada = entidadeEmpresa?.verificada ?? false;
+
+  let standgoAtividades: string[] = [];
+  let standgoAnuncios: {
+    id: number;
+    title: string;
+    price: number | null;
+    price_type: string | null;
+  }[] = [];
+
+  if (standgoAtivo) {
+    const [{ data: atividadesRows }, { data: anunciosRows }] = await Promise.all([
+      supabase
+        .from('standgo_empresa_atividades')
+        .select('standgo_atividades(nome)')
+        .eq('entidade_id', entidade.id),
+      // O filtro por entidade não existe em /viaturas — por isso os anúncios
+      // ativos são listados aqui diretamente (status "active", como na
+      // query principal do marketplace de viaturas).
+      supabase
+        .from('marketplace_ads')
+        .select('id, title, price, price_type')
+        .eq('entidade_id', entidade.id)
+        .eq('module', 'viaturas')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(6),
+    ]);
+
+    standgoAtividades = (atividadesRows ?? [])
+      .map((row: { standgo_atividades: { nome: string } | { nome: string }[] | null }) => {
+        const atividade = Array.isArray(row.standgo_atividades)
+          ? row.standgo_atividades[0]
+          : row.standgo_atividades;
+        return atividade?.nome;
+      })
+      .filter((nome: string | undefined): nome is string => Boolean(nome))
+      .sort((a, b) => a.localeCompare(b, 'pt-PT'));
+
+    standgoAnuncios = anunciosRows ?? [];
+  }
+
+  const formatarPrecoStandGo = (price: number) =>
+    new Intl.NumberFormat('pt-PT', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(price);
+
+  const precoResumoStandGo = (anuncio: {
+    price: number | null;
+    price_type: string | null;
+  }) => {
+    if (anuncio.price != null) return formatarPrecoStandGo(anuncio.price);
+    if (anuncio.price_type === 'free') return 'Grátis';
+    return 'Sob consulta';
+  };
 
   return (
     <div className="container py-10 max-w-3xl">
@@ -177,6 +258,50 @@ export default async function EntidadePage({ params }: EntidadePageProps) {
               <p className="text-sm text-gray-700">
                 Horário: {formatarHora(comercio.horario_abertura) ?? '?'} – {formatarHora(comercio.horario_fecho) ?? '?'}
               </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Presença StandGo (viaturas) — só quando a empresa está ativa no módulo */}
+      {standgoAtivo && (
+        <Card className="mb-6">
+          <CardContent className="pt-6 space-y-3">
+            <h3 className="font-semibold flex flex-wrap items-center gap-2">
+              <Car className="w-4 h-4 text-blue-600" />
+              StandGo
+              {standgoVerificada && (
+                <Badge variant="secondary" className="inline-flex items-center gap-1">
+                  <BadgeCheck className="w-3.5 h-3.5 text-emerald-700" />
+                  Verificada
+                </Badge>
+              )}
+            </h3>
+            {standgoAtividades.length > 0 && (
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">Atividades: </span>
+                {standgoAtividades.join(' · ')}
+              </p>
+            )}
+            {standgoAnuncios.length > 0 && (
+              <div className="space-y-2 border-t border-gray-100 pt-3">
+                <p className="text-sm font-medium text-gray-900">Anúncios ativos</p>
+                <ul className="space-y-1.5">
+                  {standgoAnuncios.map((anuncio) => (
+                    <li key={anuncio.id} className="flex items-center justify-between gap-3 text-sm">
+                      <Link
+                        href={`/viaturas/${anuncio.id}`}
+                        className="min-w-0 truncate text-blue-600 hover:underline"
+                      >
+                        {anuncio.title}
+                      </Link>
+                      <span className="shrink-0 font-semibold text-gray-900">
+                        {precoResumoStandGo(anuncio)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </CardContent>
         </Card>

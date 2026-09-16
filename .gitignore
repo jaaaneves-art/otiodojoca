@@ -66,3 +66,6 @@ venv/
 *.backup
 
 .env*
+
+# Scratch local (logs, backups, dumps)
+outputs/

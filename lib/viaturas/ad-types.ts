@@ -39,7 +39,12 @@ export type FieldName =
   | "preco2Semanas"
   | "precoMes"
   | "caucao"
-  | "seguroIncluido";
+  | "seguroIncluido"
+  | "precoHora"
+  | "precoMeioDia"
+  | "capacidadePassageiros"
+  | "areaServico"
+  | "servicosMotorista";
 
 export interface ViaturaAdTypeConfig {
   id: string;
@@ -119,7 +124,7 @@ export const VIATURAS_AD_TYPES: Record<string, ViaturaAdTypeConfig> = {
   },
   alugar: {
     id: "alugar",
-    label: "Alugar",
+    label: "Rent-a-Car",
     icon: "🔑",
     fields: [
       "title", "description", "categoryId",
@@ -133,7 +138,28 @@ export const VIATURAS_AD_TYPES: Record<string, ViaturaAdTypeConfig> = {
       "precoDia",
       "location", "contactMethod",
     ],
-    cardHint: "Aluguer",
+    cardHint: "Rent-a-Car",
+  },
+
+  com_motorista: {
+    id: "com_motorista",
+    label: "Com Motorista",
+    icon: "🚘",
+    fields: [
+      "title", "description", "categoryId",
+      "marca", "modelo", "ano", "combustivel", "caixa",
+      "condicao", "cor", "potencia", "tipoVendedor",
+      "precoHora", "precoMeioDia", "precoDia",
+      "capacidadePassageiros", "areaServico", "servicosMotorista",
+      "location", "contactMethod",
+    ],
+    required: [
+      "title", "description", "categoryId",
+      "marca", "modelo",
+      "capacidadePassageiros", "areaServico",
+      "location", "contactMethod",
+    ],
+    cardHint: "Com motorista",
   },
 };
 
@@ -146,5 +172,18 @@ export function getViaturaAdType(id: string): ViaturaAdTypeConfig {
 export const COMBUSTIVEL_OPCOES = ["Gasolina", "Gasóleo", "Híbrido", "Elétrico", "GPL"] as const;
 export const CAIXA_OPCOES = ["Manual", "Automática"] as const;
 export const CONDICAO_OPCOES = ["Novo", "Usado"] as const;
-export const TIPO_VENDEDOR_OPCOES = ["Particular", "Stand"] as const;
+// "Stand" continua aceite nos anúncios antigos, mas novas publicações
+// utilizam a designação transversal "Empresa automóvel".
+export const TIPO_VENDEDOR_OPCOES = ["Particular", "Empresa automóvel"] as const;
+
+export const SERVICOS_MOTORISTA_OPCOES = [
+  "Transfer",
+  "Casamentos e cerimónias",
+  "Eventos",
+  "Executivo",
+  "Turismo",
+  "Motorista à hora",
+  "Motorista ao dia",
+  "Outro",
+] as const;
 export const SEGURO_OPCOES = ["Incluído", "Não incluído", "Opcional / a combinar"] as const;

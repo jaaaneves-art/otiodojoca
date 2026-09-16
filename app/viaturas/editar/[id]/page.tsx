@@ -104,7 +104,8 @@ export default async function EditarAnuncioViaturaPage({
 
     let price: number | null = null;
     let priceType: string | null = null;
-    let details: Record<string, string> = veiculoDetails;
+    // string[] para campos como servicos_motorista (lista guardada em jsonb).
+    let details: Record<string, string | string[]> = veiculoDetails;
 
     if (type === "venda") {
       priceType = (formData.get("priceType") as string) || "fixed";
@@ -145,6 +146,33 @@ export default async function EditarAnuncioViaturaPage({
         ...(caucao ? { caucao } : {}),
         seguro,
       };
+    } else if (type === "com_motorista") {
+      const precoHora = formData.get("precoHora") as string;
+      const precoMeioDia = formData.get("precoMeioDia") as string;
+      const precoDia = formData.get("precoDia") as string;
+      const capacidadePassageiros = formData.get("capacidadePassageiros") as string;
+      const areaServico = formData.get("areaServico") as string;
+      const servicosMotorista = formData
+        .getAll("servicosMotorista")
+        .map((v) => String(v))
+        .filter(Boolean);
+
+      if (!capacidadePassageiros || !areaServico) {
+        throw new Error("Com motorista: capacidade de passageiros e área de serviço são obrigatórias");
+      }
+
+      // Mesmo padrão do novo/page.tsx: preço principal = preço por dia.
+      priceType = "fixed";
+      price = precoDia ? parseFloat(precoDia) : null;
+      details = {
+        ...veiculoDetails,
+        ...(precoHora ? { preco_hora: precoHora } : {}),
+        ...(precoMeioDia ? { preco_meio_dia: precoMeioDia } : {}),
+        ...(precoDia ? { preco_dia: precoDia } : {}),
+        capacidade_passageiros: capacidadePassageiros,
+        area_servico: areaServico,
+        ...(servicosMotorista.length > 0 ? { servicos_motorista: servicosMotorista } : {}),
+      };
     } else if (type === "leilao" && !auction) {
       // Anúncio a mudar para "leilão" pela primeira vez (ainda não existe
       // nenhuma linha em marketplace_auctions) — monta aqui o mesmo payload
@@ -175,21 +203,27 @@ export default async function EditarAnuncioViaturaPage({
       details = { ...ad.details, ...veiculoDetails };
     }
 
-    const { error: updateError } = await supabase
-      .from("marketplace_ads")
-      .update({
-        title,
-        description,
-        type,
-        category_id: parseInt(categoryId),
-        location,
-        contact_method: contactMethod,
-        price_type: priceType,
-        price,
-        details,
-      })
-      .eq("id", ad.id)
-      .eq("module", "viaturas");
+    // RPC-only: 20260913180000 revogou UPDATE direto em marketplace_ads;
+    // 20260913232000 criou esta função dedicada (ver
+    // docs/pendentes/20260913T2119-correcao-marketplace-4-modulos.md).
+    // vehicle_*_id de propósito não enviados — a edição nunca os tocou
+    // (mesmo comportamento do UPDATE direto anterior).
+    const { error: updateError } = await supabase.rpc(
+      "marketplace_ad_editar_completo",
+      {
+        p_ad_id: ad.id,
+        p_module: "viaturas",
+        p_title: title,
+        p_description: description,
+        p_type: type,
+        p_details: details,
+        p_location: location,
+        p_category_id: parseInt(categoryId),
+        p_contact_method: contactMethod,
+        p_price: price,
+        p_price_type: priceType,
+      }
+    );
 
     if (updateError) {
       throw new Error("Erro ao atualizar: " + updateError.message);
@@ -315,6 +349,11 @@ export default async function EditarAnuncioViaturaPage({
               preco_mes: d.preco_mes,
               caucao: d.caucao,
               seguro: d.seguro,
+              preco_hora: d.preco_hora,
+              preco_meio_dia: d.preco_meio_dia,
+              capacidade_passageiros: d.capacidade_passageiros,
+              area_servico: d.area_servico,
+              servicos_motorista: d.servicos_motorista,
               auction_start_price: auction?.start_price,
               auction_minimum_increment: auction?.minimum_increment,
               auction_starts_at: auction?.starts_at,
