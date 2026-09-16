@@ -2,14 +2,15 @@
 
 ## Bloqueios reais
 
-### 1. UI profissional StandGo
+### 1. UI profissional StandGo — concluída nesta execução
 
-A arquitetura SQL está pronta, mas faltam o diretório profissional StandGo, pesquisa, perfil público e integração completa dos campos de aluguer com motorista nos formulários:
+A home `/viaturas` mostra agora o ecossistema, com ligações para Rent-a-Car, Com Motorista, oficinas/mecânicos, pneus, peças, vidros, sucatas, reboques, chapa/pintura e lavagem/detalhe.
 
-- `app/viaturas/novo/page.tsx`
-- `app/viaturas/editar/[id]/page.tsx`
+Foram criadas as rotas públicas `/viaturas/servicos` e `/viaturas/empresas`, com fallback seguro quando as migrations ainda não estão aplicadas. Os formulários `/viaturas/novo` e `/viaturas/editar/[id]` já expõem e gravam `alugar`/Rent-a-Car, `com_motorista` e “Publicar como”.
 
-Os tipos/configuração já existem em `lib/viaturas/ad-types.ts`.
+Prova HTTP: `/home/berze/Transferências/OTJ/standgo-ui-verificacao.txt`.
+
+Fica pendente apenas a validação visual autenticada do formulário numa sessão real e a evolução futura de pesquisa/perfil empresarial conforme os dados publicados.
 
 ### 2. Build Next global
 

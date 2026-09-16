@@ -403,7 +403,7 @@ export function ViaturaAdForm({
 
         {mostra("tipoVendedor") && (
           <div>
-            <label className="text-sm font-medium">Tipo de vendedor</label>
+            <label className="text-sm font-medium">Publicar como</label>
             <select
               name="tipoVendedor"
               defaultValue={inicial?.tipo_vendedor ?? "Particular"}

@@ -3,6 +3,7 @@ import ViaturasNavbar from "@/components/viaturas/viaturas-navbar";
 import ViaturasFiltros from "@/components/viaturas/viaturas-filtros";
 import { ViaturasResultados } from "@/components/viaturas/viaturas-resultados";
 import { CarFront, SearchX } from "lucide-react";
+import { StandGoEcosystem } from "@/components/viaturas/standgo-ecosystem";
 
 interface SearchParams {
   q?: string;
@@ -171,6 +172,7 @@ export default async function ViaturasPage({
       <ViaturasNavbar />
       <div className="min-h-screen bg-[#f5f7fb]">
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-9">
+          <StandGoEcosystem />
           <ViaturasFiltros categories={categories || []} />
 
           <div className="mb-5 flex items-end justify-between gap-4 border-b border-slate-200 pb-4">

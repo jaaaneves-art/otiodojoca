@@ -32,6 +32,7 @@ const TYPE_BADGE_STYLE: Record<string, string> = {
   comprar: "bg-purple-600 text-white",
   ceder: "bg-green-600 text-white",
   alugar: "bg-viaturas-800 text-white",
+  com_motorista: "bg-indigo-700 text-white",
 };
 
 const formatKm = (km: string | number | undefined) =>
@@ -66,6 +67,8 @@ export function ViaturaAdCard({
       ? ad.price == null ? "A combinar" : `Até ${formatPrice(ad.price)}`
       : ad.type === "alugar"
         ? ad.price == null ? "Consultar" : `${formatPrice(ad.price)}/dia`
+        : ad.type === "com_motorista"
+          ? ad.price == null ? "Consultar" : `${formatPrice(ad.price)}/dia`
         : ad.type === "leilao"
           ? ad.auction ? formatPrice(ad.auction.current_price) : "Leilão"
           : ad.price == null ? "Consultar" : formatPrice(ad.price);

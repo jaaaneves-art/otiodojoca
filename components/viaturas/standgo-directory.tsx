@@ -112,10 +112,12 @@ export async function StandGoDirectory({
   params,
   title = "Diretório de stands e empresas automóvel",
   description,
+  basePath = "/viaturas/stands/diretorio",
 }: {
   params: StandGoSearchParams;
   title?: string;
   description?: string;
+  basePath?: string;
 }) {
   const supabase = await createClient();
 
@@ -236,7 +238,7 @@ export async function StandGoDirectory({
       {description && <p className="mt-3 max-w-2xl text-slate-600">{description}</p>}
 
       <form
-        action="/viaturas/stands/diretorio"
+        action={basePath}
         className="my-8 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-4"
         aria-label="Pesquisar empresas automóvel"
       >
@@ -274,7 +276,7 @@ export async function StandGoDirectory({
           <button className="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition hover:bg-blue-500">
             Pesquisar
           </button>
-          <Link href="/viaturas/stands/diretorio" className="text-sm text-slate-600 underline hover:text-slate-900">
+          <Link href={basePath} className="text-sm text-slate-600 underline hover:text-slate-900">
             Limpar filtros
           </Link>
         </div>
